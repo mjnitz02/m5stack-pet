@@ -20,6 +20,11 @@ struct PetSave {
   uint8_t  bright;      // 0..4 → display brightness 51..255
   bool     stayOn;      // battery testing: never auto power-off
   uint32_t awakeMin;    // cumulative powered-on minutes since last zero
+  uint8_t  food;        // last food picked, so the tray opens on it
+  uint16_t stickers;    // one bit per sticker earned
+  uint8_t  color;       // dress-up colour index, 0 = the animal's own
+  uint8_t  hat;         // dress-up hat, 0 = none
+  bool     eggTile;     // show "new egg" in the toy box (testing aid)
 };
 
 static PetSave     _pet;
@@ -37,6 +42,11 @@ inline void petLoad() {
   _pet.bright   = _prefs.getUChar("bright", 1);
   _pet.stayOn   = _prefs.getBool("stayon", false);
   _pet.awakeMin = _prefs.getUInt("awake", 0);
+  _pet.food     = _prefs.getUChar("food", 0);
+  _pet.stickers = _prefs.getUShort("stickers", 0);
+  _pet.color    = _prefs.getUChar("color", 0);
+  _pet.hat      = _prefs.getUChar("hat", 0);
+  _pet.eggTile  = _prefs.getBool("eggtile", true);
   _prefs.end();
   if (_pet.hunger > PET_MAX) _pet.hunger = PET_MAX;
   if (_pet.happy  > PET_MAX) _pet.happy  = PET_MAX;
@@ -53,13 +63,23 @@ inline void petSave() {
   _prefs.putUChar("bright", _pet.bright);
   _prefs.putBool("stayon", _pet.stayOn);
   _prefs.putUInt("awake", _pet.awakeMin);
+  _prefs.putUChar("food", _pet.food);
+  _prefs.putUShort("stickers", _pet.stickers);
+  _prefs.putUChar("color", _pet.color);
+  _prefs.putUChar("hat", _pet.hat);
+  _prefs.putBool("eggtile", _pet.eggTile);
   _prefs.end();
 }
 
-// Back to an egg. Settings and the awake timer survive.
+// Back to an egg: the pet and everything it has collected. Settings and
+// the awake timer survive.
 inline void petReset() {
-  _pet.hatched = false;
-  _pet.hunger  = 2;
-  _pet.happy   = 2;
+  _pet.hatched  = false;
+  _pet.hunger   = 2;
+  _pet.happy    = 2;
+  _pet.food     = 0;
+  _pet.stickers = 0;
+  _pet.color    = 0;
+  _pet.hat      = 0;
   petSave();
 }

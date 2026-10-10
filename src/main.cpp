@@ -7,14 +7,19 @@
 #endif
 
 // Offline pocket pet. No radio, no host: an egg hatches into one of the
-// ASCII species, and the kid feeds it, plays a tilt game, and puts it to
-// bed. Nothing can die — needs bottom out at "asking for it" and stop.
+// ASCII species, and the kid feeds it, plays with it, and puts it to bed.
+// Nothing can die — needs bottom out at "asking for it" and stop.
 //
 //   BtnB (side)        next icon
 //   BtnA (front, blue) select
+//   hold blue 0.7s     toy box from the pet screen; back to the pet from
+//                      anywhere else
 //   hold side 1.5s     sound on/off
 //   hold both 1.5s     parent screen (text; brightness, battery test, reset)
 //   Power (side)       turns the unit back on after it has put itself to bed
+//
+// main.cpp holds the core loop and screens; icons.h has every drawing and
+// activities.h has the toy box activities.
 
 TFT_eSprite spr = TFT_eSprite(&M5.Lcd);
 
@@ -29,9 +34,24 @@ const uint16_t BTN_BLUE = 0x041F;   // matches the front button
 const uint16_t YEL   = 0xFFE0;
 const uint16_t AQUA  = 0x07FF;
 const uint16_t SHELL = 0xFFF4;   // egg
+const uint16_t AMBER = 0xFD20;
+const uint16_t ROSE  = 0xFB76;
+const uint16_t TAN   = 0xE58E;
+const uint16_t GRID  = 0x39E7;   // unlit outlines
 
 enum PetState { P_SLEEP, P_IDLE, P_BUSY, P_ATTENTION, P_CELEBRATE, P_DIZZY, P_HEART };
-enum Mode     { M_EGG, M_HOME, M_FEED, M_PLAY, M_BED, M_PARENT };
+// Everything from M_WALK on is a toy box activity (see activities.h).
+enum Mode     { M_EGG, M_HOME, M_FOOD, M_FEED, M_PLAY, M_BED, M_PARENT, M_MENU, M_REWARD,
+                M_WALK, M_BATH, M_ROCK, M_FREEZE, M_DRESS, M_STICKERS,
+                M_DRAW, M_MARBLE, M_COPY, M_HIDE };
+
+// Toy box tiles in reading order. The first page is care and moving, the
+// second is the sit-still games. The egg stays last so it can be hidden.
+enum { T_WALK, T_BATH, T_ROCK, T_FREEZE, T_DRESS, T_STICKERS,
+       T_CATCH, T_DRAW, T_MARBLE, T_COPY, T_HIDE, T_EGG, T_N };
+
+// Mostly healthy, one treat. Each fills one apple on the hunger row.
+enum { FOOD_APPLE, FOOD_CARROT, FOOD_STRAWBERRY, FOOD_ICECREAM, FOOD_N };
 
 Mode     mode = M_EGG;
 uint32_t lastInteractMs = 0;
@@ -44,6 +64,7 @@ bool     swallowA = false, swallowB = false;
 const uint32_t IDLE_BED_MS = 60000;   // no input this long → bedtime
 const uint32_t BED_OFF_MS  = 15000;   // asleep this long → power off
 const uint8_t  BED_BRIGHT  = 12;
+const uint32_t MENU_IDLE_MS = 15000;  // toy box / food tray left alone → back to the pet
 
 // --- Needs ------------------------------------------------------------------
 // Only tick while the unit is on: there is no clock while it's off, so a
@@ -75,16 +96,70 @@ static void jingle(const uint16_t* notes, uint8_t n, uint16_t each) {
 }
 
 // --- IMU --------------------------------------------------------------------
-float accelBaseline = 1.0f;
-uint32_t lastShakeCheck = 0;
+// One motion sample every 50 ms, shared by everything that cares about
+// movement: how far the pull on the stick is from resting 1 g.
+float    accelBaseline = 1.0f;
+uint32_t lastImuMs = 0;
+float    imuDelta = 0;
+bool     imuFresh = false;      // true on the frame a sample was taken
+const float SHAKE_DELTA = 0.8f;
 
-static bool checkShake() {
+static void sampleMotion(uint32_t now) {
+  imuFresh = false;
+  if (now - lastImuMs < 50) return;
+  lastImuMs = now;
   float ax, ay, az;
   M5.Imu.getAccel(&ax, &ay, &az);
   float mag = sqrtf(ax*ax + ay*ay + az*az);
-  float delta = fabsf(mag - accelBaseline);
+  imuDelta = fabsf(mag - accelBaseline);
   accelBaseline = accelBaseline * 0.95f + mag * 0.05f;
-  return delta > 0.8f;
+  imuFresh = true;
+}
+
+// Tilt steering. Nobody holds the stick perfectly level, so each tilt
+// activity calls tiltBegin() and the first half second is spent averaging
+// where "level" is for this kid right now. tiltX / tiltY are then measured
+// from that. The captured centre is capped so starting with the stick on its
+// side can't leave one direction out of reach.
+const float    TILT_SIGN   = 1.0f;    // flip to -1 if left/right is backwards
+const float    TILT_SIGN_Y = 1.0f;    // flip to -1 if up/down is backwards
+const uint32_t TILT_ZERO_MS = 500;
+float    tiltX = 0, tiltY = 0;
+float    tiltZeroX = 0, tiltZeroY = 0, tiltSumX = 0, tiltSumY = 0, tiltSeenX = 0, tiltSeenY = 0;
+uint16_t tiltN = 0;
+uint32_t tiltZeroUntil = 0;
+
+static void tiltBegin(uint32_t now) {
+  tiltSumX = tiltSumY = 0;
+  tiltN = 0;
+  tiltX = tiltY = tiltSeenX = tiltSeenY = 0;
+  tiltZeroUntil = now + TILT_ZERO_MS;
+}
+
+static float clampf(float v, float lim) { return v < -lim ? -lim : v > lim ? lim : v; }
+
+// False while the centre is still being captured.
+static bool tiltUpdate(uint32_t now) {
+  float ax, ay, az;
+  M5.Imu.getAccel(&ax, &ay, &az);
+  if ((int32_t)(now - tiltZeroUntil) < 0) {
+    tiltSumX += ax; tiltSumY += ay; tiltN++;
+    return false;
+  }
+  if (tiltN) {
+    tiltZeroX = clampf(tiltSumX / tiltN, 0.5f);
+    tiltZeroY = clampf(tiltSumY / tiltN, 0.8f);
+    tiltN = 0;
+  }
+  tiltX += ((ax - tiltZeroX) - tiltX) * 0.5f;
+  tiltY += ((ay - tiltZeroY) - tiltY) * 0.5f;
+  // Steering counts as playing; a stick lying still does not, so it can
+  // still fall asleep in the middle of a tilt activity.
+  if (fabsf(tiltX - tiltSeenX) > 0.06f || fabsf(tiltY - tiltSeenY) > 0.06f) {
+    tiltSeenX = tiltX; tiltSeenY = tiltY;
+    lastInteractMs = now;
+  }
+  return true;
 }
 
 // Face-down = Z-axis dominant and negative. Debounced so a toss doesn't count.
@@ -133,44 +208,20 @@ static void powerDown() {
   M5.Power.powerOff();
 }
 
-// --- Icons ------------------------------------------------------------------
-static void drawApple(int x, int y, int r, bool filled = true) {
-  if (filled) {
-    spr.fillCircle(x, y, r, RED);
-    spr.drawLine(x, y - r, x + 1, y - r - r / 2 - 1, DIM);
-    if (r >= 6) spr.fillTriangle(x + 1, y - r - 1, x + r - 1, y - r - 3, x + r / 2, y - r + 1, GREEN);
-  } else {
-    spr.drawCircle(x, y, r, DIM);
-  }
-}
+#include "icons.h"
 
-static void tinyHeart(int x, int y, bool filled, uint16_t col) {
-  if (filled) {
-    spr.fillCircle(x - 2, y, 2, col);
-    spr.fillCircle(x + 2, y, 2, col);
-    spr.fillTriangle(x - 4, y + 1, x + 4, y + 1, x, y + 5, col);
-  } else {
-    spr.drawCircle(x - 2, y, 2, col);
-    spr.drawCircle(x + 2, y, 2, col);
-    spr.drawLine(x - 4, y + 1, x, y + 5, col);
-    spr.drawLine(x + 4, y + 1, x, y + 5, col);
-  }
-}
-
-static void drawBall(int x, int y, int r) {
-  spr.fillCircle(x, y, r, AQUA);
-  spr.drawLine(x - r, y, x + r, y, INK);
-  spr.drawLine(x, y - r, x, y + r, INK);
-  spr.drawCircle(x, y, r, INK);
-}
-
-static void drawMoon(int x, int y, int r) {
-  spr.fillCircle(x - 2, y, r, YEL);
-  spr.fillCircle(x + 2, y - 3, r - 1, BG);
-  spr.setTextSize(1);
-  spr.setTextColor(INK, BG);
-  spr.setCursor(x + 5, y - 2);
-  spr.print("z");
+// Battery at a glance for a grown-up: five slim dashes along the very top
+// edge, one per 20%. Dim on purpose so it reads as trim, not as a gauge; the
+// last dash turns orange. A dash only comes back once the reading is clearly
+// above its step, so a beep sagging the voltage doesn't make it flicker.
+static void drawBatteryTrim() {
+  static uint8_t segs = 0xFF;
+  if (batMv <= 0) return;
+  int pct = batPct();
+  uint8_t want = (pct + 19) / 20;
+  if (segs == 0xFF || want < segs || pct > segs * 20 + 5) segs = want;
+  for (int i = 0; i < 5; i++)
+    spr.fillRect(CX - 26 + i * 11, 1, 9, 2, i >= segs ? GRID : segs <= 1 ? HOT : DIM);
 }
 
 // Speaker glyph shown for a moment after the hold-side mute toggle.
@@ -194,7 +245,7 @@ static void drawNeeds() {
   for (int i = 0; i < PET_MAX; i++) {
     int x = 34 + i * 22;
     drawApple(x, 177, 4, i < pet().hunger);
-    tinyHeart(x, 190, i < pet().happy, i < pet().happy ? RED : DIM);
+    drawHeart(x, 190, 1, i < pet().happy, i < pet().happy ? RED : DIM);
   }
 }
 
@@ -226,6 +277,69 @@ static void enterHome() {
   buddyInvalidate();
   applyBrightness();
   lastInteractMs = millis();
+}
+
+// --- Dress-up look ----------------------------------------------------------
+// Index 0 keeps the animal's own colour.
+static const uint16_t LOOK_TINT[] = { 0, AQUA, ROSE, YEL, GREEN, AMBER };
+const uint8_t LOOK_N = sizeof(LOOK_TINT) / sizeof(LOOK_TINT[0]);
+
+static void applyLook() { buddySetLook(LOOK_TINT[pet().color % LOOK_N], pet().hat); }
+
+// --- Finishing an activity --------------------------------------------------
+// Every activity ends here: a heart, and one time in three a sticker the
+// kid doesn't have yet, shown off before going back to the pet.
+const uint8_t STICKER_ODDS = 3;
+uint8_t  rewardSticker = 0;
+uint32_t rewardUntil = 0;
+
+static void finishActivity(uint32_t now, uint8_t hearts = 1) {
+  PetSave& s = pet();
+  s.happy += hearts;
+  if (s.happy > PET_MAX) s.happy = PET_MAX;
+  lastHappyMs = now;
+
+  uint16_t missing = ~s.stickers & STICKER_ALL;
+  if (missing && esp_random() % STICKER_ODDS == 0) {
+    uint8_t k = esp_random() % __builtin_popcount(missing);
+    for (rewardSticker = 0; ; rewardSticker++)
+      if ((missing & (1u << rewardSticker)) && k-- == 0) break;
+    s.stickers |= 1u << rewardSticker;
+    petSave();
+    mode = M_REWARD;
+    buddySetPeek(false);
+    spr.fillSprite(BG);
+    buddyInvalidate();
+    static const uint16_t PRIZE[] = { 1319, 1568, 2093, 2637 };
+    jingle(PRIZE, 4, 90);
+    rewardUntil = millis() + 3500;
+    lastInteractMs = millis();
+    return;
+  }
+
+  petSave();
+  static const uint16_t TUNE[] = { 1319, 1568, 2093 };
+  jingle(TUNE, 3, 90);
+  enterHome();
+  triggerOneShot(P_CELEBRATE, 3500);
+}
+
+static void tickReward(uint32_t now) {
+  lastInteractMs = now;
+  if ((int32_t)(now - rewardUntil) >= 0) {
+    enterHome();
+    // The last sticker gets a proper party.
+    triggerOneShot(P_CELEBRATE, pet().stickers == STICKER_ALL ? 8000 : 2000);
+    return;
+  }
+  buddyTick(P_CELEBRATE);
+  spr.fillRect(0, BOTTOM_TOP, W, H - BOTTOM_TOP, BG);
+  spr.drawRoundRect(CX - 24, 178, 48, 48, 8, INK);
+  spr.drawRoundRect(CX - 23, 179, 46, 46, 7, INK);
+  drawSticker(rewardSticker, CX, 202);
+  bool tw = (now / 200) & 1;
+  drawStar(20, 202, tw ? 6 : 4, YEL);
+  drawStar(W - 20, 202, tw ? 4 : 6, YEL);
 }
 
 // --- Egg --------------------------------------------------------------------
@@ -286,36 +400,72 @@ static void tickEgg(uint32_t now, bool a, bool b, bool shook) {
 }
 
 // --- Feed -------------------------------------------------------------------
+// The apple on the home row opens a tray of four foods. Every food fills one
+// apple; the only difference is the reaction. One of them is today's
+// favourite (picked fresh each wake-up) and gets the full celebration.
+uint8_t  foodSel = 0, feedFood = 0, favFood = 0;
 uint32_t feedStartMs = 0;
 bool     feedCredited = false;
 const uint32_t FEED_DROP_MS = 1200, FEED_HAPPY_MS = 2500;
 
-static void startFeed(uint32_t now) {
+static void startFood() {
+  mode = M_FOOD;
+  foodSel = pet().food < FOOD_N ? pet().food : 0;   // open on the last one picked
+}
+
+static void startFeed(uint32_t now, uint8_t food) {
   mode = M_FEED;
+  feedFood = food;
   feedStartMs = now;
   feedCredited = false;
+}
+
+static void drawHungerRow() {
+  for (int i = 0; i < PET_MAX; i++) drawApple(34 + i * 22, 177, 4, i < pet().hunger);
+}
+
+static void tickFood(uint32_t now, bool a, bool b) {
+  if (b) { foodSel = (foodSel + 1) % FOOD_N; beep(1800, 25); }
+  if (a) { beep(2400, 25); startFeed(now, foodSel); return; }
+
+  buddyTick(P_IDLE);
+  spr.fillRect(0, BOTTOM_TOP, W, H - BOTTOM_TOP, BG);
+  drawHungerRow();
+  spr.drawFastHLine(0, 190, W, DIM);
+  for (int i = 0; i < FOOD_N; i++) {
+    int x = 21 + i * 31, y = 216;
+    drawFood(i, x, y);
+    if (i == foodSel) {
+      spr.drawRoundRect(x - 15, y - 17, 30, 34, 6, INK);
+      spr.drawRoundRect(x - 14, y - 16, 28, 32, 5, INK);
+    }
+  }
 }
 
 static void tickFeed(uint32_t now) {
   uint32_t e = now - feedStartMs;
   lastInteractMs = now;
+  bool fav = (feedFood == favFood);
   if (e < FEED_DROP_MS) {
     // The strip only clears on the 5 fps animation tick; force a redraw
     // every frame so the falling snack doesn't leave a trail.
     buddyInvalidate();
     buddyTick(P_IDLE);
-    drawApple(CX, 8 + (int)(e * 62 / FEED_DROP_MS), 7);
+    drawFood(feedFood, CX, 8 + (int)(e * 62 / FEED_DROP_MS));
   } else {
     if (!feedCredited) {
       feedCredited = true;
       if (pet().hunger < PET_MAX) pet().hunger++;
+      pet().food = feedFood;
       lastHungerMs = now;
       petSave();
       static const uint16_t MUNCH[] = { 900, 700, 900 };
-      jingle(MUNCH, 3, 50);
+      static const uint16_t YUM[]   = { 900, 1175, 1568, 2093 };
+      if (fav) jingle(YUM, 4, 70);
+      else     jingle(MUNCH, 3, 50);
       buddyInvalidate();
     }
-    buddyTick(P_HEART);
+    buddyTick(fav ? P_CELEBRATE : P_HEART);
     if (e > FEED_DROP_MS + FEED_HAPPY_MS) { enterHome(); return; }
   }
   drawBottom(false);
@@ -324,17 +474,17 @@ static void tickFeed(uint32_t now) {
 // --- Play: tilt to catch ----------------------------------------------------
 // Snacks fall one at a time; tilt the stick left/right to slide the basket
 // under them. No way to lose — every round ends in a celebration.
-const float   TILT_SIGN   = 1.0f;     // flip to -1 if the basket moves backwards
 const uint8_t PLAY_ROUNDS = 5;
 const int     FIELD_TOP   = 86, BASKET_Y = 214, CATCH_HALF = 30;
 const float   FALL_PX_MS  = 0.055f;
-uint8_t  playRound = 0, playCaught = 0, playHits = 0;
+uint8_t  playRound = 0, playCaught = 0, playHits = 0, dropFood = 0;
 float    basketX = CX;
 int      dropX = CX;
 uint32_t dropStartMs = 0, playCheerUntil = 0;
 
 static void spawnDrop(uint32_t now) {
   dropX = 16 + esp_random() % (W - 32);
+  dropFood = esp_random() % FOOD_N;
   dropStartMs = now;
 }
 
@@ -345,26 +495,19 @@ static void startPlay(uint32_t now) {
   buddySetPeek(true);
   spr.fillSprite(BG);
   spawnDrop(now);
+  tiltBegin(now);
 }
 
 static void endPlay(uint32_t now) {
-  PetSave& s = pet();
-  s.happy += (playCaught >= 3) ? 2 : 1;
-  if (s.happy > PET_MAX) s.happy = PET_MAX;
-  lastHappyMs = now;
-  petSave();
-  static const uint16_t TUNE[] = { 1319, 1568, 2093 };
-  jingle(TUNE, 3, 90);
-  enterHome();
-  triggerOneShot(P_CELEBRATE, 3500);
+  finishActivity(now, playCaught >= 3 ? 2 : 1);
 }
 
 static void tickPlay(uint32_t now) {
   lastInteractMs = now;
 
-  float ax, ay, az;
-  M5.Imu.getAccel(&ax, &ay, &az);
-  float target = CX + TILT_SIGN * ax * 110.0f;
+  // Nothing falls until the tilt centre has been captured.
+  if (!tiltUpdate(now)) dropStartMs = now;
+  float target = CX + TILT_SIGN * tiltX * 110.0f;
   if (target < 30) target = 30;
   if (target > W - 30) target = W - 30;
   basketX += (target - basketX) * 0.3f;
@@ -382,7 +525,7 @@ static void tickPlay(uint32_t now) {
   buddyTick((int32_t)(now - playCheerUntil) < 0 ? P_HEART : P_IDLE);
 
   spr.fillRect(0, FIELD_TOP, W, H - FIELD_TOP, BG);
-  drawApple(dropX, dropY, 7);
+  drawFood(dropFood, dropX, dropY);
   spr.setTextSize(2);
   spr.setTextColor(INK, BG);
   spr.setTextDatum(TC_DATUM);
@@ -402,6 +545,7 @@ uint32_t bedStartMs = 0;
 static void startBed(uint32_t now, bool lullaby) {
   mode = M_BED;
   bedStartMs = now;
+  buddySetPeek(false);
   spr.fillSprite(BG);
   buddyInvalidate();
   if (lullaby) {
@@ -422,10 +566,121 @@ static void tickBed(uint32_t now) {
   if (!pet().stayOn && now - bedStartMs > BED_OFF_MS) powerDown();
 }
 
+#include "activities.h"
+
+// --- Toy box ----------------------------------------------------------------
+// Two pages of six tiles. Side walks through them in reading order and rolls
+// from one page onto the next. It always opens on the first tile.
+const int TILE_W = 58, TILE_H = 66;
+const uint32_t EGG_HOLD_MS = 3000;
+uint8_t  menuSel = 0;
+uint32_t eggHoldMs = 0, tileWobbleUntil = 0;
+
+static uint8_t menuCount() { return pet().eggTile ? T_N : T_N - 1; }
+
+static void openMenu(uint8_t sel) {
+  mode = M_MENU;
+  menuSel = sel < menuCount() ? sel : 0;
+  eggHoldMs = 0;
+  buddySetPeek(false);
+  applyBrightness();
+  lastInteractMs = millis();
+}
+
+static void backToEgg() {
+  petReset();
+  applyLook();
+  mode = M_EGG;
+  eggTaps = 0;
+  lastInteractMs = millis();
+}
+
+static void launchTile(uint8_t tile, uint32_t now) {
+  switch (tile) {
+    case T_WALK:     startWalk(); break;
+    case T_BATH:     startBath(); break;
+    case T_ROCK:     startRock(now); break;
+    case T_FREEZE:   startFreeze(now); break;
+    case T_DRESS:    startDress(); break;
+    case T_STICKERS: startStickers(); break;
+    case T_CATCH:    startPlay(now); break;
+    case T_DRAW:     startDraw(now); break;
+    case T_MARBLE:   startMarble(now); break;
+    case T_COPY:     startCopy(now); break;
+    case T_HIDE:     startHide(now); break;
+    case T_EGG:      tileWobbleUntil = now + 400; break;   // a tap only wobbles it
+  }
+}
+
+// Hold blue on the egg tile: a ring fills over three seconds, then
+// everything goes back to an unhatched egg. Letting go early cancels.
+static bool tickEggHold(uint32_t now) {
+  bool holding = menuSel == T_EGG && !swallowA && M5.BtnA.isPressed() && !M5.BtnB.isPressed();
+  if (!holding) { eggHoldMs = 0; return false; }
+  if (!eggHoldMs) eggHoldMs = now;
+  uint32_t held = now - eggHoldMs;
+  if (held < 250) return false;                  // an ordinary tap never shows the ring
+  lastInteractMs = now;
+  if (held >= EGG_HOLD_MS) {
+    swallowA = true;
+    eggHoldMs = 0;
+    spr.fillSprite(INK);
+    spr.pushSprite(0, 0);
+    static const uint16_t TUNE[] = { 1568, 1047, 784 };
+    jingle(TUNE, 3, 110);
+    backToEgg();
+    return true;
+  }
+  static uint8_t lastStep = 0;
+  uint8_t step = held / 400;
+  if (step != lastStep) { lastStep = step; beep(500 + step * 120, 50); }
+
+  spr.fillSprite(BG);
+  drawEggShape(CX, 108, 34, 44);
+  int lit = held * 48 / EGG_HOLD_MS;
+  for (int i = 0; i < 48; i++) {
+    float ang = -1.5708f + i * 0.1309f;
+    spr.fillCircle(CX + (int)(cosf(ang) * 58), 108 + (int)(sinf(ang) * 58), i < lit ? 3 : 1, i < lit ? HOT : GRID);
+  }
+  spr.fillCircle(CX, 210, 10 + ((now / 400) & 1) * 3, BTN_BLUE);
+  return true;
+}
+
+static void tickMenu(uint32_t now, bool a, bool b) {
+  uint8_t n = menuCount();
+  if (b) { menuSel = (menuSel + 1) % n; beep(1800, 25); }
+  if (tickEggHold(now)) return;
+  if (a) { beep(2400, 25); launchTile(menuSel, now); if (mode != M_MENU) return; }
+
+  spr.fillSprite(BG);
+  uint8_t page = menuSel / 6;
+  for (uint8_t i = page * 6; i < n && i < page * 6 + 6; i++) {
+    int x = 6 + (i % 2) * 65, y = 12 + ((i % 6) / 2) * 72;
+    if (i == menuSel) {
+      spr.drawRoundRect(x, y, TILE_W, TILE_H, 8, INK);
+      spr.drawRoundRect(x + 1, y + 1, TILE_W - 2, TILE_H - 2, 7, INK);
+    } else {
+      spr.drawRoundRect(x, y, TILE_W, TILE_H, 8, GRID);
+    }
+    int wob = (i == T_EGG && (int32_t)(now - tileWobbleUntil) < 0) ? (((now / 60) & 1) ? 3 : -3) : 0;
+    drawTileIcon(i, x + TILE_W / 2 + wob, y + TILE_H / 2);
+  }
+  uint8_t pages = (n + 5) / 6;
+  for (uint8_t p = 0; p < pages; p++)
+    spr.fillCircle(CX - (pages - 1) * 6 + p * 12, 233, 2, p == page ? INK : DIM);
+}
+
+// Hold-blue from inside something: back to the pet. A drawing that got some
+// real pen time still counts as playing.
+static void leaveToHome(uint32_t now) {
+  if (mode == M_DRAW && drawTravel > 300) { finishActivity(now); return; }
+  enterHome();
+}
+
 // --- Parent screen ----------------------------------------------------------
-enum { PA_BRIGHT, PA_SOUND, PA_STAYON, PA_PET, PA_ZERO, PA_EGG, PA_BACK, PA_N };
+enum { PA_BRIGHT, PA_SOUND, PA_STAYON, PA_EGGTILE, PA_PET, PA_ZERO, PA_EGG, PA_BACK, PA_N };
 const char* const PARENT_ITEMS[PA_N] = {
-  "bright", "sound", "stay on", "pet", "zero timer", "new egg", "back"
+  "bright", "sound", "stay on", "egg tile", "pet", "zero timer", "new egg", "back"
 };
 uint8_t  parentSel = 0;
 uint32_t eggConfirmUntil = 0;
@@ -441,6 +696,7 @@ static void applyParent(uint8_t idx, uint32_t now) {
     case PA_BRIGHT: s.bright = (s.bright + 1) % 5; applyBrightness(); break;
     case PA_SOUND:  s.sound = !s.sound; break;
     case PA_STAYON: s.stayOn = !s.stayOn; break;
+    case PA_EGGTILE: s.eggTile = !s.eggTile; break;   // hides "new egg" in the toy box
     case PA_PET:
       buddyNextSpecies();
       s.species = buddySpeciesIdx();
@@ -451,6 +707,7 @@ static void applyParent(uint8_t idx, uint32_t now) {
       if ((int32_t)(now - eggConfirmUntil) >= 0) { eggConfirmUntil = now + 3000; return; }
       eggConfirmUntil = 0;
       petReset();
+      applyLook();
       leaveParent();
       return;
     case PA_BACK:   petSave(); leaveParent(); return;
@@ -485,6 +742,7 @@ static void tickParent(uint32_t now, bool a, bool b) {
     if (i == PA_BRIGHT)      spr.printf("%u/4", s.bright);
     else if (i == PA_SOUND)  spr.print(s.sound ? "on" : "off");
     else if (i == PA_STAYON) spr.print(s.stayOn ? "on" : "off");
+    else if (i == PA_EGGTILE) spr.print(s.eggTile ? "on" : "off");
     else if (i == PA_PET)    spr.print(buddySpeciesName());
   }
   spr.setTextColor(DIM, BG);
@@ -505,7 +763,7 @@ static void tickHome(uint32_t now, bool a, bool b, bool shook) {
   if (b) { iconSel = (iconSel + 1) % ICON_N; beep(1800, 25); }
   if (a) {
     beep(2400, 25);
-    if (iconSel == ICON_FEED)      { startFeed(now); return; }
+    if (iconSel == ICON_FEED)      { startFood(); return; }
     else if (iconSel == ICON_PLAY) { startPlay(now); return; }
     else                           { startBed(now, true); return; }
   }
@@ -551,6 +809,8 @@ void setup() {
   spr.createSprite(W, H);
   buddyInit();
   buddySetSpeciesIdx(pet().species);
+  applyLook();
+  favFood = esp_random() % FOOD_N;
 
   uint32_t now = millis();
   awakeMarkMs = lastHungerMs = lastHappyMs = lastInteractMs = now;
@@ -599,10 +859,33 @@ void loop() {
     soundFlashUntil = now + 1500;
   }
 
+  // Hold the blue button alone: the toy box from the pet screen, and back to
+  // the pet from the toy box or any activity. The egg tile keeps the hold
+  // for itself (see tickEggHold).
+  bool holdOk = mode == M_HOME || mode == M_FOOD || mode == M_PLAY || mode >= M_WALK ||
+                (mode == M_MENU && menuSel != T_EGG);
+  if (holdOk && !swallowA && M5.BtnA.pressedFor(700) && !M5.BtnB.isPressed()) {
+    swallowA = true;
+    a = false;
+    beep(1200, 60);
+    if (mode == M_HOME) openMenu(0);
+    else                leaveToHome(now);
+  }
+
   bool shook = false;
-  if ((mode == M_HOME || mode == M_EGG) && now - lastShakeCheck > 50) {
-    lastShakeCheck = now;
-    shook = checkShake();
+  if (mode != M_BED && mode != M_PARENT) {
+    sampleMotion(now);
+    shook = imuFresh && imuDelta > SHAKE_DELTA;
+  }
+
+  // Left alone: the toy box and food tray drift back to the pet, and an
+  // activity goes to bed like the pet screen does. Moving the stick counts
+  // as playing, so a walk isn't cut short for want of a button press.
+  if (mode == M_MENU || mode == M_FOOD || mode == M_STICKERS) {
+    if (now - lastInteractMs > MENU_IDLE_MS) enterHome();
+  } else if (mode >= M_WALK) {
+    if (imuFresh && imuDelta > 0.12f) lastInteractMs = now;
+    if (!pet().stayOn && now - lastInteractMs > IDLE_BED_MS) startBed(now, false);
   }
 
   switch (mode) {
@@ -611,12 +894,29 @@ void loop() {
       if (mode == M_EGG && !pet().stayOn && now - lastInteractMs > IDLE_BED_MS + BED_OFF_MS) powerDown();
       break;
     case M_HOME:   tickHome(now, a, b, shook); break;
+    case M_FOOD:   tickFood(now, a, b); break;
     case M_FEED:   tickFeed(now); break;
     case M_PLAY:   tickPlay(now); break;
     case M_BED:    tickBed(now); break;
     case M_PARENT: tickParent(now, a, b); break;
+    case M_MENU:   tickMenu(now, a, b); break;
+    case M_REWARD: tickReward(now); break;
+    case M_WALK:   tickWalk(now); break;
+    case M_BATH:   tickBath(now, shook); break;
+    case M_ROCK:   tickRock(now); break;
+    case M_FREEZE: tickFreeze(now); break;
+    case M_DRESS:  tickDress(a, b); break;
+    case M_STICKERS:
+      tickStickers();
+      if (a || b) openMenu(T_STICKERS);
+      break;
+    case M_DRAW:   tickDraw(now, a, shook); break;
+    case M_MARBLE: tickMarble(now); break;
+    case M_COPY:   tickCopy(now, a, b); break;
+    case M_HIDE:   tickHide(now, a, b); break;
   }
 
+  if (mode != M_PARENT) drawBatteryTrim();
   if (mode != M_PARENT && (int32_t)(now - soundFlashUntil) < 0) drawSoundFlash();
   spr.pushSprite(0, 0);
   delay(mode == M_BED ? 100 : 33);

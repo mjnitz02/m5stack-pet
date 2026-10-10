@@ -52,11 +52,61 @@ void buddyPrintLine(const char* line, int yPx, uint16_t color, int xOff) {
   for (int i = 0; i < len; i++) _tgt->print(line[i]);
 }
 
+// ──────────────── dress-up ────────────────
+static uint16_t _tint = 0;
+static uint8_t  _hat  = HAT_NONE;
+
+void buddyDrawHat(TFT_eSPI* tgt, uint8_t hat, int x, int y, int k) {
+  switch (hat) {
+    case HAT_BOW:
+      tgt->fillTriangle(x, y - 4*k, x - 6*k, y - 8*k, x - 6*k, y, 0xFB76);
+      tgt->fillTriangle(x, y - 4*k, x + 6*k, y - 8*k, x + 6*k, y, 0xFB76);
+      tgt->fillCircle(x, y - 4*k, k + 1, BUDDY_WHITE);
+      break;
+    case HAT_CROWN:
+      tgt->fillRect(x - 7*k, y - 3*k, 14*k + 1, 3*k, BUDDY_YEL);
+      tgt->fillTriangle(x - 7*k, y - 3*k, x - 7*k, y - 8*k, x - 2*k, y - 3*k, BUDDY_YEL);
+      tgt->fillTriangle(x - 4*k, y - 3*k, x,       y - 9*k, x + 4*k, y - 3*k, BUDDY_YEL);
+      tgt->fillTriangle(x + 7*k, y - 3*k, x + 7*k, y - 8*k, x + 2*k, y - 3*k, BUDDY_YEL);
+      break;
+    case HAT_PARTY:
+      tgt->fillTriangle(x - 5*k, y, x + 5*k, y, x, y - 12*k, BUDDY_CYAN);
+      tgt->fillRect(x - 3*k, y - 6*k, 6*k + 1, k, 0xFB76);
+      tgt->fillCircle(x, y - 12*k, 2*k, BUDDY_YEL);
+      break;
+    case HAT_FLOWER: {
+      static const int8_t PX[5] = { 0, 3, 2, -2, -3 }, PY[5] = { -3, -1, 2, 2, -1 };
+      for (int i = 0; i < 5; i++)
+        tgt->fillCircle(x + PX[i]*k, y - 5*k + PY[i]*k, 2*k, 0xFB76);
+      tgt->fillCircle(x, y - 5*k, 2*k - 1, BUDDY_YEL);
+      break;
+    }
+  }
+}
+
 void buddyPrintSprite(const char* const* lines, uint8_t nLines, int yOffset, uint16_t color, int xOff) {
+  bool body = (color == buddyBodyColor());
+  if (body && _tint) color = _tint;
   _tgt->setTextSize(_scale);
   int yBase = BUDDY_Y_BASE * _scale - (_scale - 1) * 14;
   for (uint8_t i = 0; i < nLines; i++) {
     buddyPrintLine(lines[i], yBase + (yOffset + i * BUDDY_CHAR_H) * _scale, color, xOff);
+  }
+
+  // The hat sits on the first row with ink in it, so it follows bobs, jumps
+  // and the curled-up sleep pose. 2× re-centres every row; 1× keeps the
+  // padding, so find the ink's own centre there.
+  if (!body || _hat == HAT_NONE || nLines != 5) return;
+  for (uint8_t i = 0; i < nLines; i++) {
+    const char* l = lines[i];
+    int len = strlen(l), first = 0, last = len - 1;
+    while (first < len && l[first] == ' ') first++;
+    if (first == len) continue;
+    while (l[last] == ' ') last--;
+    int x = BUDDY_X_CENTER + xOff * _scale;
+    if (_scale == 1) x += (first + last + 1 - len) * BUDDY_CHAR_W / 2;
+    buddyDrawHat(_tgt, _hat, x, yBase + (yOffset + i * BUDDY_CHAR_H + 3) * _scale, _scale);
+    return;
   }
 }
 
@@ -121,6 +171,14 @@ uint8_t buddySpeciesCount() { return N_SPECIES; }
 uint8_t buddySpeciesIdx() { return currentSpeciesIdx; }
 
 uint16_t buddyBodyColor() { return SPECIES_TABLE[currentSpeciesIdx]->bodyColor; }
+
+void buddySetLook(uint16_t tint, uint8_t hat) {
+  _tint = tint;
+  _hat = hat < HAT_N ? hat : (uint8_t)HAT_NONE;
+  buddyInvalidate();
+}
+
+uint16_t buddyInkColor() { return _tint ? _tint : buddyBodyColor(); }
 
 void buddyNextSpecies() {
   currentSpeciesIdx = (currentSpeciesIdx + 1) % N_SPECIES;

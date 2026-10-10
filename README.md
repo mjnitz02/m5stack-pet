@@ -1,7 +1,7 @@
 # m5stack-pet
 
 A small offline virtual pet for the M5StickS3. An egg hatches into an ASCII
-animal that you feed, play a tilt game with, and put to bed. There is no
+animal that you feed, play with, take for walks and put to bed. There is no
 Bluetooth, no Wi-Fi and no app. It is meant for young kids, so nothing on the
 main screens needs reading and the pet can't die.
 
@@ -24,14 +24,43 @@ animations come from that project.
    it. A pet hatches. For now every egg is an octopus.
 2. **Home.** The pet sits at the top. Under it are two rows, apples for
    hunger and hearts for happiness, and three icons.
-3. **Feed** (apple). An apple drops, the pet is happy, one apple fills in.
-4. **Play** (ball). Five apples fall one at a time. Tilt the stick left and
+3. **Feed** (apple). A tray of four foods opens: apple, carrot, strawberry
+   and ice cream. Each one fills one apple. One of them is the pet's
+   favourite that day and gets a bigger celebration.
+4. **Play** (ball). Five snacks fall one at a time. Tilt the stick left and
    right to catch them in the basket. Every round ends in a celebration.
 5. **Bed** (moon). The pet goes to sleep and the stick turns itself off.
+6. **Toy box** (hold the blue button). Two pages of icon tiles with more
+   things to do, described below.
 
 Apples and hearts drain slowly while the stick is on. When one runs out the
 pet asks for attention, and that is the worst that happens. Time does not
 pass while the stick is off, so a pet left in a drawer comes back as it was.
+
+## Toy box
+
+Hold the blue button on the pet screen to open it, and hold it again from
+anywhere to go back to the pet. The first page is the activities that get a
+kid moving; the second is the sit-still games. Nothing has a score or a way
+to lose. Finishing one adds a heart and sometimes a sticker.
+
+| Tile | What you do |
+| --- | --- |
+| **Walk** | Carry the pet around. Any movement fills a path to a flower. |
+| **Bath** | Shake the bubbles off. |
+| **Rock to sleep** | Rock the stick slowly side to side until six moons fill, then it goes to bed. |
+| **Freeze** | Wiggle while the pet's eyes are shut, hold still when the big eye opens. |
+| **Dress-up** | Side button changes the colour, blue changes the hat. |
+| **Stickers** | Shows the twelve stickers and which are still to find. |
+| **Catch** | The same game as the ball icon. |
+| **Draw** | Tilt moves the pen, blue changes colour, shake wipes the page. |
+| **Marble** | Tilt to roll a ball onto three apples. |
+| **Copycat** | The pet lights the two buttons in a pattern; repeat it. |
+| **Hide and seek** | The pet peeks over one of three bushes; pick the bush. |
+| **New egg** | Hold blue for three seconds to start over from an egg. |
+
+Tilt activities take half a second at the start to learn how the stick is
+being held, so "level" is wherever the kid is holding it.
 
 ## Controls
 
@@ -41,6 +70,7 @@ pass while the stick is off, so a pet left in a drawer comes back as it was.
 | **Blue front button** | Select |
 | **Shake** | Pet gets dizzy |
 | **Face down** | Puts the pet to bed |
+| **Hold blue button** (0.7s) | Toy box, or back to the pet |
 | **Hold side button** (1.5s) | Sound on or off |
 | **Hold both buttons** (1.5s) | Parent screen |
 | **Power button** | Turn the stick back on |
@@ -48,7 +78,7 @@ pass while the stick is off, so a pet left in a drawer comes back as it was.
 ### Parent screen
 
 Text menu for grown-ups: brightness, sound, `stay on` (no auto power-off),
-`pet` (switch animal), `zero timer`, and `new egg`. It also shows battery
+`egg tile` (show or hide New egg in the toy box), `pet` (switch animal), `zero timer`, and `new egg`. It also shows battery
 voltage and how long the stick has been awake since the timer was zeroed.
 
 ## Battery
@@ -60,6 +90,9 @@ it:
 - After 60 seconds without input the pet falls asleep, and 15 seconds later
   the stick powers off. The power button turns it back on.
 - The CPU runs at 80 MHz and the screen brightness defaults to low.
+
+Five dim dashes along the top edge of the screen show the charge, one per
+20%. The last one turns orange.
 
 To measure screen-on time: charge it, open the parent screen, choose
 `zero timer`, turn `stay on` on, and leave it until it dies. After charging
@@ -110,8 +143,10 @@ delete its file and its two lines in `src/buddy.cpp`, then run
 
 ```
 src/
-  main.cpp   - game loop, screens, power handling
-  pet.h      - saved state (needs, settings, awake timer)
+  main.cpp   - game loop, core screens, toy box, power handling
+  activities.h - the toy box activities
+  icons.h    - every icon, drawn from shapes
+  pet.h      - saved state (needs, settings, stickers, dress-up)
   buddy.cpp  - animal registry and ASCII render helpers
   buddies/   - one file per animal, seven animation functions each
   compat.h   - maps the old display type names onto M5Unified

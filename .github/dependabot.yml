@@ -1,0 +1,25 @@
+# Please see the documentation for all configuration options:
+# https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+#
+# Only the workflow actions are covered. Dependabot has no PlatformIO
+# ecosystem, so the espressif32 platform and M5Unified in platformio.ini are
+# bumped by hand, as is the PlatformIO Core version pinned in ci.yml.
+
+version: 2
+
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    # One PR a week instead of one per action (codeql-action's init and
+    # analyze would otherwise open a matched pair). dependabot-automerge.yml
+    # merges it once the required checks pass.
+    groups:
+      dependencies:
+        patterns: ["*"]
+    # Nobody reviews these PRs before they merge, so wait a week after a
+    # release: time for a compromised or broken version to be yanked upstream.
+    # Security updates ignore the cooldown.
+    cooldown:
+      default-days: 7

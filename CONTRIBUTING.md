@@ -1,31 +1,48 @@
 # Contributing
 
-The best contribution is a fork.
+m5stack-pet is a personal, single-maintainer project built for two small
+kids. It's open source in case it helps someone build their own, but it isn't
+trying to grow into a general-purpose virtual pet. That shapes how
+contributions are handled:
 
-This repo is a reference implementation — a worked example of one device
-that speaks the BLE protocol described in [REFERENCE.md](REFERENCE.md).
-It's not an actively maintained project, and we'd rather you build the
-thing _you_ want than bend this one into it.
+- **Bug reports and ideas are welcome** via [issues](https://github.com/mjnitz02/m5stack-pet/issues).
+- **PRs may be declined** if they don't fit the design guardrails — even if
+  they're well made. Please open an issue to discuss anything non-trivial
+  first. Forking it and making it yours is just as good an outcome.
 
-## So what should I do instead?
+## Design guardrails (non-negotiable)
 
-**Fork it and make it yours.** Swap the M5Stick for a Pi Pico W. Replace
-the ASCII pets with an e-ink panel. Put it in a 3D-printed shell. Rip
-out everything but `ble_bridge.cpp` and the JSON parser. The protocol is
-the stable surface — `REFERENCE.md` is the contract, this firmware is
-just one way to honor it.
+1. **No reading.** It's for four- and five-year-olds. Everything outside the
+   parent screen is icons and pictures.
+2. **Nothing dies, nothing is lost.** No scores, no way to lose, and the
+   worst a neglected pet does is ask for attention.
+3. **Battery first.** No radio code, and the stick turns itself off when
+   nobody is playing.
+4. **Offline.** No Bluetooth, no Wi-Fi, no app.
 
-## What we will take
+## Development
 
-- Corrections to `REFERENCE.md` if the protocol docs are wrong or
-  unclear
-- Fixes for bugs that make the reference _not work as a reference_ —
-  i.e., it doesn't pair, doesn't render, crashes on boot
+Everything runs through the `Makefile` (see [`README.md`](README.md) for the
+full list). You need [PlatformIO Core](https://docs.platformio.org/en/latest/core/installation/),
+[uv](https://docs.astral.sh/uv/) and [gitleaks](https://github.com/gitleaks/gitleaks).
 
-## What we won't take
+```sh
+make install-hooks   # pre-commit hook (ruff + art checks + secret scan)
 
-- New features, new pets, new screens
-- Ports to other boards (fork!)
-- Refactors, style changes, dependency bumps
+make test            # checks on the animal art
+make lint            # ruff on tools/, then a build with warnings as errors
+make flash           # compile and upload over USB
+```
 
-If you're unsure which bucket something falls in, it's likely the second one.
+## Before you open a PR
+
+- `make test` and `make lint` pass. CI runs both, and builds for the
+  M5StickC Plus as well as the M5StickS3.
+- Try it on a stick if the change is something a kid would see or feel.
+- Keep changes focused; match the style of the surrounding code.
+- Fill in the PR template.
+
+## License
+
+By contributing, you agree your contributions are licensed under the
+[MIT License](LICENSE).

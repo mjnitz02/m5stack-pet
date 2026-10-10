@@ -41,7 +41,7 @@ const uint16_t GRID  = 0x39E7;   // unlit outlines
 
 enum PetState { P_SLEEP, P_IDLE, P_BUSY, P_ATTENTION, P_CELEBRATE, P_DIZZY, P_HEART };
 // Everything from M_WALK on is a toy box activity (see activities.h).
-enum Mode     { M_EGG, M_HOME, M_FOOD, M_FEED, M_PLAY, M_BED, M_PARENT, M_MENU, M_REWARD,
+enum Mode     { M_EGG, M_HOME, M_FOOD, M_FEED, M_PLAY, M_BED, M_PARENT, M_MENU, M_REWARD, M_CAL,
                 M_WALK, M_BATH, M_ROCK, M_FREEZE, M_DRESS, M_STICKERS,
                 M_DRAW, M_MARBLE, M_COPY, M_HIDE, M_DANCE };
 
@@ -124,43 +124,87 @@ static void sampleMotion(uint32_t now) {
   imuFresh = true;
 }
 
-// Tilt steering. Nobody holds the stick perfectly level, so each tilt
-// activity calls tiltBegin() and the first half second is spent averaging
-// where "level" is for this kid right now. tiltX / tiltY are then measured
-// from that. The captured centre is capped so starting with the stick on its
-// side can't leave one direction out of reach.
-const float    TILT_SIGN   = 1.0f;    // flip to -1 if left/right is backwards
-const float    TILT_SIGN_Y = 1.0f;    // flip to -1 if up/down is backwards
+// Tilt steering. Nobody holds the stick level, so "level" is whatever way
+// gravity points when a tilt activity starts: tiltBegin() spends the first
+// half second averaging it. tiltX and tiltY are then how far gravity has
+// leaned from there, along the screen's own left/right and up/down, at full
+// strength however the stick was held.
+//
+// TILT_DEFAULT is what a real calibration on a StickS3 read, in an adult
+// hand, and is used until a grown-up runs their own from the parent screen:
+//   held to play   -0.55  0.00  0.84   top tipped up about 35 degrees
+//   tilted left    -0.54  0.63  0.55   so screen-right is the sensor's -y
+//   tilted right   -0.56 -0.57  0.61
+//   tilted up       0.05  0.01  1.00   flat on its back
+//   tilted down    -0.98  0.01  0.14   so screen-down is the sensor's -x
+// A deliberate tilt came out at 0.6 to 0.7 g each way (roughly 40 degrees),
+// about twice what the games count as a full tilt, hence the gain.
+const TiltCal  TILT_DEFAULT = { false, { 0, -1, 0 }, { -1, 0, 0 }, 0.55f, 0.55f };
 const uint32_t TILT_ZERO_MS = 500;
-float    tiltX = 0, tiltY = 0;
-float    tiltZeroX = 0, tiltZeroY = 0, tiltSumX = 0, tiltSumY = 0, tiltSeenX = 0, tiltSeenY = 0;
+float    tiltX = 0, tiltY = 0, tiltSeenX = 0, tiltSeenY = 0;
+float    tiltSum[3] = { 0, 0, 0 };
+float    tiltU[3] = { 0, -1, 0 }, tiltV[3] = { -1, 0, 0 };   // screen x and y, laid level
+float    tiltGainX = 1, tiltGainY = 1;
 uint16_t tiltN = 0;
 uint32_t tiltZeroUntil = 0;
 
 static void tiltBegin(uint32_t now) {
-  tiltSumX = tiltSumY = 0;
+  tiltSum[0] = tiltSum[1] = tiltSum[2] = 0;
   tiltN = 0;
   tiltX = tiltY = tiltSeenX = tiltSeenY = 0;
   tiltZeroUntil = now + TILT_ZERO_MS;
 }
 
-static float clampf(float v, float lim) { return v < -lim ? -lim : v > lim ? lim : v; }
+// The part of d that lies level (square to the unit pull g), at unit length.
+// False if d points too nearly at the floor to say.
+static bool tiltFlatten(const float* d, const float* g, float* out) {
+  float k = d[0]*g[0] + d[1]*g[1] + d[2]*g[2];
+  for (int i = 0; i < 3; i++) out[i] = d[i] - k * g[i];
+  float len = sqrtf(out[0]*out[0] + out[1]*out[1] + out[2]*out[2]);
+  if (len < 0.3f) return false;
+  for (int i = 0; i < 3; i++) out[i] /= len;
+  return true;
+}
 
-// False while the centre is still being captured.
+static void tiltCross(const float* a, const float* b, float* out) {
+  out[0] = a[1]*b[2] - a[2]*b[1];
+  out[1] = a[2]*b[0] - a[0]*b[2];
+  out[2] = a[0]*b[1] - a[1]*b[0];
+}
+
+// Turn the averaged pull into the two directions a tilt is measured along:
+// the calibrated "right" and "down", laid level for today's grip.
+static void tiltSetLevel() {
+  float g[3] = { tiltSum[0], tiltSum[1], tiltSum[2] };
+  float len = sqrtf(g[0]*g[0] + g[1]*g[1] + g[2]*g[2]);
+  if (len < 0.01f) { g[0] = g[1] = 0; g[2] = 1; len = 1; }
+  for (int i = 0; i < 3; i++) g[i] /= len;
+
+  const TiltCal& cal = tiltCal().set ? tiltCal() : TILT_DEFAULT;
+  tiltGainX = cal.gainX;
+  tiltGainY = cal.gainY;
+  bool okU = tiltFlatten(cal.u, g, tiltU), okV = tiltFlatten(cal.v, g, tiltV);
+  // Held bolt upright, "down the screen" points at the floor and can't be
+  // laid level; on its side the same goes for "right". Square the lost one
+  // off the other, the way round the readings above come out.
+  if (!okV) tiltCross(tiltU, g, tiltV);
+  else if (!okU) tiltCross(g, tiltV, tiltU);
+}
+
+// False while level is still being captured.
 static bool tiltUpdate(uint32_t now) {
-  float ax, ay, az;
-  M5.Imu.getAccel(&ax, &ay, &az);
+  float a[3];
+  M5.Imu.getAccel(&a[0], &a[1], &a[2]);
   if ((int32_t)(now - tiltZeroUntil) < 0) {
-    tiltSumX += ax; tiltSumY += ay; tiltN++;
+    for (int i = 0; i < 3; i++) tiltSum[i] += a[i];
+    tiltN++;
     return false;
   }
-  if (tiltN) {
-    tiltZeroX = clampf(tiltSumX / tiltN, 0.5f);
-    tiltZeroY = clampf(tiltSumY / tiltN, 0.8f);
-    tiltN = 0;
-  }
-  tiltX += ((ax - tiltZeroX) - tiltX) * 0.5f;
-  tiltY += ((ay - tiltZeroY) - tiltY) * 0.5f;
+  if (tiltN) { tiltSetLevel(); tiltN = 0; }
+  float x = (a[0]*tiltU[0] + a[1]*tiltU[1] + a[2]*tiltU[2]) * tiltGainX;
+  float y = (a[0]*tiltV[0] + a[1]*tiltV[1] + a[2]*tiltV[2]) * tiltGainY;
+  tiltX += (x - tiltX) * 0.5f;
+  tiltY += (y - tiltY) * 0.5f;
   // Steering counts as playing; a stick lying still does not, so it can
   // still fall asleep in the middle of a tilt activity.
   if (fabsf(tiltX - tiltSeenX) > 0.06f || fabsf(tiltY - tiltSeenY) > 0.06f) {
@@ -515,7 +559,7 @@ static void tickPlay(uint32_t now) {
 
   // Nothing falls until the tilt centre has been captured.
   if (!tiltUpdate(now)) dropStartMs = now;
-  float target = CX + TILT_SIGN * tiltX * 110.0f;
+  float target = CX + tiltX * 110.0f;
   if (target < 30) target = 30;
   if (target > W - 30) target = W - 30;
   basketX += (target - basketX) * 0.3f;
@@ -685,10 +729,155 @@ static void leaveToHome(uint32_t now) {
   enterHome();
 }
 
+// --- Tilt calibration -------------------------------------------------------
+// From the parent screen. Five poses, blue on each: how the stick is held to
+// play, then tilted as if rolling a ball left, right, up and down the
+// screen. The sensor is averaged for a moment after each click, and the
+// difference between opposite poses says which way "right" and "down"
+// really read on this board and how far a hand comfortably tips it. The
+// numbers stay on screen at the end, and go to the serial log, for tuning.
+enum { CAL_LEVEL, CAL_LEFT, CAL_RIGHT, CAL_UP, CAL_DOWN, CAL_POSES };
+const uint32_t CAL_SETTLE_MS = 150;    // let the button press stop wobbling the stick
+const uint32_t CAL_READ_MS   = 400;
+const float    CAL_MIN_REACH = 0.05f;  // g each way; less than this wasn't really a tilt
+const float    CAL_FULL_TILT = 0.35f;  // what the games treat as a full tilt
+uint8_t  calPose = 0;
+bool     calReading = false, calGood = false;
+uint32_t calAt = 0;
+uint16_t calN = 0;
+float    calSum[3], calG[CAL_POSES][3], calReachX = 0, calReachY = 0;
+
+static void startCal() {
+  mode = M_CAL;
+  calPose = 0;
+  calReading = false;
+}
+
+// Direction and half-length of the swing between two opposite poses.
+static float calAxis(uint8_t from, uint8_t to, const float* g, float* out) {
+  float d[3];
+  for (int i = 0; i < 3; i++) d[i] = calG[to][i] - calG[from][i];
+  float k = d[0]*g[0] + d[1]*g[1] + d[2]*g[2];
+  for (int i = 0; i < 3; i++) out[i] = d[i] - k * g[i];
+  float len = sqrtf(out[0]*out[0] + out[1]*out[1] + out[2]*out[2]);
+  if (len > 0) for (int i = 0; i < 3; i++) out[i] /= len;
+  return len / 2;
+}
+
+static void calFinish() {
+  float g[3], len = 0;
+  for (int i = 0; i < 3; i++) len += calG[CAL_LEVEL][i] * calG[CAL_LEVEL][i];
+  len = sqrtf(len);
+  for (int i = 0; i < 3; i++) g[i] = len > 0 ? calG[CAL_LEVEL][i] / len : 0;
+
+  TiltCal c;
+  calReachX = calAxis(CAL_LEFT, CAL_RIGHT, g, c.u);
+  calReachY = calAxis(CAL_UP, CAL_DOWN, g, c.v);
+  calGood = calReachX >= CAL_MIN_REACH && calReachY >= CAL_MIN_REACH;
+  if (calGood) {
+    c.set = true;
+    c.gainX = constrain(CAL_FULL_TILT / calReachX, 0.5f, 3.0f);
+    c.gainY = constrain(CAL_FULL_TILT / calReachY, 0.5f, 3.0f);
+    tiltCal() = c;
+    tiltCalSave();
+  }
+
+  static const char* const NAME[CAL_POSES] = { "level", "left", "right", "up", "down" };
+  for (int i = 0; i < CAL_POSES; i++)
+    Serial.printf("cal %-5s % .3f % .3f % .3f\n", NAME[i], calG[i][0], calG[i][1], calG[i][2]);
+  Serial.printf("cal %s reach %.3f %.3f u % .2f % .2f % .2f v % .2f % .2f % .2f\n",
+                calGood ? "saved" : "rejected", calReachX, calReachY,
+                c.u[0], c.u[1], c.u[2], c.v[0], c.v[1], c.v[2]);
+}
+
+static void drawCalPose(uint8_t pose) {
+  static const int8_t DX[CAL_POSES] = { 0, -1, 1, 0, 0 }, DY[CAL_POSES] = { 0, 0, 0, -1, 1 };
+  int cx = CX, cy = 100, dx = DX[pose], dy = DY[pose];
+  spr.drawRoundRect(cx - 34, cy - 50, 68, 100, 8, DIM);        // the stick, screen towards you
+  spr.fillCircle(cx + dx * 14, cy + dy * 26, 7, AQUA);
+  spr.drawCircle(cx + dx * 14, cy + dy * 26, 7, INK);
+  if (!dx && !dy) return;
+  int tx = cx + dx * 54, ty = cy + dy * 70;                    // arrowhead outside the outline
+  spr.fillTriangle(tx, ty, tx - dx * 12 - dy * 9, ty - dy * 12 - dx * 9,
+                   tx - dx * 12 + dy * 9, ty - dy * 12 + dx * 9, YEL);
+}
+
+static void tickCal(uint32_t now, bool a, bool b) {
+  lastInteractMs = now;
+  float v[3];
+  M5.Imu.getAccel(&v[0], &v[1], &v[2]);
+
+  spr.fillSprite(BG);
+  spr.setTextSize(1);
+  spr.setTextColor(INK, BG);
+  spr.setCursor(6, 8);
+
+  if (calPose >= CAL_POSES) {                    // results
+    if (b) { beep(1800, 25); startCal(); return; }
+    if (a) { beep(2400, 25); mode = M_PARENT; return; }
+    spr.print(calGood ? "TILT CAL SAVED" : "NOT ENOUGH TILT");
+    spr.setTextColor(DIM, BG);
+    static const char* const TAG[CAL_POSES] = { "lvl", "lft", "rgt", "up ", "dn " };
+    for (int i = 0; i < CAL_POSES; i++) {
+      spr.setCursor(6, 30 + i * 14);
+      spr.printf("%s%6.2f%6.2f%6.2f", TAG[i], calG[i][0], calG[i][1], calG[i][2]);
+    }
+    spr.setCursor(6, 112); spr.printf("reach l/r %.2f g", calReachX);
+    spr.setCursor(6, 126); spr.printf("reach u/d %.2f g", calReachY);
+    if (calGood) {
+      spr.setCursor(6, 146); spr.printf("gain %.1f x  %.1f y", tiltCal().gainX, tiltCal().gainY);
+    } else {
+      spr.setCursor(6, 146); spr.print("old setting kept");
+    }
+    spr.setCursor(6, H - 24); spr.print("side: again");
+    spr.setCursor(6, H - 12); spr.print("blue: back");
+    return;
+  }
+
+  if (calReading) {
+    if (now - calAt >= CAL_SETTLE_MS) {
+      for (int i = 0; i < 3; i++) calSum[i] += v[i];
+      calN++;
+    }
+    if (now - calAt >= CAL_SETTLE_MS + CAL_READ_MS) {
+      for (int i = 0; i < 3; i++) calG[calPose][i] = calSum[i] / calN;
+      calReading = false;
+      beep(2000, 60);
+      if (++calPose >= CAL_POSES) { calFinish(); return; }
+    }
+  } else if (a) {
+    calReading = true;
+    calAt = now;
+    calN = 0;
+    calSum[0] = calSum[1] = calSum[2] = 0;
+    beep(2400, 25);
+  } else if (b) {
+    // Side backs out. On the first pose it also forgets a saved calibration,
+    // which is the way back to the built-in one.
+    if (calPose == 0 && tiltCal().set) { tiltCal().set = false; tiltCalSave(); }
+    beep(1800, 25);
+    mode = M_PARENT;
+    return;
+  }
+
+  spr.printf("TILT CAL %u/%u", calPose + 1, CAL_POSES);
+  drawCalPose(calPose);
+  spr.setTextColor(calReading ? YEL : INK, BG);
+  spr.setCursor(6, 178);
+  spr.print(calReading ? "hold still..." : calPose ? "tilt so the ball" : "hold it the way");
+  spr.setCursor(6, 190);
+  spr.print(calReading ? "" : calPose ? "would roll there" : "you play");
+  spr.setTextColor(DIM, BG);
+  spr.setCursor(6, 204); spr.printf("%6.2f%6.2f%6.2f", v[0], v[1], v[2]);
+  spr.setCursor(6, H - 24);
+  spr.print(calPose ? "side: cancel" : tiltCal().set ? "side: clear saved" : "side: cancel");
+  spr.setCursor(6, H - 12); spr.print("blue: read");
+}
+
 // --- Parent screen ----------------------------------------------------------
-enum { PA_BRIGHT, PA_SOUND, PA_STAYON, PA_EGGTILE, PA_PET, PA_ZERO, PA_EGG, PA_BACK, PA_N };
+enum { PA_BRIGHT, PA_SOUND, PA_STAYON, PA_EGGTILE, PA_PET, PA_CAL, PA_ZERO, PA_EGG, PA_BACK, PA_N };
 const char* const PARENT_ITEMS[PA_N] = {
-  "bright", "sound", "stay on", "egg tile", "pet", "zero timer", "new egg", "back"
+  "bright", "sound", "stay on", "egg tile", "pet", "tilt cal", "zero timer", "new egg", "back"
 };
 uint8_t  parentSel = 0;
 uint32_t eggConfirmUntil = 0;
@@ -709,6 +898,7 @@ static void applyParent(uint8_t idx, uint32_t now) {
       buddyNextSpecies();
       s.species = buddySpeciesIdx();
       break;
+    case PA_CAL:    startCal(); return;
     case PA_ZERO:   s.awakeMin = 0; awakeMarkMs = now; break;
     case PA_EGG:
       // Tap-twice confirm: first tap arms (label flips to "really?").
@@ -752,6 +942,7 @@ static void tickParent(uint32_t now, bool a, bool b) {
     else if (i == PA_STAYON) spr.print(s.stayOn ? "on" : "off");
     else if (i == PA_EGGTILE) spr.print(s.eggTile ? "on" : "off");
     else if (i == PA_PET)    spr.print(buddySpeciesName());
+    else if (i == PA_CAL)    spr.print(tiltCal().set ? "set" : "-");
   }
   spr.setTextColor(DIM, BG);
   spr.setCursor(6, H - 24); spr.print("side: next");
@@ -858,7 +1049,7 @@ void loop() {
 
   // Hold the side button alone: mute/unmute. The chirp plays only when
   // sound has just come back on; the glyph covers the silent direction.
-  if (mode != M_PARENT && !swallowB && M5.BtnB.pressedFor(1500) && !M5.BtnA.isPressed()) {
+  if (mode != M_PARENT && mode != M_CAL && !swallowB && M5.BtnB.pressedFor(1500) && !M5.BtnA.isPressed()) {
     swallowB = true;
     b = false;
     pet().sound = !pet().sound;
@@ -909,6 +1100,7 @@ void loop() {
     case M_PARENT: tickParent(now, a, b); break;
     case M_MENU:   tickMenu(now, a, b); break;
     case M_REWARD: tickReward(now); break;
+    case M_CAL:    tickCal(now, a, b); break;
     case M_WALK:   tickWalk(now); break;
     case M_BATH:   tickBath(now, shook); break;
     case M_ROCK:   tickRock(now); break;
@@ -919,14 +1111,15 @@ void loop() {
       if (a || b) openMenu(T_STICKERS);
       break;
     case M_DRAW:   tickDraw(now, a, shook); break;
-    case M_MARBLE: tickMarble(now); break;
+    case M_MARBLE: tickMarble(now, a); break;
     case M_COPY:   tickCopy(now, a, b); break;
     case M_HIDE:   tickHide(now, a, b); break;
     case M_DANCE:  tickDance(now); break;
   }
 
-  if (mode != M_PARENT) drawBatteryTrim();
-  if (mode != M_PARENT && (int32_t)(now - soundFlashUntil) < 0) drawSoundFlash();
+  bool kidScreen = mode != M_PARENT && mode != M_CAL;
+  if (kidScreen) drawBatteryTrim();
+  if (kidScreen && (int32_t)(now - soundFlashUntil) < 0) drawSoundFlash();
   spr.pushSprite(0, 0);
   delay(mode == M_BED ? 100 : 33);
 }

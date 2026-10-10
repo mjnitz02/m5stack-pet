@@ -278,39 +278,59 @@ static void tickFreeze(uint32_t now) {
 }
 
 // --- Draw -------------------------------------------------------------------
-// Tilt moves the pen, blue changes colour, a shake wipes the page. The
-// sprite keeps whatever was drawn, so the field is never cleared per frame.
-const float PEN_SPEED = 9.0f;          // px per frame at 1 g of tilt
-const float PEN_DEAD  = 0.04f;
-static const uint16_t PEN_COLORS[] = { INK, AQUA, ROSE, YEL, GREEN, AMBER };
-const uint8_t PEN_N = sizeof(PEN_COLORS) / sizeof(PEN_COLORS[0]);
-float   penX = 0, penY = 0, drawTravel = 0;
-uint8_t penCol = 0;
+// Tilt moves the pen and the line drifts through the rainbow as it goes.
+// Blue starts a fresh page with the pen back in the middle; a shake wipes
+// the page where the pen is. The sprite keeps whatever was drawn, so the
+// field is never cleared per frame.
+const float PEN_SPEED  = 9.0f;         // px per frame at a full tilt
+const float PEN_DEAD   = 0.04f;
+const float PEN_RAINBOW_PX = 700.0f;   // pen travel for one trip round the colours
+float penX = 0, penY = 0, drawTravel = 0;
 
 static float penDead(float v) {
   if (fabsf(v) < PEN_DEAD) return 0;
   return v > 0 ? v - PEN_DEAD : v + PEN_DEAD;
 }
 
-static void startDraw(uint32_t now) {
-  actBegin(M_DRAW, true);
+// Full-brightness colour wheel, h in 0..1.
+static uint16_t rainbow(float h) {
+  h = (h - floorf(h)) * 6;
+  int seg = (int)h;
+  uint8_t up = (uint8_t)((h - seg) * 255), down = 255 - up, r = 0, g = 0, b = 0;
+  switch (seg) {
+    case 0:  r = 255;  g = up;                break;
+    case 1:  r = down; g = 255;               break;
+    case 2:            g = 255;  b = up;      break;
+    case 3:            g = down; b = 255;     break;
+    case 4:  r = up;             b = 255;     break;
+    default: r = 255;            b = down;    break;
+  }
+  return spr.color565(r, g, b);
+}
+
+static void drawFresh() {
+  spr.fillRect(0, FIELD_TOP, W, H - FIELD_TOP, BG);
   penX = CX;
   penY = (FIELD_TOP + H) / 2;
+}
+
+static void startDraw(uint32_t now) {
+  actBegin(M_DRAW, true);
+  drawFresh();
   drawTravel = 0;
   tiltBegin(now);
 }
 
 static void tickDraw(uint32_t now, bool a, bool shook) {
-  uint16_t col = PEN_COLORS[penCol];
-  if (a) { penCol = (penCol + 1) % PEN_N; col = PEN_COLORS[penCol]; beep(2400, 25); }
+  if (a) { drawFresh(); beep(2400, 25); }
   if (shook) {
     spr.fillRect(0, FIELD_TOP, W, H - FIELD_TOP, BG);
     beep(700, 60);
-    tiltBegin(now);                 // let the hand settle before drawing again
   }
+  uint16_t col = rainbow(drawTravel / PEN_RAINBOW_PX);
   if (tiltUpdate(now)) {
-    float nx = penX + TILT_SIGN * penDead(tiltX) * PEN_SPEED;
-    float ny = penY + TILT_SIGN_Y * penDead(tiltY) * PEN_SPEED;
+    float nx = penX + penDead(tiltX) * PEN_SPEED;
+    float ny = penY + penDead(tiltY) * PEN_SPEED;
     if (nx < 2) nx = 2;
     if (nx > W - 3) nx = W - 3;
     if (ny < FIELD_TOP + 2) ny = FIELD_TOP + 2;
@@ -326,12 +346,12 @@ static void tickDraw(uint32_t now, bool a, bool shook) {
   spr.fillCircle((int)penX, (int)penY, 1, col);
 
   buddyTick(P_IDLE);
-  spr.fillCircle(W - 11, 11, 5, col);            // which colour is loaded
+  spr.fillCircle(W - 11, 11, 5, col);            // the colour the pen is on now
   spr.drawCircle(W - 11, 11, 7, DIM);
 }
 
 // --- Marble -----------------------------------------------------------------
-// Roll the ball onto three apples, one at a time.
+// Roll the ball onto three apples, one at a time. Blue starts the game over.
 const float   MARBLE_ACCEL = 1.2f, MARBLE_DRAG = 0.92f;
 const uint8_t MARBLE_GOAL  = 3;
 float   mbX = 0, mbY = 0, mbVX = 0, mbVY = 0;
@@ -345,20 +365,25 @@ static void mbSpawn() {
   } while (fabsf(mbAX - mbX) + fabsf(mbAY - mbY) < 50);
 }
 
-static void startMarble(uint32_t now) {
-  actBegin(M_MARBLE, true);
+static void mbFresh() {
   mbX = CX;
   mbY = (FIELD_TOP + H) / 2;
   mbVX = mbVY = 0;
   mbGot = 0;
   mbSpawn();
+}
+
+static void startMarble(uint32_t now) {
+  actBegin(M_MARBLE, true);
+  mbFresh();
   tiltBegin(now);
 }
 
-static void tickMarble(uint32_t now) {
+static void tickMarble(uint32_t now, bool a) {
+  if (a) { mbFresh(); beep(2400, 25); }
   if (tiltUpdate(now)) {
-    mbVX = (mbVX + TILT_SIGN * tiltX * MARBLE_ACCEL) * MARBLE_DRAG;
-    mbVY = (mbVY + TILT_SIGN_Y * tiltY * MARBLE_ACCEL) * MARBLE_DRAG;
+    mbVX = (mbVX + tiltX * MARBLE_ACCEL) * MARBLE_DRAG;
+    mbVY = (mbVY + tiltY * MARBLE_ACCEL) * MARBLE_DRAG;
     mbX += mbVX;
     mbY += mbVY;
     const float L = 8, R = W - 9, T = FIELD_TOP + 8, B = H - 22;

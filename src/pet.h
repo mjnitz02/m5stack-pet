@@ -27,10 +27,21 @@ struct PetSave {
   bool     eggTile;     // show "new egg" in the toy box (testing aid)
 };
 
+// What the parent screen's tilt calibration measured: which way the sensor
+// reads when the stick is tipped right (u) and tipped down the screen (v),
+// and how much to scale each so a comfortable tilt is a full one.
+struct TiltCal {
+  bool  set;
+  float u[3], v[3];
+  float gainX, gainY;
+};
+
 static PetSave     _pet;
+static TiltCal     _tiltCal;
 static Preferences _prefs;
 
 inline PetSave& pet() { return _pet; }
+inline TiltCal& tiltCal() { return _tiltCal; }
 
 inline void petLoad() {
   _prefs.begin("pet", true);
@@ -47,6 +58,9 @@ inline void petLoad() {
   _pet.color    = _prefs.getUChar("color", 0);
   _pet.hat      = _prefs.getUChar("hat", 0);
   _pet.eggTile  = _prefs.getBool("eggtile", true);
+  _tiltCal.set = false;
+  if (_prefs.isKey("tiltcal") && _prefs.getBytesLength("tiltcal") == sizeof(_tiltCal))
+    _prefs.getBytes("tiltcal", &_tiltCal, sizeof(_tiltCal));
   _prefs.end();
   if (_pet.hunger > PET_MAX) _pet.hunger = PET_MAX;
   if (_pet.happy  > PET_MAX) _pet.happy  = PET_MAX;
@@ -68,6 +82,13 @@ inline void petSave() {
   _prefs.putUChar("color", _pet.color);
   _prefs.putUChar("hat", _pet.hat);
   _prefs.putBool("eggtile", _pet.eggTile);
+  _prefs.end();
+}
+
+// Kept out of petSave(): it only changes when a grown-up calibrates.
+inline void tiltCalSave() {
+  _prefs.begin("pet", false);
+  _prefs.putBytes("tiltcal", &_tiltCal, sizeof(_tiltCal));
   _prefs.end();
 }
 

@@ -53,14 +53,24 @@ to lose. Finishing one adds a heart and sometimes a sticker.
 | **Dress-up** | Side button changes the colour, blue changes the hat. |
 | **Stickers** | Shows the twelve stickers and which are still to find. |
 | **Catch** | Five snacks fall one at a time. Tilt the stick left and right to catch them in the basket. |
-| **Draw** | Tilt moves the pen, blue changes colour, shake wipes the page. |
-| **Marble** | Tilt to roll a ball onto three apples. |
+| **Draw** | Tilt moves the pen and the line slowly runs through the rainbow. Blue starts a fresh page from the middle; shake wipes the page. |
+| **Marble** | Tilt to roll a ball onto three apples. Blue starts it over. |
 | **Copycat** | The pet lights the two buttons in a pattern; repeat it. |
 | **Hide and seek** | The pet peeks over one of three bushes; pick the bush. |
 | **New egg** | Hold blue for three seconds to start over from an egg. |
 
-Tilt activities take half a second at the start to learn how the stick is
-being held, so "level" is wherever the kid is holding it.
+Tilt activities (catch, draw, marble) take half a second at the start to
+learn how the stick is being held, so "level" is wherever the kid is holding
+it, upright included.
+
+Which way counts as left, right, up and down, and how far a tilt goes, comes
+from a calibration measured on one StickS3 until the stick is given its own. On the parent screen choose `tilt cal` and follow the
+five pictures, pressing blue on each: hold the stick the way you play, then
+tilt it as if rolling a ball left, right, up and down the screen. The
+measured directions and reach are saved and used by every tilt activity. The
+readings stay on screen at the end and are printed to the serial log. To go
+back to the built-in setting, open `tilt cal` and press the side button on the
+first picture.
 
 ## Controls
 

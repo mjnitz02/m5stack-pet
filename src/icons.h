@@ -45,6 +45,19 @@ static void drawBall(int x, int y, int r) {
   spr.drawCircle(x, y, r, INK);
 }
 
+// Party hat and confetti: the dance party icon on the home row.
+static void drawParty(int x, int y) {
+  spr.fillTriangle(x - 8, y + 9, x + 8, y + 9, x, y - 8, AQUA);
+  spr.fillRect(x - 4, y, 9, 2, ROSE);
+  spr.fillCircle(x, y - 8, 2, YEL);
+  spr.fillRect(x - 14, y - 6, 3, 3, ROSE);
+  spr.fillRect(x + 11, y - 3, 3, 3, YEL);
+  spr.fillRect(x - 13, y + 3, 3, 3, GREEN);
+  spr.fillRect(x + 13, y + 6, 3, 3, AMBER);
+  spr.fillRect(x + 7, y - 11, 3, 3, GREEN);
+  spr.fillRect(x - 9, y - 12, 3, 3, AMBER);
+}
+
 static void drawCrescent(int x, int y, int r, uint16_t col) {
   spr.fillCircle(x - 2, y, r, col);
   spr.fillCircle(x + r / 4, y - r / 3, r - 1, BG);

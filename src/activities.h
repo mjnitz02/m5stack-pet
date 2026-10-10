@@ -68,6 +68,60 @@ static void tickWalk(uint32_t now) {
   }
 }
 
+// --- Dance party ------------------------------------------------------------
+// Walk in party clothes, opened from the middle icon on the pet screen. The
+// same "any movement adds up", shown as five rainbow bars that fill one after
+// another while the pet parties. Aim: about half a minute of dancing.
+const float   DANCE_PER_BAR = 18.0f;
+const float   DANCE_LIVELY  = 0.12f;   // movement big enough to set the party off
+const uint8_t DANCE_BARS    = 5;
+const int     DANCE_BAR_H   = 58;
+static const uint16_t DANCE_COLORS[DANCE_BARS] = { ROSE, AMBER, YEL, GREEN, AQUA };
+float    danceAcc = 0;
+uint8_t  danceBars = 0;
+uint32_t danceMovedMs = 0;
+
+static void startDance(uint32_t now) {
+  actBegin(M_DANCE, false);
+  danceAcc = 0;
+  danceBars = 0;
+  danceMovedMs = now - 1000;
+}
+
+static void tickDance(uint32_t now) {
+  if (imuFresh && imuDelta > WALK_FLOOR) danceAcc += fminf(imuDelta, 1.0f) - WALK_FLOOR;
+  if (imuFresh && imuDelta > DANCE_LIVELY) danceMovedMs = now;
+  if (danceAcc >= DANCE_PER_BAR) {
+    danceAcc = 0;
+    danceBars++;
+    beep(900 + danceBars * 180, 60);
+    actUntil = now + 700;
+    if (danceBars >= DANCE_BARS) { finishActivity(now); return; }
+  }
+  bool moving = now - danceMovedMs < 800;
+
+  buddyTick(actBeat(now) ? P_HEART : moving ? P_CELEBRATE : P_IDLE);
+  if (moving) {                      // sparkles round the pet, colours chasing
+    static const int16_t SPARK[4][2] = { { 16, 50 }, { 118, 44 }, { 14, 128 }, { 120, 124 } };
+    uint32_t beat = now / 200;
+    for (int i = 0; i < 4; i++)
+      drawStar(SPARK[i][0], SPARK[i][1], ((beat + i) & 1) ? 6 : 4, DANCE_COLORS[(beat + i) % DANCE_BARS]);
+  }
+
+  spr.fillRect(0, BOTTOM_TOP, W, H - BOTTOM_TOP, BG);
+  for (int i = 0; i < DANCE_BARS; i++) {
+    int x = 10 + i * 24, h = 0;
+    spr.drawRoundRect(x, 172, 19, DANCE_BAR_H + 4, 4, GRID);
+    if (i < danceBars) {
+      // Full bars bounce like a music meter while the dancing goes on.
+      h = DANCE_BAR_H - (moving ? (int)((now / 110 + i * 3) % 4) * 5 : 0);
+    } else if (i == danceBars) {
+      h = (int)(danceAcc * DANCE_BAR_H / DANCE_PER_BAR);
+    }
+    if (h > 0) spr.fillRoundRect(x + 2, 174 + DANCE_BAR_H - h, 15, h, 2, DANCE_COLORS[i]);
+  }
+}
+
 // --- Bath -------------------------------------------------------------------
 // Shake the bubbles off.
 const uint8_t BATH_N = 8;
@@ -112,40 +166,42 @@ static void tickBath(uint32_t now, bool shook) {
 }
 
 // --- Rock to sleep ----------------------------------------------------------
-// Slow side-to-side rocking. Each full sway fills a moon; six and it's bed.
-const float    ROCK_TILT   = 0.15f;   // g either side of centre counts as a lean
-const uint32_t ROCK_MIN_MS = 350;     // faster than this is shaking, not rocking
-const uint8_t  ROCK_MOONS  = 6;
-int8_t   rockSide = 0;
-uint8_t  rockHalf = 0, rockMoons = 0;
-uint32_t rockLastMs = 0;
+// Not a sway detector. Any gentle rocking, tipping or swinging of the stick
+// pushes the ball along its track; it runs to one end, turns round and runs
+// back, as if every bit of movement were a perfect sway. Each crossing fills
+// a moon; six and it's bed. Holding still just parks the ball.
+const float   ROCK_FLOOR     = 0.04f;  // a hand trying to hold still stays under this
+const float   ROCK_CAP       = 0.15f;  // a hard shake is no faster than a gentle rock
+const float   ROCK_PER_CROSS = 2.0f;   // about two seconds of rocking per crossing
+const uint8_t ROCK_MOONS     = 6;
+const int     ROCK_REACH     = 44;     // px the ball travels either side of centre
+float   rockPos = 0, rockShown = 0;    // 0..1 along the current crossing; eased x offset
+int8_t  rockDir = 1;
+uint8_t rockMoons = 0;
 
-static void startRock(uint32_t now) {
+static void startRock() {
   actBegin(M_ROCK, false);
-  rockSide = 0;
-  rockHalf = rockMoons = 0;
-  rockLastMs = now;
-  tiltBegin(now);
+  rockPos = 0.5f;                      // starts in the middle, so the first moon comes quickly
+  rockShown = 0;
+  rockDir = 1;
+  rockMoons = 0;
 }
 
 static void tickRock(uint32_t now) {
-  if (tiltUpdate(now)) {
-    int8_t side = tiltX > ROCK_TILT ? 1 : tiltX < -ROCK_TILT ? -1 : 0;
-    if (side && side != rockSide) {
-      bool slow = now - rockLastMs >= ROCK_MIN_MS;
-      rockSide = side;
-      rockLastMs = now;
-      if (slow && ++rockHalf >= 2) {
-        rockHalf = 0;
-        rockMoons++;
-        beep(520, 70);
-        if (rockMoons >= ROCK_MOONS) {
-          if (pet().happy < PET_MAX) pet().happy++;
-          lastHappyMs = now;
-          petSave();
-          startBed(now, true);
-          return;
-        }
+  if (imuFresh && imuTurn > ROCK_FLOOR) {
+    lastInteractMs = now;
+    rockPos += (fminf(imuTurn, ROCK_CAP) - ROCK_FLOOR) / ROCK_PER_CROSS;
+    if (rockPos >= 1.0f) {
+      rockPos = 0;
+      rockDir = -rockDir;
+      rockMoons++;
+      beep(520, 70);
+      if (rockMoons >= ROCK_MOONS) {
+        if (pet().happy < PET_MAX) pet().happy++;
+        lastHappyMs = now;
+        petSave();
+        startBed(now, true);
+        return;
       }
     }
   }
@@ -153,8 +209,11 @@ static void tickRock(uint32_t now) {
   buddyTick(rockMoons >= ROCK_MOONS / 2 ? P_SLEEP : P_IDLE);
   spr.fillRect(0, BOTTOM_TOP, W, H - BOTTOM_TOP, BG);
   drawText("<        >", CX, 172, 2, DIM);
-  float t = tiltX < -0.4f ? -0.4f : tiltX > 0.4f ? 0.4f : tiltX;
-  spr.fillCircle(CX + (int)(TILT_SIGN * t * 110), 180, 4, INK);
+  // Slow into each end and out of it again, like something swinging.
+  float u = rockPos * rockPos * (3 - 2 * rockPos);
+  if (rockDir < 0) u = 1 - u;
+  rockShown += ((u * 2 - 1) * ROCK_REACH - rockShown) * 0.35f;
+  spr.fillCircle(CX + (int)lroundf(rockShown), 180, 4, INK);
   for (int i = 0; i < ROCK_MOONS; i++) drawCrescent(19 + i * 20, 216, 7, i < rockMoons ? YEL : GRID);
 }
 

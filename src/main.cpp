@@ -43,7 +43,7 @@ enum PetState { P_SLEEP, P_IDLE, P_BUSY, P_ATTENTION, P_CELEBRATE, P_DIZZY, P_HE
 // Everything from M_WALK on is a toy box activity (see activities.h).
 enum Mode     { M_EGG, M_HOME, M_FOOD, M_FEED, M_PLAY, M_BED, M_PARENT, M_MENU, M_REWARD,
                 M_WALK, M_BATH, M_ROCK, M_FREEZE, M_DRESS, M_STICKERS,
-                M_DRAW, M_MARBLE, M_COPY, M_HIDE };
+                M_DRAW, M_MARBLE, M_COPY, M_HIDE, M_DANCE };
 
 // Toy box tiles in reading order. The first page is care and moving, the
 // second is the sit-still games. The egg stays last so it can be hidden.
@@ -101,6 +101,8 @@ static void jingle(const uint16_t* notes, uint8_t n, uint16_t each) {
 float    accelBaseline = 1.0f;
 uint32_t lastImuMs = 0;
 float    imuDelta = 0;
+float    imuTurn = 0;           // how far the pull has swung round, see below
+float    turnX = 0, turnY = 0, turnZ = 0;
 bool     imuFresh = false;      // true on the frame a sample was taken
 const float SHAKE_DELTA = 0.8f;
 
@@ -113,6 +115,12 @@ static void sampleMotion(uint32_t now) {
   float mag = sqrtf(ax*ax + ay*ay + az*az);
   imuDelta = fabsf(mag - accelBaseline);
   accelBaseline = accelBaseline * 0.95f + mag * 0.05f;
+  // The same sample as a direction. Tipping or swaying the stick barely
+  // changes how hard gravity pulls on it, but it does change which way, so
+  // this is the one that notices gentle movement.
+  float dx = ax - turnX, dy = ay - turnY, dz = az - turnZ;
+  imuTurn = sqrtf(dx*dx + dy*dy + dz*dz);
+  turnX += dx * 0.2f; turnY += dy * 0.2f; turnZ += dz * 0.2f;
   imuFresh = true;
 }
 
@@ -237,7 +245,7 @@ static void drawSoundFlash() {
 }
 
 // --- Home screen ------------------------------------------------------------
-enum { ICON_FEED, ICON_PLAY, ICON_BED, ICON_N };
+enum { ICON_FEED, ICON_DANCE, ICON_BED, ICON_N };
 uint8_t iconSel = 0;
 const int BOTTOM_TOP = 166;      // buddy strip at 2× clears y < 164
 
@@ -256,7 +264,7 @@ static void drawBottom(bool showSel) {
   for (int i = 0; i < ICON_N; i++) {
     int cx = 22 + i * 45, cy = 222;
     if (i == ICON_FEED)      drawApple(cx, cy + 2, 9);
-    else if (i == ICON_PLAY) drawBall(cx, cy, 9);
+    else if (i == ICON_DANCE) drawParty(cx, cy);
     else                     drawMoon(cx, cy, 9);
     if (showSel && i == iconSel) {
       spr.drawRoundRect(cx - 20, 204, 40, 35, 6, INK);
@@ -471,7 +479,7 @@ static void tickFeed(uint32_t now) {
   drawBottom(false);
 }
 
-// --- Play: tilt to catch ----------------------------------------------------
+// --- Catch ------------------------------------------------------------------
 // Snacks fall one at a time; tilt the stick left/right to slide the basket
 // under them. No way to lose — every round ends in a celebration.
 const uint8_t PLAY_ROUNDS = 5;
@@ -599,7 +607,7 @@ static void launchTile(uint8_t tile, uint32_t now) {
   switch (tile) {
     case T_WALK:     startWalk(); break;
     case T_BATH:     startBath(); break;
-    case T_ROCK:     startRock(now); break;
+    case T_ROCK:     startRock(); break;
     case T_FREEZE:   startFreeze(now); break;
     case T_DRESS:    startDress(); break;
     case T_STICKERS: startStickers(); break;
@@ -764,7 +772,7 @@ static void tickHome(uint32_t now, bool a, bool b, bool shook) {
   if (a) {
     beep(2400, 25);
     if (iconSel == ICON_FEED)      { startFood(); return; }
-    else if (iconSel == ICON_PLAY) { startPlay(now); return; }
+    else if (iconSel == ICON_DANCE) { startDance(now); return; }
     else                           { startBed(now, true); return; }
   }
   if (shook && !oneShotActive()) {
@@ -914,6 +922,7 @@ void loop() {
     case M_MARBLE: tickMarble(now); break;
     case M_COPY:   tickCopy(now, a, b); break;
     case M_HIDE:   tickHide(now, a, b); break;
+    case M_DANCE:  tickDance(now); break;
   }
 
   if (mode != M_PARENT) drawBatteryTrim();

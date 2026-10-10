@@ -27,8 +27,8 @@ animations come from that project.
 3. **Feed** (apple). A tray of four foods opens: apple, carrot, strawberry
    and ice cream. Each one fills one apple. One of them is the pet's
    favourite that day and gets a bigger celebration.
-4. **Play** (ball). Five snacks fall one at a time. Tilt the stick left and
-   right to catch them in the basket. Every round ends in a celebration.
+4. **Dance party** (party hat). Dance, jump or wiggle with the stick. Any
+   movement fills five rainbow bars while the pet parties.
 5. **Bed** (moon). The pet goes to sleep and the stick turns itself off.
 6. **Toy box** (hold the blue button). Two pages of icon tiles with more
    things to do, described below.
@@ -48,11 +48,11 @@ to lose. Finishing one adds a heart and sometimes a sticker.
 | --- | --- |
 | **Walk** | Carry the pet around. Any movement fills a path to a flower. |
 | **Bath** | Shake the bubbles off. |
-| **Rock to sleep** | Rock the stick slowly side to side until six moons fill, then it goes to bed. |
+| **Rock to sleep** | Rock the stick gently, any way that feels like rocking. The ball sways across and back, each crossing fills a moon, and after six the pet goes to bed. |
 | **Freeze** | Wiggle while the pet's eyes are shut, hold still when the big eye opens. |
 | **Dress-up** | Side button changes the colour, blue changes the hat. |
 | **Stickers** | Shows the twelve stickers and which are still to find. |
-| **Catch** | The same game as the ball icon. |
+| **Catch** | Five snacks fall one at a time. Tilt the stick left and right to catch them in the basket. |
 | **Draw** | Tilt moves the pen, blue changes colour, shake wipes the page. |
 | **Marble** | Tilt to roll a ball onto three apples. |
 | **Copycat** | The pet lights the two buttons in a pattern; repeat it. |

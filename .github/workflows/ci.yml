@@ -91,9 +91,12 @@ jobs:
           path: ~/.platformio
           key: platformio-${{ runner.os }}-${{ env.PLATFORMIO_VERSION }}-${{ hashFiles('platformio.ini') }}
 
+      # --with pip: uv's tool environments have no pip, and PlatformIO shells
+      # out to `python -m pip` to install tool-esptoolpy's dependencies.
+      # Without it the package install fails with "No module named pip".
       - name: Install PlatformIO
         run: |
-          uv tool install "platformio==${PLATFORMIO_VERSION}"
+          uv tool install --with pip "platformio==${PLATFORMIO_VERSION}"
           pio --version
 
       # Warnings as errors, same as `make lint` locally.

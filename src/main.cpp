@@ -401,10 +401,11 @@ uint32_t eggWobbleUntil = 0;
 
 static void hatch() {
   PetSave& s = pet();
-  // Every egg is an octopus while testing. The parent screen can still
-  // switch species; picking one at hatch comes later.
-  buddySetSpecies("octopus");
-  s.species = buddySpeciesIdx();
+  // The parent screen can name the animal. Otherwise it is any of them,
+  // except the one that was here before the egg.
+  uint8_t n = buddySpeciesCount(), next = s.pick ? s.pick - 1 : esp_random() % n;
+  if (!s.pick && n > 1 && next == s.species) next = (next + 1 + esp_random() % (n - 1)) % n;
+  s.species = next;
   s.hatched = true;
   s.hunger = 2;
   s.happy = 2;
@@ -875,12 +876,13 @@ static void tickCal(uint32_t now, bool a, bool b) {
 }
 
 // --- Parent screen ----------------------------------------------------------
-enum { PA_BRIGHT, PA_SOUND, PA_STAYON, PA_EGGTILE, PA_PET, PA_CAL, PA_ZERO, PA_EGG, PA_BACK, PA_N };
+enum { PA_BRIGHT, PA_SOUND, PA_STAYON, PA_EGGTILE, PA_PET, PA_CAL, PA_RESET, PA_BACK, PA_N };
 const char* const PARENT_ITEMS[PA_N] = {
-  "bright", "sound", "stay on", "egg tile", "pet", "tilt cal", "zero timer", "new egg", "back"
+  "bright", "sound", "stay on", "egg tile", "pet", "tilt cal", "reset", "back"
 };
 uint8_t  parentSel = 0;
-uint32_t eggConfirmUntil = 0;
+uint8_t  parentWasSpecies = 0;   // the pet as it was when the screen opened
+uint32_t resetConfirmUntil = 0;
 
 static void leaveParent() {
   if (pet().hatched) enterHome();
@@ -895,16 +897,21 @@ static void applyParent(uint8_t idx, uint32_t now) {
     case PA_STAYON: s.stayOn = !s.stayOn; break;
     case PA_EGGTILE: s.eggTile = !s.eggTile; break;   // hides "new egg" in the toy box
     case PA_PET:
-      buddyNextSpecies();
-      s.species = buddySpeciesIdx();
+      // random, then each animal in turn. Naming one swaps the pet there and
+      // then; back on random it is whoever it was, and only eggs are random.
+      s.pick = (s.pick + 1) % (buddySpeciesCount() + 1);
+      s.species = s.pick ? s.pick - 1 : parentWasSpecies;
+      buddySetSpeciesIdx(s.species);
       break;
     case PA_CAL:    startCal(); return;
-    case PA_ZERO:   s.awakeMin = 0; awakeMarkMs = now; break;
-    case PA_EGG:
-      // Tap-twice confirm: first tap arms (label flips to "really?").
-      if ((int32_t)(now - eggConfirmUntil) >= 0) { eggConfirmUntil = now + 3000; return; }
-      eggConfirmUntil = 0;
-      petReset();
+    case PA_RESET:
+      // Tap-twice confirm: first tap arms (label flips to "really?"). Then
+      // the pet, its stickers, the settings and the awake timer all go.
+      if ((int32_t)(now - resetConfirmUntil) >= 0) { resetConfirmUntil = now + 3000; return; }
+      resetConfirmUntil = 0;
+      petFactoryReset();
+      awakeMarkMs = now;
+      applyBrightness();
       applyLook();
       leaveParent();
       return;
@@ -915,7 +922,7 @@ static void applyParent(uint8_t idx, uint32_t now) {
 
 static void tickParent(uint32_t now, bool a, bool b) {
   lastInteractMs = now;
-  if (b) { parentSel = (parentSel + 1) % PA_N; eggConfirmUntil = 0; beep(1800, 25); }
+  if (b) { parentSel = (parentSel + 1) % PA_N; resetConfirmUntil = 0; beep(1800, 25); }
   if (a) { beep(2400, 25); applyParent(parentSel, now); if (mode != M_PARENT) return; }
 
   PetSave& s = pet();
@@ -930,7 +937,7 @@ static void tickParent(uint32_t now, bool a, bool b) {
   for (int i = 0; i < PA_N; i++) {
     int y = 60 + i * 16;
     bool sel = (i == parentSel);
-    bool armed = (i == PA_EGG) && (int32_t)(now - eggConfirmUntil) < 0;
+    bool armed = (i == PA_RESET) && (int32_t)(now - resetConfirmUntil) < 0;
     spr.setTextColor(armed ? HOT : sel ? INK : DIM, BG);
     spr.setCursor(6, y);
     spr.print(sel ? "> " : "  ");
@@ -941,7 +948,7 @@ static void tickParent(uint32_t now, bool a, bool b) {
     else if (i == PA_SOUND)  spr.print(s.sound ? "on" : "off");
     else if (i == PA_STAYON) spr.print(s.stayOn ? "on" : "off");
     else if (i == PA_EGGTILE) spr.print(s.eggTile ? "on" : "off");
-    else if (i == PA_PET)    spr.print(buddySpeciesName());
+    else if (i == PA_PET)    spr.print(s.pick ? buddySpeciesName() : "random");
     else if (i == PA_CAL)    spr.print(tiltCal().set ? "set" : "-");
   }
   spr.setTextColor(DIM, BG);
@@ -1007,6 +1014,7 @@ void setup() {
   applyBrightness();
   spr.createSprite(W, H);
   buddyInit();
+  if (pet().pick > buddySpeciesCount()) pet().pick = 0;   // that animal has since been removed
   buddySetSpeciesIdx(pet().species);
   applyLook();
   favFood = esp_random() % FOOD_N;
@@ -1043,6 +1051,7 @@ void loop() {
     buddySetPeek(false);
     applyBrightness();
     parentSel = 0;
+    parentWasSpecies = pet().species;
     mode = M_PARENT;
     beep(800, 80);
   }
@@ -1102,7 +1111,7 @@ void loop() {
     case M_REWARD: tickReward(now); break;
     case M_CAL:    tickCal(now, a, b); break;
     case M_WALK:   tickWalk(now); break;
-    case M_BATH:   tickBath(now, shook); break;
+    case M_BATH:   tickBath(now); break;
     case M_ROCK:   tickRock(now); break;
     case M_FREEZE: tickFreeze(now); break;
     case M_DRESS:  tickDress(a, b); break;

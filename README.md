@@ -21,7 +21,8 @@ animations come from that project.
 ## How it plays
 
 1. **Egg.** Press the blue button (or shake the stick) a few times to crack
-   it. A pet hatches. For now every egg is an octopus.
+   it. A pet hatches, a different animal each time unless the parent
+   screen names one.
 2. **Home.** The pet sits at the top. Under it are two rows, apples for
    hunger and hearts for happiness, and three icons.
 3. **Feed** (apple). A tray of four foods opens: apple, carrot, strawberry
@@ -47,7 +48,7 @@ to lose. Finishing one adds a heart and sometimes a sticker.
 | Tile | What you do |
 | --- | --- |
 | **Walk** | Carry the pet around. Any movement fills a path to a flower. |
-| **Bath** | Shake the bubbles off. |
+| **Bath** | Shake the bubbles off. Each one swells, then pops. |
 | **Rock to sleep** | Rock the stick gently, any way that feels like rocking. The ball sways across and back, each crossing fills a moon, and after six the pet goes to bed. |
 | **Freeze** | Wiggle while the pet's eyes are shut, hold still when the big eye opens. |
 | **Dress-up** | Side button changes the colour, blue changes the hat. |
@@ -88,8 +89,17 @@ first picture.
 ### Parent screen
 
 Text menu for grown-ups: brightness, sound, `stay on` (no auto power-off),
-`egg tile` (show or hide New egg in the toy box), `pet` (switch animal), `zero timer`, and `new egg`. It also shows battery
-voltage and how long the stick has been awake since the timer was zeroed.
+`egg tile` (show or hide New egg in the toy box), `pet`, `tilt cal` and
+`reset`. It also shows battery voltage and how long the stick has been awake
+since the last reset.
+
+`pet` is what an egg hatches. On `random`, the default, it is any of the
+animals. Naming one makes every egg hatch that animal, and changes the
+current pet to it straight away.
+
+`reset` (press twice) goes back to an egg and puts everything back as it
+started: stickers, dress-up, hearts, the settings above and the awake timer.
+The tilt calibration is the one thing kept.
 
 ## Battery
 
@@ -105,7 +115,7 @@ Five dim dashes along the top edge of the screen show the charge, one per
 20%. The last one turns orange.
 
 To measure screen-on time: charge it, open the parent screen, choose
-`zero timer`, turn `stay on` on, and leave it until it dies. After charging
+`reset`, open it again and turn `stay on` on, and leave it until it dies. After charging
 again the parent screen shows the awake time (saved every 5 minutes).
 
 ## Hardware

@@ -123,7 +123,10 @@ static void tickDance(uint32_t now) {
 }
 
 // --- Bath -------------------------------------------------------------------
-// Shake the bubbles off.
+// Shake the bubbles off. Like the walk, any movement adds up; the next bubble
+// swells as it does and pops when there has been enough. Aim: about half a
+// dance party.
+const float   BATH_PER_BUBBLE = 6.0f;
 const uint8_t BATH_N = 8;
 static const int16_t BUBBLE[BATH_N][3] = {
   { 34, 70, 9 }, { 98, 66, 11 }, { 60, 58, 6 }, { 84, 100, 8 },
@@ -131,15 +134,16 @@ static const int16_t BUBBLE[BATH_N][3] = {
 };
 uint8_t  bathLeft = 0;
 bool     bathDone = false;
-uint32_t bathShakeMs = 0;
+float    bathAcc = 0;
 
 static void startBath() {
   actBegin(M_BATH, false);
   bathLeft = BATH_N;
   bathDone = false;
+  bathAcc = 0;
 }
 
-static void tickBath(uint32_t now, bool shook) {
+static void tickBath(uint32_t now) {
   if (bathDone) {
     if (!actBeat(now)) { finishActivity(now); return; }
     buddyTick(P_HEART);
@@ -151,16 +155,22 @@ static void tickBath(uint32_t now, bool shook) {
     spr.fillRect(0, BOTTOM_TOP, W, H - BOTTOM_TOP, BG);
     return;
   }
-  if (shook && now - bathShakeMs > 250) {
-    bathShakeMs = now;
-    bathLeft -= bathLeft >= 2 ? 2 : bathLeft;
+  if (imuFresh && imuDelta > WALK_FLOOR) {
+    bathAcc += fminf(imuDelta, 1.0f) - WALK_FLOOR;
+    buddyInvalidate();              // wipe the last size of the swelling bubble
+  }
+  if (bathAcc >= BATH_PER_BUBBLE) {
+    bathAcc = 0;
+    bathLeft--;
     beep(1400 + (BATH_N - bathLeft) * 100, 40);
-    buddyInvalidate();              // wipe the popped bubbles straight away
     if (!bathLeft) { bathDone = true; actUntil = now + 1800; }
   }
 
   buddyTick(P_IDLE);
-  for (int i = 0; i < bathLeft; i++) drawBubble(BUBBLE[i][0], BUBBLE[i][1], BUBBLE[i][2]);
+  for (int i = 0; i < bathLeft; i++) {
+    int swell = i == bathLeft - 1 ? (int)(bathAcc * 5 / BATH_PER_BUBBLE) : 0;
+    drawBubble(BUBBLE[i][0], BUBBLE[i][1], BUBBLE[i][2] + swell);
+  }
   spr.fillRect(0, BOTTOM_TOP, W, H - BOTTOM_TOP, BG);
   drawText("((      ))", CX + (((now / 250) & 1) ? 2 : -2), 190, 2, DIM);
 }

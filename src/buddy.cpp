@@ -153,15 +153,6 @@ void buddySetSpeciesIdx(uint8_t idx) {
   if (idx < N_SPECIES) currentSpeciesIdx = idx;
 }
 
-void buddySetSpecies(const char* name) {
-  for (uint8_t i = 0; i < N_SPECIES; i++) {
-    if (strcmp(SPECIES_TABLE[i]->name, name) == 0) {
-      currentSpeciesIdx = i;
-      return;
-    }
-  }
-}
-
 const char* buddySpeciesName() {
   return SPECIES_TABLE[currentSpeciesIdx]->name;
 }
@@ -179,10 +170,6 @@ void buddySetLook(uint16_t tint, uint8_t hat) {
 }
 
 uint16_t buddyInkColor() { return _tint ? _tint : buddyBodyColor(); }
-
-void buddyNextSpecies() {
-  currentSpeciesIdx = (currentSpeciesIdx + 1) % N_SPECIES;
-}
 
 // Only redraw when tickCount actually changes — animations run at TICK_MS
 // (5 fps), the loop runs at 60 fps, and the redraw is identical between

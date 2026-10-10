@@ -10,6 +10,7 @@
 // sectors have ~100K write cycles, so never on a per-frame timer.
 
 static const uint8_t PET_MAX = 4;        // pips per need row
+static const uint8_t PET_NO_SPECIES = 0xFF;   // nothing has hatched yet
 
 struct PetSave {
   bool     hatched;
@@ -25,6 +26,7 @@ struct PetSave {
   uint8_t  color;       // dress-up colour index, 0 = the animal's own
   uint8_t  hat;         // dress-up hat, 0 = none
   bool     eggTile;     // show "new egg" in the toy box (testing aid)
+  uint8_t  pick;        // what an egg hatches: 0 = any animal, else species + 1
 };
 
 // What the parent screen's tilt calibration measured: which way the sensor
@@ -46,7 +48,7 @@ inline TiltCal& tiltCal() { return _tiltCal; }
 inline void petLoad() {
   _prefs.begin("pet", true);
   _pet.hatched  = _prefs.getBool("hatched", false);
-  _pet.species  = _prefs.getUChar("species", 0);
+  _pet.species  = _prefs.getUChar("species", PET_NO_SPECIES);
   _pet.hunger   = _prefs.getUChar("hunger", 2);
   _pet.happy    = _prefs.getUChar("happy", 2);
   _pet.sound    = _prefs.getBool("sound", true);
@@ -58,6 +60,7 @@ inline void petLoad() {
   _pet.color    = _prefs.getUChar("color", 0);
   _pet.hat      = _prefs.getUChar("hat", 0);
   _pet.eggTile  = _prefs.getBool("eggtile", true);
+  _pet.pick     = _prefs.getUChar("pick", 0);
   _tiltCal.set = false;
   if (_prefs.isKey("tiltcal") && _prefs.getBytesLength("tiltcal") == sizeof(_tiltCal))
     _prefs.getBytes("tiltcal", &_tiltCal, sizeof(_tiltCal));
@@ -82,6 +85,7 @@ inline void petSave() {
   _prefs.putUChar("color", _pet.color);
   _prefs.putUChar("hat", _pet.hat);
   _prefs.putBool("eggtile", _pet.eggTile);
+  _prefs.putUChar("pick", _pet.pick);
   _prefs.end();
 }
 
@@ -102,5 +106,19 @@ inline void petReset() {
   _pet.stickers = 0;
   _pet.color    = 0;
   _pet.hat      = 0;
+  petSave();
+}
+
+// The parent screen's reset: all of the above plus every setting and the
+// awake timer, as if freshly flashed. Only the tilt calibration is kept; it
+// describes the stick, not the pet, and has its own way to be cleared.
+inline void petFactoryReset() {
+  TiltCal keep = _tiltCal;
+  _prefs.begin("pet", false);
+  _prefs.clear();
+  _prefs.end();
+  petLoad();
+  _tiltCal = keep;
+  if (keep.set) tiltCalSave();
   petSave();
 }

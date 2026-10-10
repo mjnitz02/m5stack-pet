@@ -1,0 +1,101 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# The repo default is already read-only, but declaring it here pins the
+# grant in-repo: a change to the repository setting can't silently widen
+# what these jobs can do.
+permissions:
+  contents: read
+
+# Cancel an in-progress run when a newer commit lands on the same branch/PR.
+# head_ref (PR source branch) falls back to ref (push), so push + PR runs for
+# one branch share a group instead of running twice.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+# Pinned tool versions. Dependabot won't touch these; bump them by hand.
+# PLATFORMIO_VERSION should match what `pio --version` reports locally.
+env:
+  PLATFORMIO_VERSION: 6.1.19
+  GITLEAKS_VERSION: 8.30.1
+
+jobs:
+  secret_scan:
+    name: Secret scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          # gitleaks scans history, not just the working tree.
+          fetch-depth: 0
+
+      - name: Install gitleaks
+        run: |
+          set -euo pipefail
+          curl -fsSL -o "$RUNNER_TEMP/gitleaks.tar.gz" \
+            "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          sudo tar -xzf "$RUNNER_TEMP/gitleaks.tar.gz" -C /usr/local/bin gitleaks
+          gitleaks version
+
+      - name: Scan for leaked secrets
+        run: make secrets-scan
+
+  tools:
+    name: Art checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+
+      - name: Lint tools
+        run: make lint-tools
+
+      - name: Run species art checks
+        run: make test
+
+  firmware:
+    name: Firmware (${{ matrix.env }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        # Both boards in platformio.ini. The StickS3 is the one that gets
+        # flashed; the StickC Plus is here so it keeps compiling.
+        env: [m5stack-sticks3, m5stickc-plus]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+
+      # The espressif32 platform, both toolchains and the Arduino framework:
+      # well over a gigabyte that PlatformIO would otherwise download on every
+      # run. Keyed on platformio.ini because that is where their versions are
+      # set. Shared by both matrix entries; they resolve the same platform.
+      - name: Cache PlatformIO packages
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.platformio
+          key: platformio-${{ runner.os }}-${{ env.PLATFORMIO_VERSION }}-${{ hashFiles('platformio.ini') }}
+
+      - name: Install PlatformIO
+        run: |
+          uv tool install "platformio==${PLATFORMIO_VERSION}"
+          pio --version
+
+      # Warnings as errors, same as `make lint` locally.
+      - name: Build
+        run: make lint-firmware PIO_ENV=${{ matrix.env }}

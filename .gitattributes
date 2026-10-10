@@ -1,0 +1,13 @@
+# Normalize line endings on checkin; check out with LF everywhere.
+* text=auto eol=lf
+
+# Shell scripts break with CRLF.
+*.sh              text eol=lf
+.githooks/*       text eol=lf
+
+# Binary assets — never diff, never eol-convert.
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.bin   binary
+*.elf   binary

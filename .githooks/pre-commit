@@ -1,0 +1,25 @@
+#!/bin/sh
+# m5stack-pet pre-commit hook: the fast checks before a commit lands.
+# Enable with `make install-hooks` (sets core.hooksPath to .githooks).
+# Skip a one-off commit with `git commit --no-verify`.
+#
+# The warnings-as-errors firmware build is left to `make lint` and CI: it is
+# too slow to sit in front of every commit.
+
+set -e
+
+if ! command -v uvx >/dev/null 2>&1 || ! command -v gitleaks >/dev/null 2>&1; then
+	echo "pre-commit: uv/gitleaks not found — 'brew install uv gitleaks'." >&2
+	exit 1
+fi
+
+echo "pre-commit: ruff check tools ..."
+uvx ruff check tools
+
+echo "pre-commit: species art checks ..."
+uv run --no-project python -m unittest discover -s tools
+
+echo "pre-commit: gitleaks protect --staged ..."
+gitleaks protect --staged --config .gitleaks.toml -v --redact
+
+echo "pre-commit: OK"

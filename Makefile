@@ -1,10 +1,13 @@
 PIO_ENV ?= m5stack-sticks3
 
-.PHONY: help build flash monitor test lint lint-tools lint-firmware secrets-scan install-hooks species clean
+.PHONY: help build flash flash-debug log log-clear monitor test lint lint-tools lint-firmware secrets-scan install-hooks species clean
 
 help:
 	@echo "build    compile firmware for $(PIO_ENV)"
 	@echo "flash    compile and upload over USB"
+	@echo "flash-debug  the same with the on-device log compiled in (src/petlog.h)"
+	@echo "log      copy the on-device log to logs/ (debug build only)"
+	@echo "log-clear  empty the on-device log"
 	@echo "monitor  serial log (battery mV + awake minutes every 10s)"
 	@echo "test     species art checks"
 	@echo "lint     ruff on tools/, then a build with warnings as errors"
@@ -19,6 +22,16 @@ build:
 
 flash:
 	pio run -e $(PIO_ENV) -t upload
+
+# The flag changes, so PlatformIO rebuilds src/ when switching between the two.
+flash-debug:
+	PLATFORMIO_BUILD_SRC_FLAGS="-DPET_LOG" pio run -e $(PIO_ENV) -t upload
+
+log:
+	uv run tools/pull_log.py
+
+log-clear:
+	uv run tools/pull_log.py --clear
 
 monitor:
 	pio device monitor -e $(PIO_ENV)

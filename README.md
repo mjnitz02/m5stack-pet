@@ -108,7 +108,9 @@ it:
 
 - No radio code is compiled in.
 - After 60 seconds without input the pet falls asleep, and 15 seconds later
-  the stick powers off. The power button turns it back on.
+  the screen goes off and the stick naps. For the next 10 minutes the blue
+  button wakes it; after that it powers off and the power button turns it
+  back on.
 - The CPU runs at 80 MHz and the screen brightness defaults to low.
 
 Five dim dashes along the top edge of the screen show the charge, one per
@@ -117,6 +119,13 @@ Five dim dashes along the top edge of the screen show the charge, one per
 To measure screen-on time: charge it, open the parent screen, choose
 `reset`, open it again and turn `stay on` on, and leave it until it dies. After charging
 again the parent screen shows the awake time (saved every 5 minutes).
+
+A debug build (`make flash-debug`) also records a row every ten seconds, and
+on every screen change, to the stick's own flash: battery voltage, backlight,
+how hard it is being moved, button presses and frame rate. Play with it off
+the cable, plug it back in, and `make log` writes the rows to `logs/` as CSV.
+The columns are described in `src/petlog.h`. `make flash` goes back to a
+build with none of it.
 
 ## Hardware
 
@@ -138,6 +147,9 @@ and, for the Python tools, [uv](https://docs.astral.sh/uv/).
 make build     # compile for the M5StickS3
 make flash     # compile and upload over USB
 make monitor   # serial log: battery mV and awake minutes
+make flash-debug   # flash with the on-device log compiled in
+make log       # copy that log to logs/ (stick awake and on USB)
+make log-clear # empty it
 make test      # checks on the animal art
 make lint      # ruff on tools/, then a build with warnings as errors
 make species   # re-render docs/species/*.png

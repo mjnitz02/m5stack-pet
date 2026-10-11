@@ -64,6 +64,9 @@ enum { FOOD_APPLE, FOOD_CARROT, FOOD_STRAWBERRY, FOOD_ICECREAM, FOOD_N };
 
 Mode     mode = M_EGG;
 uint32_t lastInteractMs = 0;
+// Signed, because a screen that opens mid-frame stamps lastInteractMs with a
+// millis() later than that frame's `now`.
+static bool idleFor(uint32_t now, uint32_t ms) { return (int32_t)(now - lastInteractMs) > (int32_t)ms; }
 bool     swallowA = false, swallowB = false;
 
 // --- Battery budget ---------------------------------------------------------
@@ -1059,7 +1062,7 @@ static void tickHome(uint32_t now, bool a, bool b, bool shook) {
   else              { faceDownFrames = 0; }
   if (faceDownFrames >= 15) { faceDownFrames = 0; startBed(now, false); return; }
 
-  if (!s.stayOn && now - lastInteractMs > IDLE_BED_MS) startBed(now, false);
+  if (!s.stayOn && idleFor(now, IDLE_BED_MS)) startBed(now, false);
 }
 
 void setup() {
@@ -1185,16 +1188,16 @@ void loop() {
   // activity goes to bed like the pet screen does. Moving the stick counts
   // as playing, so a walk isn't cut short for want of a button press.
   if (mode == M_MENU || mode == M_FOOD || mode == M_STICKERS) {
-    if (now - lastInteractMs > MENU_IDLE_MS) enterHome();
+    if (idleFor(now, MENU_IDLE_MS)) enterHome();
   } else if (mode >= M_WALK) {
     if (imuFresh && imuDelta > 0.12f) lastInteractMs = now;
-    if (!pet().stayOn && now - lastInteractMs > IDLE_BED_MS) startBed(now, false);
+    if (!pet().stayOn && idleFor(now, IDLE_BED_MS)) startBed(now, false);
   }
 
   switch (mode) {
     case M_EGG:
       tickEgg(now, a, b, shook);
-      if (mode == M_EGG && !pet().stayOn && now - lastInteractMs > IDLE_BED_MS + BED_OFF_MS) napDown();
+      if (mode == M_EGG && !pet().stayOn && idleFor(now, IDLE_BED_MS + BED_OFF_MS)) napDown();
       break;
     case M_HOME:   tickHome(now, a, b, shook); break;
     case M_FOOD:   tickFood(now, a, b); break;
@@ -1207,7 +1210,7 @@ void loop() {
     case M_CAL:    tickCal(now, a, b); break;
     case M_LEARN:
       tickLearn(now, a, b);
-      if (mode == M_LEARN && !pet().stayOn && now - lastInteractMs > IDLE_BED_MS + BED_OFF_MS) napDown();
+      if (mode == M_LEARN && !pet().stayOn && idleFor(now, IDLE_BED_MS + BED_OFF_MS)) napDown();
       break;
     case M_WALK:   tickWalk(now); break;
     case M_BATH:   tickBath(now); break;

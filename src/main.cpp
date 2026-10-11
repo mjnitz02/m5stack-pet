@@ -16,6 +16,7 @@
 //                      anywhere else
 //   hold side 1.5s     sound on/off
 //   hold both 1.5s     parent screen (text; brightness, battery test, reset)
+// A new or reset stick opens on a short lesson in those buttons, then the egg.
 //   blue button        wakes it from a nap (the first minutes after bedtime)
 //   Power (side)       turns the unit back on once it has powered off
 //
@@ -42,12 +43,12 @@ const uint16_t GRID  = 0x39E7;   // unlit outlines
 
 enum PetState { P_SLEEP, P_IDLE, P_BUSY, P_ATTENTION, P_CELEBRATE, P_DIZZY, P_HEART };
 // Everything from M_WALK on is a toy box activity (see activities.h).
-enum Mode     { M_EGG, M_HOME, M_FOOD, M_FEED, M_PLAY, M_BED, M_PARENT, M_MENU, M_REWARD, M_CAL,
+enum Mode     { M_EGG, M_HOME, M_FOOD, M_FEED, M_PLAY, M_BED, M_PARENT, M_MENU, M_REWARD, M_CAL, M_LEARN,
                 M_WALK, M_BATH, M_ROCK, M_FREEZE, M_DRESS, M_STICKERS,
                 M_DRAW, M_MARBLE, M_COPY, M_HIDE, M_DANCE };
 #if defined(PET_LOG)
 const char* const MODE_NAME[] = {
-  "egg", "home", "food", "feed", "play", "bed", "parent", "menu", "reward", "cal",
+  "egg", "home", "food", "feed", "play", "bed", "parent", "menu", "reward", "cal", "learn",
   "walk", "bath", "rock", "freeze", "dress", "stickers",
   "draw", "marble", "copy", "hide", "dance" };
 static_assert(sizeof(MODE_NAME) / sizeof(MODE_NAME[0]) == M_DANCE + 1, "MODE_NAME is out of step with Mode");
@@ -73,9 +74,15 @@ bool     swallowA = false, swallowB = false;
 // button.
 const uint32_t IDLE_BED_MS = 60000;   // no input this long → bedtime
 const uint32_t BED_OFF_MS  = 15000;   // asleep this long → screen off, nap
-const uint32_t NAP_MS      = 10UL * 60 * 1000;   // napping this long → power off
+#if defined(PET_LOG)
+// Debug build: a nap long enough for its drain to show in the log overnight.
+const uint32_t NAP_MS      = 12UL * 60 * 60 * 1000;
+#else
+const uint32_t NAP_MS      = 60UL * 60 * 1000;   // napping this long → power off
+#endif
 const uint8_t  BED_BRIGHT  = 12;
 const uint32_t MENU_IDLE_MS = 15000;  // toy box / food tray left alone → back to the pet
+const uint32_t HOLD_BLUE_MS = 700;    // blue held this long → toy box, or back to the pet
 
 // --- Needs ------------------------------------------------------------------
 // Only tick while the unit is on: there is no clock while it's off, so a
@@ -260,11 +267,30 @@ static void powerTick(uint32_t now) {
 
 #include "petlog.h"
 
+#if defined(BOARD_STICKS3)
+// Deep sleep only stops the ESP32: every other chip on the board stays in
+// whatever state it was left in, so each one is switched off by hand first.
+// M5.begin() brings all of it back on the next boot, bar the light: see setup().
+static void railsDown() {
+  M5.Speaker.end();                                      // amp enable (PM1 GPIO3) low
+  M5.In_I2C.writeRegister8(0x18, 0x12, 0x02, 100000);    // ES8311 codec: DAC off
+  M5.In_I2C.writeRegister8(0x18, 0x13, 0x00, 100000);    //   output drive off
+  M5.In_I2C.writeRegister8(0x18, 0x0D, 0xFC, 100000);    //   analog off
+  M5.In_I2C.writeRegister8(0x18, 0x00, 0x00, 100000);    //   clocks off
+  M5.In_I2C.writeRegister8(0x69, 0x7D, 0x00, 400000);    // BMI270: accel + gyro off
+  M5.In_I2C.writeRegister8(0x69, 0x7C, 0x01, 400000);    //   suspend
+  M5.Power.setExtOutput(false);                          // 5 V boost (Grove port)
+  M5.Power.M5pm1.setGPIOOutput(m5::M5PM1_Class::gpio2, false);   // LCD rail
+  M5.Power.M5pm1.setLedEnLevel(false);                   // green light by the power button
+}
+#endif
+
 // The real off switch. Saves nothing, so a nap that has run out can use it
 // without loading the pet first.
 static void powerOffNow() {
   M5.Display.sleep();
 #if defined(BOARD_STICKS3)
+  railsDown();   // for the USB case below, where the PMIC stays up
   // On USB the PMIC can't cut the rail, so powerOff() lands in deep sleep
   // instead. Arm the front button (GPIO11) so that case is still wakeable.
   rtc_gpio_pullup_en(GPIO_NUM_11);
@@ -282,7 +308,7 @@ static void napDown() {
 #if defined(BOARD_STICKS3)
   logRow("nap");
   M5.Display.sleep();
-  M5.Speaker.end();
+  railsDown();
   rtc_gpio_pullup_en(GPIO_NUM_11);
   rtc_gpio_pulldown_dis(GPIO_NUM_11);
   esp_sleep_enable_ext0_wakeup(GPIO_NUM_11, 0);
@@ -432,6 +458,12 @@ static void tickReward(uint32_t now) {
 const uint8_t EGG_TAPS = 7;
 uint8_t  eggTaps = 0;
 uint32_t eggWobbleUntil = 0;
+
+static void enterEgg() {
+  mode = M_EGG;
+  eggTaps = 0;
+  lastInteractMs = millis();
+}
 
 static void hatch() {
   PetSave& s = pet();
@@ -677,9 +709,7 @@ static void openMenu(uint8_t sel) {
 static void backToEgg() {
   petReset();
   applyLook();
-  mode = M_EGG;
-  eggTaps = 0;
-  lastInteractMs = millis();
+  enterEgg();
 }
 
 static void launchTile(uint8_t tile, uint32_t now) {
@@ -910,17 +940,18 @@ static void tickCal(uint32_t now, bool a, bool b) {
 }
 
 // --- Parent screen ----------------------------------------------------------
-enum { PA_BRIGHT, PA_SOUND, PA_STAYON, PA_EGGTILE, PA_PET, PA_CAL, PA_RESET, PA_BACK, PA_N };
+enum { PA_BRIGHT, PA_SOUND, PA_STAYON, PA_EGGTILE, PA_PET, PA_CAL, PA_LEARN, PA_RESET, PA_BACK, PA_N };
 const char* const PARENT_ITEMS[PA_N] = {
-  "bright", "sound", "stay on", "egg tile", "pet", "tilt cal", "reset", "back"
+  "bright", "sound", "stay on", "egg tile", "pet", "tilt cal", "lesson", "reset", "back"
 };
 uint8_t  parentSel = 0;
 uint8_t  parentWasSpecies = 0;   // the pet as it was when the screen opened
 uint32_t resetConfirmUntil = 0;
 
 static void leaveParent() {
-  if (pet().hatched) enterHome();
-  else { mode = M_EGG; eggTaps = 0; lastInteractMs = millis(); }
+  if (pet().hatched)       enterHome();
+  else if (!pet().learned) startLearn(millis());   // new or just reset: the lesson, then the egg
+  else                     enterEgg();
 }
 
 static void applyParent(uint8_t idx, uint32_t now) {
@@ -938,6 +969,7 @@ static void applyParent(uint8_t idx, uint32_t now) {
       buddySetSpeciesIdx(s.species);
       break;
     case PA_CAL:    startCal(); return;
+    case PA_LEARN:  petSave(); startLearn(now); return;   // nothing is reset; it ends where the pet is
     case PA_RESET:
       // Tap-twice confirm: first tap arms (label flips to "really?"). Then
       // the pet, its stickers, the settings and the awake timer all go.
@@ -1048,12 +1080,20 @@ void setup() {
   M5.begin();
   logBegin(napOver ? "boot:timer" : napWoken ? "boot:button" : "boot:cold");
   if (napOver) { logRow("off"); powerOffNow(); }
+#if defined(BOARD_STICKS3)
+  // The PM1 keeps its settings through a nap and M5.begin() leaves this one
+  // alone, so the light railsDown() put out is lit again here.
+  M5.Power.M5pm1.setLedEnLevel(true);
+  // Only the accelerometer is ever read; M5.begin() starts the gyro as well.
+  M5.In_I2C.writeRegister8(0x69, 0x7D, 0x04, 400000);    // BMI270: accel only
+#endif
   // No radio and 5 fps animation: 80 MHz is plenty and roughly halves the
   // CPU's share of the battery. (Lowest speed that keeps USB alive.)
   setCpuFrequencyMhz(80);
   M5.Lcd.setRotation(0);
   M5.Speaker.setVolume(90);      // IMU auto-inits in M5.begin()
   petLoad();
+  petMigrateRoster();
   applyBrightness();
   spr.createSprite(W, H);
   buddyInit();
@@ -1073,6 +1113,8 @@ void setup() {
     }
     enterHome();
     triggerOneShot(P_SLEEP, 2500);
+  } else if (!pet().learned) {
+    startLearn(now);
   } else {
     mode = M_EGG;
   }
@@ -1099,6 +1141,7 @@ void loop() {
   if (mode != M_PARENT && M5.BtnA.pressedFor(1500) && M5.BtnB.pressedFor(1500)) {
     swallowA = swallowB = true;
     a = b = false;
+    if (mode == M_LEARN) pet().learned = true;   // a grown-up stepping in skips the lesson
     buddySetPeek(false);
     applyBrightness();
     parentSel = 0;
@@ -1123,7 +1166,7 @@ void loop() {
   // for itself (see tickEggHold).
   bool holdOk = mode == M_HOME || mode == M_FOOD || mode == M_PLAY || mode >= M_WALK ||
                 (mode == M_MENU && menuSel != T_EGG);
-  if (holdOk && !swallowA && M5.BtnA.pressedFor(700) && !M5.BtnB.isPressed()) {
+  if (holdOk && !swallowA && M5.BtnA.pressedFor(HOLD_BLUE_MS) && !M5.BtnB.isPressed()) {
     swallowA = true;
     a = false;
     beep(1200, 60);
@@ -1162,6 +1205,10 @@ void loop() {
     case M_MENU:   tickMenu(now, a, b); break;
     case M_REWARD: tickReward(now); break;
     case M_CAL:    tickCal(now, a, b); break;
+    case M_LEARN:
+      tickLearn(now, a, b);
+      if (mode == M_LEARN && !pet().stayOn && now - lastInteractMs > IDLE_BED_MS + BED_OFF_MS) napDown();
+      break;
     case M_WALK:   tickWalk(now); break;
     case M_BATH:   tickBath(now); break;
     case M_ROCK:   tickRock(now); break;

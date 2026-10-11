@@ -78,7 +78,8 @@ static void logBegin(const char* bootEvent) {
 }
 
 // `L` on the serial port dumps the log between two marker lines, `C` clears
-// it. tools/pull_log.py is the other end.
+// it. tools/pull_log.py is the other end. `0` and `1` set the PM1's LED_EN
+// level on the StickS3.
 static void logSerial() {
   while (Serial.available() > 0) {
     int c = Serial.read();
@@ -100,6 +101,14 @@ static void logSerial() {
     } else if (c == 'C') {
       if (_logOk) LittleFS.remove(LOG_PATH);
       Serial.println("#LOG CLEARED");
+#if defined(BOARD_STICKS3)
+    } else if (c == '0' || c == '1') {
+      // Bench test: flip the PM1's LED_EN level and report its power config
+      // register (0x06), to see by eye which light that bit drives.
+      M5.Power.M5pm1.setLedEnLevel(c == '1');
+      Serial.printf("#PM1 PWR_CFG %02X\n", (unsigned)M5.Power.M5pm1.readRegister8(0x06));
+      lastInteractMs = millis();
+#endif
     }
   }
 }

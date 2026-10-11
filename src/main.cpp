@@ -16,7 +16,8 @@
 //                      anywhere else
 //   hold side 1.5s     sound on/off
 //   hold both 1.5s     parent screen (text; brightness, battery test, reset)
-//   Power (side)       turns the unit back on after it has put itself to bed
+//   blue button        wakes it from a nap (the first minutes after bedtime)
+//   Power (side)       turns the unit back on once it has powered off
 //
 // main.cpp holds the core loop and screens; icons.h has every drawing and
 // activities.h has the toy box activities.
@@ -44,6 +45,13 @@ enum PetState { P_SLEEP, P_IDLE, P_BUSY, P_ATTENTION, P_CELEBRATE, P_DIZZY, P_HE
 enum Mode     { M_EGG, M_HOME, M_FOOD, M_FEED, M_PLAY, M_BED, M_PARENT, M_MENU, M_REWARD, M_CAL,
                 M_WALK, M_BATH, M_ROCK, M_FREEZE, M_DRESS, M_STICKERS,
                 M_DRAW, M_MARBLE, M_COPY, M_HIDE, M_DANCE };
+#if defined(PET_LOG)
+const char* const MODE_NAME[] = {
+  "egg", "home", "food", "feed", "play", "bed", "parent", "menu", "reward", "cal",
+  "walk", "bath", "rock", "freeze", "dress", "stickers",
+  "draw", "marble", "copy", "hide", "dance" };
+static_assert(sizeof(MODE_NAME) / sizeof(MODE_NAME[0]) == M_DANCE + 1, "MODE_NAME is out of step with Mode");
+#endif
 
 // Toy box tiles in reading order. The first page is care and moving, the
 // second is the sit-still games. The egg stays last so it can be hidden.
@@ -59,10 +67,13 @@ bool     swallowA = false, swallowB = false;
 
 // --- Battery budget ---------------------------------------------------------
 // The backlight and the CPU are the only real loads once the radio is gone.
-// Idle → the pet falls asleep on a dimmed screen → the unit powers itself
-// off. Waking is the side power button.
+// Idle → the pet falls asleep on a dimmed screen → the screen goes off and
+// the unit naps in deep sleep, where the blue button brings it straight
+// back → the unit powers itself off. After that, waking is the side power
+// button.
 const uint32_t IDLE_BED_MS = 60000;   // no input this long → bedtime
-const uint32_t BED_OFF_MS  = 15000;   // asleep this long → power off
+const uint32_t BED_OFF_MS  = 15000;   // asleep this long → screen off, nap
+const uint32_t NAP_MS      = 10UL * 60 * 1000;   // napping this long → power off
 const uint8_t  BED_BRIGHT  = 12;
 const uint32_t MENU_IDLE_MS = 15000;  // toy box / food tray left alone → back to the pet
 
@@ -247,8 +258,11 @@ static void powerTick(uint32_t now) {
   }
 }
 
-static void powerDown() {
-  petSave();
+#include "petlog.h"
+
+// The real off switch. Saves nothing, so a nap that has run out can use it
+// without loading the pet first.
+static void powerOffNow() {
   M5.Display.sleep();
 #if defined(BOARD_STICKS3)
   // On USB the PMIC can't cut the rail, so powerOff() lands in deep sleep
@@ -258,6 +272,26 @@ static void powerDown() {
   esp_sleep_enable_ext0_wakeup(GPIO_NUM_11, 0);
 #endif
   M5.Power.powerOff();
+}
+
+// Screen off but not gone: deep sleep with the blue button armed, and a
+// timer that wakes the chip just long enough to power off properly (see
+// setup()). Waking is a reboot either way; the pet comes back from flash.
+static void napDown() {
+  petSave();
+#if defined(BOARD_STICKS3)
+  logRow("nap");
+  M5.Display.sleep();
+  M5.Speaker.end();
+  rtc_gpio_pullup_en(GPIO_NUM_11);
+  rtc_gpio_pulldown_dis(GPIO_NUM_11);
+  esp_sleep_enable_ext0_wakeup(GPIO_NUM_11, 0);
+  esp_sleep_enable_timer_wakeup(NAP_MS * 1000ULL);
+  esp_deep_sleep_start();
+#else
+  logRow("off");
+  powerOffNow();
+#endif
 }
 
 #include "icons.h"
@@ -616,7 +650,7 @@ static void tickBed(uint32_t now) {
     return;
   }
   buddyTick(P_SLEEP);
-  if (!pet().stayOn && now - bedStartMs > BED_OFF_MS) powerDown();
+  if (!pet().stayOn && now - bedStartMs > BED_OFF_MS) napDown();
 }
 
 #include "activities.h"
@@ -1003,8 +1037,17 @@ void setup() {
   // standalone. The StickC Plus has a real UART and no such call.
 #if defined(BOARD_STICKS3)
   Serial.setTxTimeoutMs(0);
+  esp_sleep_wakeup_cause_t woke = esp_sleep_get_wakeup_cause();
+  bool napOver = woke == ESP_SLEEP_WAKEUP_TIMER;
+  bool napWoken = woke == ESP_SLEEP_WAKEUP_EXT0;
+  // A nap that ran out only wakes to switch off: keep the backlight dark.
+  if (napOver) M5.Display.setBrightness(0);
+#else
+  const bool napOver = false, napWoken = false;
 #endif
   M5.begin();
+  logBegin(napOver ? "boot:timer" : napWoken ? "boot:button" : "boot:cold");
+  if (napOver) { logRow("off"); powerOffNow(); }
   // No radio and 5 fps animation: 80 MHz is plenty and roughly halves the
   // CPU's share of the battery. (Lowest speed that keeps USB alive.)
   setCpuFrequencyMhz(80);
@@ -1023,12 +1066,20 @@ void setup() {
   awakeMarkMs = lastHungerMs = lastHappyMs = lastInteractMs = now;
   if (pet().hatched) {
     // Woke up a little hungry and a little bored: always something to do.
-    if (pet().hunger) pet().hunger--;
-    if (pet().happy)  pet().happy--;
+    // Not after a nap, or a kid who keeps waking it would starve it.
+    if (!napWoken) {
+      if (pet().hunger) pet().hunger--;
+      if (pet().happy)  pet().happy--;
+    }
     enterHome();
     triggerOneShot(P_SLEEP, 2500);
   } else {
     mode = M_EGG;
+  }
+  // The press that ended the nap is still down: it wakes, it doesn't select.
+  if (napWoken) {
+    M5.update(); delay(20); M5.update();
+    swallowA = M5.BtnA.isPressed();
   }
 }
 
@@ -1085,6 +1136,7 @@ void loop() {
     sampleMotion(now);
     shook = imuFresh && imuDelta > SHAKE_DELTA;
   }
+  logTick(now);
 
   // Left alone: the toy box and food tray drift back to the pet, and an
   // activity goes to bed like the pet screen does. Moving the stick counts
@@ -1099,7 +1151,7 @@ void loop() {
   switch (mode) {
     case M_EGG:
       tickEgg(now, a, b, shook);
-      if (mode == M_EGG && !pet().stayOn && now - lastInteractMs > IDLE_BED_MS + BED_OFF_MS) powerDown();
+      if (mode == M_EGG && !pet().stayOn && now - lastInteractMs > IDLE_BED_MS + BED_OFF_MS) napDown();
       break;
     case M_HOME:   tickHome(now, a, b, shook); break;
     case M_FOOD:   tickFood(now, a, b); break;

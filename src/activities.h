@@ -31,22 +31,69 @@ static void drawPips(uint8_t n, uint8_t done, int y) {
 
 // --- Walk -------------------------------------------------------------------
 // Not a step counter. Any movement of the stick — walking, jumping, dancing —
-// adds up, and enough of it lights the next dot on the path to the flower.
-// Standing still just pauses. Aim: about a minute of real moving.
+// adds up, and enough of it lights the next stone on the path. Standing still
+// just pauses. Aim: about a minute of real moving.
+//
+// A little walker slides along the path with every bit of movement and hops
+// while the stick is moving, leaving a coloured trail, so the screen answers
+// from the first step and not only when a stone lights. Each walk picks one
+// of a few routes, never the one just walked.
 const float   WALK_FLOOR   = 0.06f;   // ignore hand tremor below this
 const float   WALK_PER_DOT = 18.0f;
 const uint8_t WALK_DOTS    = 10;
-float   walkAcc = 0;
-uint8_t walkDots = 0;
+const int     WALK_STONE_R = 5;
+
+enum { WG_FLOWER, WG_STAR, WG_APPLE, WG_BALL };
+struct WalkRoute {
+  int16_t  pt[WALK_DOTS + 1][2];      // where the walker starts, then the stones
+  int16_t  gx, gy;                    // what it is walking to
+  uint8_t  goal;
+  uint16_t col;                       // lit stones and the trail
+};
+static const WalkRoute WALK_ROUTES[] = {
+  // Winding up from the bottom left to a flower.
+  { { { 14, 232 }, { 32, 226 }, { 52, 222 }, { 72, 216 }, { 90, 206 }, { 100, 190 },
+      { 88, 174 }, { 68, 166 }, { 48, 158 }, { 34, 144 }, { 40, 126 } },
+    62, 106, WG_FLOWER, ROSE },
+  // Stairs from the bottom right up to a star.
+  { { { 124, 230 }, { 104, 230 }, { 104, 212 }, { 84, 212 }, { 84, 194 }, { 64, 194 },
+      { 64, 176 }, { 44, 176 }, { 44, 158 }, { 24, 158 }, { 24, 140 } },
+    24, 114, WG_STAR, YEL },
+  // Round the edge and curling in to an apple.
+  { { { 8, 222 }, { 28, 228 }, { 50, 230 }, { 72, 230 }, { 94, 226 }, { 112, 212 },
+      { 116, 190 }, { 108, 170 }, { 90, 158 }, { 70, 160 }, { 58, 176 } },
+    68, 198, WG_APPLE, AMBER },
+  // Up and over a hill to a ball.
+  { { { 14, 226 }, { 17, 203 }, { 22, 184 }, { 31, 168 }, { 44, 156 }, { 59, 151 },
+      { 75, 151 }, { 89, 157 }, { 102, 170 }, { 111, 186 }, { 116, 205 } },
+    116, 227, WG_BALL, AQUA },
+};
+const uint8_t WALK_ROUTE_N = sizeof(WALK_ROUTES) / sizeof(WALK_ROUTES[0]);
+
+float    walkAcc = 0;
+uint8_t  walkDots = 0;
+uint8_t  walkRoute = 0;
+uint32_t walkMovedMs = 0;
 
 static void startWalk() {
   actBegin(M_WALK, true);
   walkAcc = 0;
   walkDots = 0;
+  walkRoute = (walkRoute + 1 + esp_random() % (WALK_ROUTE_N - 1)) % WALK_ROUTE_N;   // any route but the last
+  walkMovedMs = millis() - 1000;
+}
+
+static void walkLine(int x0, int y0, int x1, int y1, uint16_t col) {
+  spr.drawLine(x0, y0, x1, y1, col);
+  spr.drawLine(x0 + 1, y0, x1 + 1, y1, col);
+  spr.drawLine(x0, y0 + 1, x1, y1 + 1, col);
 }
 
 static void tickWalk(uint32_t now) {
-  if (imuFresh && imuDelta > WALK_FLOOR) walkAcc += fminf(imuDelta, 1.0f) - WALK_FLOOR;
+  if (imuFresh && imuDelta > WALK_FLOOR) {
+    walkAcc += fminf(imuDelta, 1.0f) - WALK_FLOOR;
+    walkMovedMs = now;
+  }
   if (walkAcc >= WALK_PER_DOT) {
     walkAcc = 0;
     walkDots++;
@@ -54,25 +101,52 @@ static void tickWalk(uint32_t now) {
     actUntil = now + 700;
     if (walkDots >= WALK_DOTS) { finishActivity(now); return; }
   }
+  bool moving = now - walkMovedMs < 400;
 
   buddyTick(actBeat(now) ? P_HEART : P_IDLE);
   spr.fillRect(0, FIELD_TOP, W, H - FIELD_TOP, BG);
-  spr.drawLine(112, 110, 112, 124, GREEN);
-  drawFlower(112, 104, 6);
+  const WalkRoute& r = WALK_ROUTES[walkRoute];
+
+  // The walker is part-way from the last lit stone to the next one.
+  float f = walkAcc / WALK_PER_DOT;
+  int wx = r.pt[walkDots][0] + (int)((r.pt[walkDots + 1][0] - r.pt[walkDots][0]) * f);
+  int wy = r.pt[walkDots][1] + (int)((r.pt[walkDots + 1][1] - r.pt[walkDots][1]) * f);
+
+  for (int i = walkDots; i < WALK_DOTS; i++)          // the way still to go
+    spr.drawLine(r.pt[i][0], r.pt[i][1], r.pt[i + 1][0], r.pt[i + 1][1], GRID);
+  for (int i = 0; i < walkDots; i++)                  // the way walked
+    walkLine(r.pt[i][0], r.pt[i][1], r.pt[i + 1][0], r.pt[i + 1][1], r.col);
+  walkLine(r.pt[walkDots][0], r.pt[walkDots][1], wx, wy, r.col);
+
   for (int i = 0; i < WALK_DOTS; i++) {
-    int x = 20 + (int)(i * 9.5f + sinf(i * 0.9f) * 10), y = 222 - i * 11;
-    if (i < walkDots) { spr.fillCircle(x, y, 3, INK); continue; }
-    spr.drawCircle(x, y, 3, DIM);
-    // The next dot swells as they move, so the screen answers right away.
-    if (i == walkDots) spr.fillCircle(x, y, (int)(walkAcc * 3 / WALK_PER_DOT), INK);
+    int x = r.pt[i + 1][0], y = r.pt[i + 1][1];
+    if (i < walkDots) { spr.fillCircle(x, y, WALK_STONE_R, r.col); continue; }
+    spr.fillCircle(x, y, WALK_STONE_R, BG);
+    spr.drawCircle(x, y, WALK_STONE_R, DIM);
   }
+
+  int big = moving ? (int)((now / 300) & 1) : 0;      // the goal twinkles while they move
+  switch (r.goal) {
+    case WG_FLOWER:
+      spr.drawLine(r.gx, r.gy + 6, r.gx, r.gy + 18, GREEN);
+      drawFlower(r.gx, r.gy, 6 + big);
+      break;
+    case WG_STAR:  drawStar(r.gx, r.gy, 10 + big * 2, YEL); break;
+    case WG_APPLE: drawApple(r.gx, r.gy, 8 + big); break;
+    default:       drawBall(r.gx, r.gy, 8 + big); break;
+  }
+
+  int hop = moving ? (int)((now / 120) & 1) * 3 : 0;
+  spr.fillCircle(wx, wy - hop, 6, INK);
+  spr.fillRect(wx - 3, wy - hop - 2, 2, 2, BG);
+  spr.fillRect(wx + 2, wy - hop - 2, 2, 2, BG);
 }
 
 // --- Dance party ------------------------------------------------------------
 // Walk in party clothes, opened from the middle icon on the pet screen. The
 // same "any movement adds up", shown as five rainbow bars that fill one after
 // another while the pet parties. Aim: about half a minute of dancing.
-const float   DANCE_PER_BAR = 18.0f;
+const float   DANCE_PER_BAR = 20.7f;
 const float   DANCE_LIVELY  = 0.12f;   // movement big enough to set the party off
 const uint8_t DANCE_BARS    = 5;
 const int     DANCE_BAR_H   = 58;
@@ -436,6 +510,26 @@ static void ccLight(uint8_t which, uint32_t now, uint16_t ms) {
   beep(which ? 660 : 880, ms > 60 ? ms - 40 : ms);
 }
 
+// The two button pictures. A cue is the "press this one" pulse the lesson
+// uses: the egg's throbbing blue dot, or an arrow nudging at the white bar.
+static void ccDraw(uint32_t now, bool cueBlue = false, bool cueSide = false) {
+  bool lit = (int32_t)(now - ccLitUntil) < 0, pulse = (now / 400) & 1;
+  if (lit && ccLit == 0) spr.fillCircle(CX, 178, 22, BTN_BLUE);
+  else {
+    spr.drawCircle(CX, 178, 22, BTN_BLUE);
+    spr.drawCircle(CX, 178, 21, BTN_BLUE);
+    if (cueBlue) spr.fillCircle(CX, 178, 10 + pulse * 3, BTN_BLUE);
+  }
+  if (lit && ccLit == 1) spr.fillRoundRect(SIDE_BAR_X, 98, 10, 46, 4, INK);
+  else                   spr.drawRoundRect(SIDE_BAR_X, 98, 10, 46, 4, cueSide ? INK : DIM);
+  if (cueSide) {
+    // Points away from the middle of the screen, at whichever edge the bar is on.
+    int tip = SIDE_BAR_X > CX ? SIDE_BAR_X - 4 + pulse * 3 : SIDE_BAR_X + 14 - pulse * 3;
+    int back = SIDE_BAR_X > CX ? tip - 7 : tip + 7;
+    spr.fillTriangle(tip, 121, back, 114, back, 128, INK);
+  }
+}
+
 static void ccShow(uint32_t now) {
   ccPhase = CC_SHOW;
   ccIdx = 0;
@@ -491,12 +585,218 @@ static void tickCopy(uint32_t now, bool a, bool b) {
 
   buddyTick(st);
   spr.fillRect(0, FIELD_TOP, W, H - FIELD_TOP, BG);
-  bool lit = (int32_t)(now - ccLitUntil) < 0;
-  if (lit && ccLit == 0) spr.fillCircle(CX, 178, 22, BTN_BLUE);
-  else { spr.drawCircle(CX, 178, 22, BTN_BLUE); spr.drawCircle(CX, 178, 21, BTN_BLUE); }
-  if (lit && ccLit == 1) spr.fillRoundRect(SIDE_BAR_X, 98, 10, 46, 4, INK);
-  else                   spr.drawRoundRect(SIDE_BAR_X, 98, 10, 46, 4, DIM);
+  ccDraw(now);
   drawPips(COPY_ROUNDS, ccRound, 232);
+}
+
+// --- Lesson -----------------------------------------------------------------
+// Not a toy box activity: it plays before the first egg, and again from the
+// parent screen. It teaches what the two buttons do with Copycat's pictures
+// of them, in four steps: blue picks, side moves along, the two together,
+// and holding blue opens and shuts. The screen does each one once, then
+// waits for it to be copied a few times. A press lights the picture of the
+// button that was pressed whether or not it was the one wanted, and nothing
+// can be got wrong: the step just waits.
+enum { LS_TAP, LS_NEXT, LS_BOTH, LS_HOLD, LS_N };
+enum { LP_SHOW, LP_SHOWN, LP_INPUT, LP_CHEER, LP_PARTY };
+static const uint8_t LS_REPS[LS_N] = { 3, 4, 3, 2 };
+const int LS_MID_Y = 112;            // middle of the box, or of the four tiles
+uint8_t  lsStep = 0, lsPhase = LP_SHOW, lsDone = 0, lsSel = 0, lsTarget = 0;
+bool     lsOpen = false;
+uint32_t lsUntil = 0, lsHoldMs = 0, lsPopUntil = 0;
+int      lsPopX = 0, lsPopY = 0;
+
+static int lsTileX(uint8_t i) { return CX - 17 + (i % 2) * 34; }
+static int lsTileY(uint8_t i) { return LS_MID_Y - 17 + (i / 2) * 34; }
+
+static void lsPop(int x, int y, uint32_t now) {
+  lsPopX = x;
+  lsPopY = y;
+  lsPopUntil = now + 400;
+  beep(1568, 80);
+}
+
+static void lsBeginStep(uint32_t now) {
+  lsDone = 0;
+  lsSel = 0;
+  lsOpen = false;
+  lsHoldMs = 0;
+  lsTarget = 1 + esp_random() % 3;
+  // The third step is the first two put together, so it is not shown again.
+  lsPhase = lsStep == LS_BOTH ? LP_INPUT : LP_SHOW;
+  lsUntil = now + 900;
+}
+
+static void startLearn(uint32_t now) {
+  mode = M_LEARN;
+  buddySetPeek(false);
+  applyBrightness();
+  lsStep = 0;
+  ccLitUntil = 0;
+  lsPopUntil = 0;
+  lsBeginStep(now);
+  lastInteractMs = now;
+}
+
+// What a tap of blue, a tap of the side button or a finished hold does in
+// this step. True when it was the thing the step is teaching.
+static bool lsAct(bool a, bool b, bool held, uint32_t now) {
+  switch (lsStep) {
+    case LS_TAP:
+      if (a) { lsPop(CX, LS_MID_Y, now); return true; }
+      break;
+    case LS_NEXT:
+      if (b) { lsSel = (lsSel + 1) % 4; return true; }
+      break;
+    case LS_BOTH:
+      if (b) lsSel = (lsSel + 1) % 4;
+      if (a && lsSel == lsTarget) {
+        lsPop(lsTileX(lsSel), lsTileY(lsSel), now);
+        lsTarget = (lsTarget + 1 + esp_random() % 3) % 4;   // any tile but this one
+        return true;
+      }
+      break;
+    case LS_HOLD:
+      if (held) { lsOpen = !lsOpen; lsPop(CX, LS_MID_Y, now); return true; }
+      break;
+  }
+  return false;
+}
+
+static void lsIcon(uint8_t i, int x, int y) {
+  switch (i % 4) {
+    case 0: drawApple(x, y + 1, 7); break;
+    case 1: drawHeart(x, y - 4, 2, true, RED); break;
+    case 2: drawBall(x, y, 7); break;
+    case 3: drawFlower(x, y, 5); break;
+  }
+}
+
+static void tickLearn(uint32_t now, bool a, bool b) {
+  uint32_t held = 0;                 // how long blue has been held, in the last step
+
+  switch (lsPhase) {
+    case LP_SHOW:                    // the screen presses the button itself
+      if ((int32_t)(now - lsUntil) < 0) break;
+      if (lsStep == LS_HOLD) {
+        held = now - lsUntil;
+        ccLit = 0;
+        ccLitUntil = now + 100;
+        if (held < HOLD_BLUE_MS) break;
+      } else {
+        ccLight(lsStep == LS_NEXT ? 1 : 0, now, 450);
+      }
+      lsAct(lsStep == LS_TAP, lsStep == LS_NEXT, lsStep == LS_HOLD, now);
+      lsPhase = LP_SHOWN;
+      lsUntil = now + 1100;
+      break;
+    case LP_SHOWN:
+      if ((int32_t)(now - lsUntil) < 0) break;
+      lsSel = 0;
+      lsOpen = false;
+      lsPhase = LP_INPUT;
+      break;
+    case LP_INPUT: {
+      // The picture lights as the button goes down; the action waits for the
+      // release like everywhere else.
+      if (M5.BtnA.wasPressed()) ccLight(0, now, 200);
+      if (M5.BtnB.wasPressed()) ccLight(1, now, 200);
+      bool full = false;
+      if (lsStep == LS_HOLD && !swallowA && M5.BtnA.isPressed() && !M5.BtnB.isPressed()) {
+        if (!lsHoldMs) lsHoldMs = now;
+        held = now - lsHoldMs;
+        ccLit = 0;
+        ccLitUntil = now + 100;
+        if (held >= HOLD_BLUE_MS) { full = true; swallowA = true; lsHoldMs = 0; held = 0; }
+      } else {
+        lsHoldMs = 0;
+      }
+      if (lsAct(a, b, full, now) && ++lsDone >= LS_REPS[lsStep]) {
+        lsPhase = LP_CHEER;
+        lsUntil = now + 1100;
+      }
+      break;
+    }
+    case LP_CHEER:
+      lastInteractMs = now;
+      if ((int32_t)(now - lsUntil) < 0) break;
+      if (++lsStep < LS_N) { lsBeginStep(now); break; }
+      spr.fillSprite(BG);
+      spr.pushSprite(0, 0);
+      {
+        static const uint16_t TUNE[] = { 1047, 1319, 1568, 2093 };
+        jingle(TUNE, 4, 90);
+      }
+      lsPhase = LP_PARTY;
+      lsUntil = millis() + 2500;
+      return;
+    case LP_PARTY: {
+      lastInteractMs = now;
+      if ((int32_t)(now - lsUntil) >= 0) {
+        pet().learned = true;
+        petSave();
+        if (pet().hatched) enterHome();
+        else               enterEgg();
+        return;
+      }
+      // Stars all over, each one staying a couple of seconds, colours chasing.
+      spr.fillSprite(BG);
+      uint32_t beat = now / 200;
+      for (uint32_t i = beat; i < beat + 10; i++) {
+        uint32_t h = i * 2654435761u;
+        drawStar(12 + (h >> 8) % (W - 24), 12 + (h >> 18) % (H - 24), (i & 1) ? 6 : 4, DANCE_COLORS[i % DANCE_BARS]);
+      }
+      return;
+    }
+  }
+
+  bool popping = (int32_t)(now - lsPopUntil) < 0, cheer = lsPhase == LP_CHEER;
+  spr.fillSprite(BG);
+
+  // The egg watches from the top and jiggles when something goes right.
+  drawEggShape(CX + ((popping || cheer) ? (((now / 60) & 1) ? 3 : -3) : 0), 40, 20, 26);
+  if (cheer) {
+    bool tw = (now / 200) & 1;
+    drawStar(24, 40, tw ? 6 : 4, YEL);
+    drawStar(W - 24, 40, tw ? 4 : 6, YEL);
+  }
+
+  if (lsStep == LS_TAP || (lsStep == LS_HOLD && !lsOpen)) {
+    // One thing in a box: something to pick, or something to open.
+    spr.drawRoundRect(CX - 22, LS_MID_Y - 22, 44, 44, 8, INK);
+    spr.drawRoundRect(CX - 21, LS_MID_Y - 21, 42, 42, 7, INK);
+    if (lsStep == LS_TAP) lsIcon(lsDone, CX, LS_MID_Y);
+    else                  drawStar(CX, LS_MID_Y, 10, YEL);
+  } else {
+    // Four tiles, the toy box in small. The frame goes right, then down.
+    for (uint8_t i = 0; i < 4; i++) {
+      int x = lsTileX(i), y = lsTileY(i);
+      spr.drawRoundRect(x - 15, y - 15, 30, 30, 6, i == lsSel ? INK : GRID);
+      if (i == lsSel) spr.drawRoundRect(x - 14, y - 14, 28, 28, 5, INK);
+      if (lsStep != LS_BOTH)                lsIcon(i, x, y);
+      else if (i == lsTarget && !cheer)     drawStar(x, y, ((now / 300) & 1) ? 8 : 6, YEL);
+    }
+  }
+  if (popping) {
+    int r = 30 - (int)(lsPopUntil - now) / 25;         // four stars flying outward
+    for (int i = 0; i < 4; i++)
+      drawStar(lsPopX + ((i & 1) ? r : -r), lsPopY + ((i & 2) ? r : -r), 4, YEL);
+  }
+
+  // Which button to press now pulses, but only once it is the kid's turn.
+  bool turn = lsPhase == LP_INPUT, onStar = lsSel == lsTarget;
+  ccDraw(now,
+         turn && (lsStep == LS_TAP || lsStep == LS_HOLD || (lsStep == LS_BOTH && onStar)),
+         turn && (lsStep == LS_NEXT || (lsStep == LS_BOTH && !onStar)));
+  if (lsStep == LS_HOLD) {
+    // A ring round the blue circle that fills while it is held.
+    int lit = held * 24 / HOLD_BLUE_MS;
+    for (int i = 0; i < 24; i++) {
+      float ang = -1.5708f + i * 0.2618f;
+      spr.fillCircle(CX + (int)(cosf(ang) * 29), 178 + (int)(sinf(ang) * 29), i < lit ? 3 : 1, i < lit ? AQUA : GRID);
+    }
+  }
+  drawPips(LS_REPS[lsStep], lsDone, 232);
 }
 
 // --- Hide and seek ----------------------------------------------------------

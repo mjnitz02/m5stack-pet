@@ -25,6 +25,27 @@ up costs one of each, so there is always something to do. When a row runs out
 the pet asks for attention, and that is the worst that happens. Time does not
 pass while the stick is off, so a pet left in a drawer comes back as it was.
 
+## The buttons lesson
+
+A stick that is new, or has just been reset from the parent screen, opens on
+a one-minute lesson before the egg. It uses the two pictures from Copycat: a
+blue circle for the blue button and a white bar at the edge for the side
+button. Whichever one to press pulses, and every press lights its picture.
+
+1. **Blue picks.** Press blue and the thing in the box pops.
+2. **Side moves along.** Each press moves the frame over four tiles: right,
+   then down to the next row, then back to the start.
+3. **Both.** Move the frame to the star with the side button, then pick it
+   with blue.
+4. **Hold blue.** A ring fills round the circle while blue is held. A full
+   ring opens the box into four tiles; another shuts it. A quick tap only
+   lights the circle.
+
+The screen does each step once, then waits for it to be copied a few times.
+There is no timer and no wrong answer. It ends in a burst of stars, then the
+egg. A new egg from the toy box does not play it again. To skip it, open the
+parent screen and choose `back`.
+
 ## Controls
 
 | Input | On the pet screen | In the toy box or an activity |
@@ -55,7 +76,8 @@ moves, blue changes.
 | `egg tile` | Show or hide New egg in the toy box. |
 | `pet` | What an egg hatches. On `random`, the default, it is any of the animals. Naming one makes every egg hatch that animal, and changes the current pet to it straight away. |
 | `tilt cal` | Teach the stick how it is held for the tilt games. See below. |
-| `reset` | Press twice. Back to an egg with everything as it started: stickers, dress-up, hearts, the settings above and the awake timer. The tilt calibration is the one thing kept. |
+| `lesson` | Plays the buttons lesson now. Nothing is reset, and it ends back at the pet. |
+| `reset` | Press twice. Back to an egg with everything as it started: stickers, dress-up, hearts, the settings above and the awake timer. The buttons lesson plays again before the egg. The tilt calibration is the one thing kept. |
 
 It also shows the battery voltage and how long the stick has been awake since
 the last reset.

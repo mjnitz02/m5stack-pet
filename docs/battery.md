@@ -44,6 +44,10 @@ the cable, plug it back in, and `make log` writes the rows to `logs/` as CSV.
 `make log-clear` empties it. The columns are described in `src/petlog.h`.
 `make flash` goes back to a build with none of it.
 
+The debug build also naps for 12 hours instead of 60 minutes, so one night
+off the cable shows how much the nap itself drains: compare `bat_mv` on the
+"nap" row with the next "boot:" row.
+
 The power chip has no current sensor, so drain has to be read off how fast
 the voltage falls. While USB is connected the battery is charging and its
 voltage says nothing about drain.

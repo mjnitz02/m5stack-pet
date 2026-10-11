@@ -50,7 +50,7 @@ belongs with these.
 | Activity | What you do | Ends |
 | --- | --- | --- |
 | **Dance party** | Dance, jump or wiggle with the stick. Any movement fills five rainbow bars while the pet parties. | When the fifth bar is full, after about half a minute of dancing. |
-| **Walk** | Take the pet somewhere. Walking, running, jumping and spinning all count: the stick adds up how much it has been moved and lights the next dot on a path. Standing still just pauses. | At the flower, ten dots and about a minute of real moving. |
+| **Walk** | Take the pet somewhere. Walking, running, jumping and spinning all count: the stick adds up how much it has been moved and slides a little walker along a path, lighting each stone it reaches and leaving a coloured trail. The walker hops while the stick is moving; standing still just pauses. Each walk picks one of four routes (to a flower, a star, an apple or a ball), never the one just walked. | At the end of the path, ten stones and about a minute of real moving. |
 | **Bath** | Shake the bubbles off. The next bubble swells as you shake, then pops. | When the eighth bubble goes. |
 | **Rock to sleep** | Rock the stick gently, any way that feels like rocking. A ball sways across its track and back, and each crossing fills a moon. A hard shake is no faster than a gentle rock. | After six moons the pet goes to bed and the stick powers off as usual. |
 | **Freeze** | Wiggle while the pet's eyes are shut. When the big eye opens, hold still for a star. Moving makes the pet dizzy and the round comes again. | After five stars. |

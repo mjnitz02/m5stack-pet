@@ -29,6 +29,7 @@ struct PetSave {
   bool     eggTile;     // show "new egg" in the toy box (testing aid)
   uint8_t  pick;        // what an egg hatches: 0 = any animal, else species + 1
   uint8_t  roster;      // PET_ROSTER when species and pick were saved
+  bool     learned;     // the buttons lesson has been shown
 };
 
 // What the parent screen's tilt calibration measured: which way the sensor
@@ -64,6 +65,8 @@ inline void petLoad() {
   _pet.eggTile  = _prefs.getBool("eggtile", true);
   _pet.pick     = _prefs.getUChar("pick", 0);
   _pet.roster   = _prefs.getUChar("roster", 0);
+  // A stick that already has a pet from before the lesson existed has seen it.
+  _pet.learned  = _prefs.getBool("learned", _pet.hatched);
   _tiltCal.set = false;
   if (_prefs.isKey("tiltcal") && _prefs.getBytesLength("tiltcal") == sizeof(_tiltCal))
     _prefs.getBytes("tiltcal", &_tiltCal, sizeof(_tiltCal));
@@ -90,6 +93,7 @@ inline void petSave() {
   _prefs.putBool("eggtile", _pet.eggTile);
   _prefs.putUChar("pick", _pet.pick);
   _prefs.putUChar("roster", _pet.roster);
+  _prefs.putBool("learned", _pet.learned);
   _prefs.end();
 }
 
@@ -114,8 +118,8 @@ inline void tiltCalSave() {
   _prefs.end();
 }
 
-// Back to an egg: the pet and everything it has collected. Settings and
-// the awake timer survive.
+// Back to an egg: the pet and everything it has collected. Settings, the
+// awake timer and having seen the buttons lesson survive.
 inline void petReset() {
   _pet.hatched  = false;
   _pet.hunger   = 2;
@@ -128,7 +132,8 @@ inline void petReset() {
 }
 
 // The parent screen's reset: all of the above plus every setting and the
-// awake timer, as if freshly flashed. Only the tilt calibration is kept; it
+// awake timer, as if freshly flashed, so the buttons lesson plays again
+// before the egg. Only the tilt calibration is kept; it
 // describes the stick, not the pet, and has its own way to be cleared.
 inline void petFactoryReset() {
   TiltCal keep = _tiltCal;

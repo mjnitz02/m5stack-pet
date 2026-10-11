@@ -10,7 +10,7 @@ SRC = PROJECT / "src" / "buddies"
 STATES = ["sleep", "idle", "busy", "attention", "celebrate", "dizzy", "heart"]
 
 # Characters that fit across the 135px screen at the home screen's 2x scale
-# (12px per glyph). Wider art still draws, but its edges are cut off.
+# (12px per glyph). Wider art would have its edges cut off; the tests refuse it.
 FIT_COLS = 11
 
 FUNC = re.compile(r"static void do(\w+)\(uint32_t t\)\s*\{")

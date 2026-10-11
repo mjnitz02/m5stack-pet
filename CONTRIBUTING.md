@@ -22,8 +22,8 @@ contributions are handled:
 
 ## Development
 
-Everything runs through the `Makefile` (see [`README.md`](README.md) for the
-full list). You need [PlatformIO Core](https://docs.platformio.org/en/latest/core/installation/),
+Everything runs through the `Makefile` (see [`docs/development.md`](docs/development.md) for
+the full list). You need [PlatformIO Core](https://docs.platformio.org/en/latest/core/installation/),
 [uv](https://docs.astral.sh/uv/) and [gitleaks](https://github.com/gitleaks/gitleaks).
 
 ```sh

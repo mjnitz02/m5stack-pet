@@ -119,22 +119,20 @@ void buddySetColor(uint16_t fg)   { _tgt->setTextColor(fg, BUDDY_BG); }
 void buddyPrint(const char* s)    { _tgt->setTextSize(_scale); _tgt->print(s); }
 
 // ──────────────── species registry ────────────────
-extern const Species CAPYBARA_SPECIES;
-extern const Species DUCK_SPECIES;
 extern const Species BLOB_SPECIES;
 extern const Species CAT_SPECIES;
-extern const Species OCTOPUS_SPECIES;
-extern const Species OWL_SPECIES;
-extern const Species PENGUIN_SPECIES;
-extern const Species TURTLE_SPECIES;
-extern const Species SNAIL_SPECIES;
+extern const Species CHICK_SPECIES;
+extern const Species DOG_SPECIES;
 extern const Species GHOST_SPECIES;
-extern const Species RABBIT_SPECIES;
+extern const Species OCTOPUS_SPECIES;
+extern const Species PENGUIN_SPECIES;
 
+// The saved pet is an index into this table. Reordering or removing an entry
+// needs a new PET_ROSTER and a row in petMigrateRoster() (src/pet.h), or
+// every hatched pet turns into a different animal.
 static const Species* SPECIES_TABLE[] = {
-  &CAPYBARA_SPECIES, &DUCK_SPECIES, &BLOB_SPECIES, &CAT_SPECIES,
-  &OCTOPUS_SPECIES, &OWL_SPECIES, &PENGUIN_SPECIES, &TURTLE_SPECIES,
-  &SNAIL_SPECIES, &GHOST_SPECIES, &RABBIT_SPECIES,
+  &BLOB_SPECIES, &CAT_SPECIES, &CHICK_SPECIES, &DOG_SPECIES,
+  &GHOST_SPECIES, &OCTOPUS_SPECIES, &PENGUIN_SPECIES,
 };
 static const uint8_t N_SPECIES = sizeof(SPECIES_TABLE) / sizeof(SPECIES_TABLE[0]);
 static uint8_t currentSpeciesIdx = 0;

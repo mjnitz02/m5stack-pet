@@ -1,194 +1,53 @@
 # m5stack-pet
 
 A small offline virtual pet for the M5StickS3. An egg hatches into an ASCII
-animal that you feed, play with, take for walks and put to bed. There is no
-Bluetooth, no Wi-Fi and no app. It is meant for young kids, so nothing on the
+animal that you feed, dance with, take for walks and put to bed. There is no
+Bluetooth, no Wi-Fi and no app. It is made for young kids, so nothing on the
 main screens needs reading and the pet can't die.
 
-This started as a fork of
-[claude-desktop-buddy](https://github.com/anthropics/claude-desktop-buddy)
-with the Claude and Bluetooth parts taken out. The ASCII animals and their
-animations come from that project.
-
-> **Status: early.** The firmware builds and the pieces below are written,
-> but it is still being tested on real hardware. Expect timings and details
-> to change.
-
 <p align="center">
-  <img src="docs/species/_all.png" alt="The ASCII animals in their idle pose" width="720">
+  <img src="docs/home.png" alt="The pet screen: an octopus, its apples and hearts, and three icons" width="200">
 </p>
 
-## How it plays
-
-1. **Egg.** Press the blue button (or shake the stick) a few times to crack
-   it. A pet hatches, a different animal each time unless the parent
-   screen names one.
-2. **Home.** The pet sits at the top. Under it are two rows, apples for
-   hunger and hearts for happiness, and three icons.
-3. **Feed** (apple). A tray of four foods opens: apple, carrot, strawberry
-   and ice cream. Each one fills one apple. One of them is the pet's
-   favourite that day and gets a bigger celebration.
-4. **Dance party** (party hat). Dance, jump or wiggle with the stick. Any
-   movement fills five rainbow bars while the pet parties.
-5. **Bed** (moon). The pet goes to sleep and the stick turns itself off.
-6. **Toy box** (hold the blue button). Two pages of icon tiles with more
-   things to do, described below.
-
-Apples and hearts drain slowly while the stick is on. When one runs out the
-pet asks for attention, and that is the worst that happens. Time does not
-pass while the stick is off, so a pet left in a drawer comes back as it was.
-
-## Toy box
-
-Hold the blue button on the pet screen to open it, and hold it again from
-anywhere to go back to the pet. The first page is the activities that get a
-kid moving; the second is the sit-still games. Nothing has a score or a way
-to lose. Finishing one adds a heart and sometimes a sticker.
-
-| Tile | What you do |
-| --- | --- |
-| **Walk** | Carry the pet around. Any movement fills a path to a flower. |
-| **Bath** | Shake the bubbles off. Each one swells, then pops. |
-| **Rock to sleep** | Rock the stick gently, any way that feels like rocking. The ball sways across and back, each crossing fills a moon, and after six the pet goes to bed. |
-| **Freeze** | Wiggle while the pet's eyes are shut, hold still when the big eye opens. |
-| **Dress-up** | Side button changes the colour, blue changes the hat. |
-| **Stickers** | Shows the twelve stickers and which are still to find. |
-| **Catch** | Five snacks fall one at a time. Tilt the stick left and right to catch them in the basket. |
-| **Draw** | Tilt moves the pen and the line slowly runs through the rainbow. Blue starts a fresh page from the middle; shake wipes the page. |
-| **Marble** | Tilt to roll a ball onto three apples. Blue starts it over. |
-| **Copycat** | The pet lights the two buttons in a pattern; repeat it. |
-| **Hide and seek** | The pet peeks over one of three bushes; pick the bush. |
-| **New egg** | Hold blue for three seconds to start over from an egg. |
-
-Tilt activities (catch, draw, marble) take half a second at the start to
-learn how the stick is being held, so "level" is wherever the kid is holding
-it, upright included.
-
-Which way counts as left, right, up and down, and how far a tilt goes, comes
-from a calibration measured on one StickS3 until the stick is given its own. On the parent screen choose `tilt cal` and follow the
-five pictures, pressing blue on each: hold the stick the way you play, then
-tilt it as if rolling a ball left, right, up and down the screen. The
-measured directions and reach are saved and used by every tilt activity. The
-readings stay on screen at the end and are printed to the serial log. To go
-back to the built-in setting, open `tilt cal` and press the side button on the
-first picture.
-
-## Controls
-
-| Input | What it does |
-| --- | --- |
-| **Side button** | Next icon |
-| **Blue front button** | Select |
-| **Shake** | Pet gets dizzy |
-| **Face down** | Puts the pet to bed |
-| **Hold blue button** (0.7s) | Toy box, or back to the pet |
-| **Hold side button** (1.5s) | Sound on or off |
-| **Hold both buttons** (1.5s) | Parent screen |
-| **Power button** | Turn the stick back on |
-
-### Parent screen
-
-Text menu for grown-ups: brightness, sound, `stay on` (no auto power-off),
-`egg tile` (show or hide New egg in the toy box), `pet`, `tilt cal` and
-`reset`. It also shows battery voltage and how long the stick has been awake
-since the last reset.
-
-`pet` is what an egg hatches. On `random`, the default, it is any of the
-animals. Naming one makes every egg hatch that animal, and changes the
-current pet to it straight away.
-
-`reset` (press twice) goes back to an egg and puts everything back as it
-started: stickers, dress-up, hearts, the settings above and the awake timer.
-The tilt calibration is the one thing kept.
-
-## Battery
-
-The stick has a small battery, so the firmware is built around not wasting
-it:
-
-- No radio code is compiled in.
-- After 60 seconds without input the pet falls asleep, and 15 seconds later
-  the screen goes off and the stick naps. For the next 10 minutes the blue
-  button wakes it; after that it powers off and the power button turns it
-  back on.
-- The CPU runs at 80 MHz and the screen brightness defaults to low.
-
-Five dim dashes along the top edge of the screen show the charge, one per
-20%. The last one turns orange.
-
-To measure screen-on time: charge it, open the parent screen, choose
-`reset`, open it again and turn `stay on` on, and leave it until it dies. After charging
-again the parent screen shows the awake time (saved every 5 minutes).
-
-A debug build (`make flash-debug`) also records a row every ten seconds, and
-on every screen change, to the stick's own flash: battery voltage, backlight,
-how hard it is being moved, button presses and frame rate. Play with it off
-the cable, plug it back in, and `make log` writes the rows to `logs/` as CSV.
-The columns are described in `src/petlog.h`. `make flash` goes back to a
-build with none of it.
-
-## Hardware
-
-Built for the **M5StickS3** (ESP32-S3). The older **M5StickC Plus** also
-compiles from the same code through
-[M5Unified](https://github.com/m5stack/M5Unified), but is not the board this
-is tested on.
-
 <p align="center">
-  <img src="docs/sticks3.png" alt="M5Stack M5StickS3" width="320">
+  <img src="docs/species/_all.png" alt="The seven animals: blob, cat, chick, dog, ghost, octopus and penguin" width="820">
 </p>
 
-## Building and flashing
+The idea comes from
+[claude-desktop-buddy](https://github.com/anthropics/claude-desktop-buddy),
+a desk companion that shows what Claude is doing. This project keeps its
+ASCII animals and leans all the way into the pet, with the Claude and
+Bluetooth parts taken out.
 
-You need [PlatformIO Core](https://docs.platformio.org/en/latest/core/installation/)
-and, for the Python tools, [uv](https://docs.astral.sh/uv/).
+> **Status: early.** It runs on real hardware and is being tested by two
+> small kids. Expect timings and details to change.
+
+## Install
+
+You need an [M5StickS3](https://docs.m5stack.com/en/core/StickS3),
+[PlatformIO Core](https://docs.platformio.org/en/latest/core/installation/)
+and a USB-C cable.
 
 ```bash
-make build     # compile for the M5StickS3
+git clone https://github.com/mjnitz02/m5stack-pet.git
+cd m5stack-pet
 make flash     # compile and upload over USB
-make monitor   # serial log: battery mV and awake minutes
-make flash-debug   # flash with the on-device log compiled in
-make log       # copy that log to logs/ (stick awake and on USB)
-make log-clear # empty it
-make test      # checks on the animal art
-make lint      # ruff on tools/, then a build with warnings as errors
-make species   # re-render docs/species/*.png
 ```
 
-Use `PIO_ENV=m5stickc-plus` with any of these for the older board.
+It boots to an egg. Press the blue button a few times to hatch it.
 
-**M5StickS3 download mode:** if the stick is running other firmware and the
-upload can't connect, plug in USB and hold the side power button until the
-inner green LED blinks, then run `make flash` again.
+If the upload can't connect, plug in USB, hold the side power button until
+the inner green LED blinks, then run `make flash` again.
 
-## Animals
+## Docs
 
-Eleven animals, each with seven animations: sleep, idle, busy, attention,
-celebrate, dizzy and heart. Each one is a file in `src/buddies/` and is
-listed in `SPECIES_TABLE` in `src/buddy.cpp`.
+- [Playing](docs/playing.md): the pet screen, buttons, and the parent screen.
+- [Toy box](docs/toy-box.md): the twelve activities and the rules they keep.
+- [Animals](docs/animals.md): the seven animals and how to draw another.
+- [Battery](docs/battery.md): how it saves power and how to measure it.
+- [Development](docs/development.md): make targets, code layout, tuning.
 
-`docs/species/` has a picture of every animal in every state. To remove one,
-delete its file and its two lines in `src/buddy.cpp`, then run
-`make test species`.
-
-## Project layout
-
-```
-src/
-  main.cpp   - game loop, core screens, toy box, power handling
-  activities.h - the toy box activities
-  icons.h    - every icon, drawn from shapes
-  pet.h      - saved state (needs, settings, stickers, dress-up)
-  buddy.cpp  - animal registry and ASCII render helpers
-  buddies/   - one file per animal, seven animation functions each
-  compat.h   - maps the old display type names onto M5Unified
-tools/
-  species.py         - parses the animal art out of src/buddies/
-  render_species.py  - draws docs/species/*.png
-  test_species.py    - art checks
-```
-
-## Credits and license
+## License
 
 MIT, see [LICENSE](LICENSE). The animal art, the renderer and the original
 firmware are from

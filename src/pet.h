@@ -11,6 +11,7 @@
 
 static const uint8_t PET_MAX = 4;        // pips per need row
 static const uint8_t PET_NO_SPECIES = 0xFF;   // nothing has hatched yet
+static const uint8_t PET_ROSTER = 1;          // which animal list the saved indexes refer to
 
 struct PetSave {
   bool     hatched;
@@ -27,6 +28,7 @@ struct PetSave {
   uint8_t  hat;         // dress-up hat, 0 = none
   bool     eggTile;     // show "new egg" in the toy box (testing aid)
   uint8_t  pick;        // what an egg hatches: 0 = any animal, else species + 1
+  uint8_t  roster;      // PET_ROSTER when species and pick were saved
 };
 
 // What the parent screen's tilt calibration measured: which way the sensor
@@ -61,6 +63,7 @@ inline void petLoad() {
   _pet.hat      = _prefs.getUChar("hat", 0);
   _pet.eggTile  = _prefs.getBool("eggtile", true);
   _pet.pick     = _prefs.getUChar("pick", 0);
+  _pet.roster   = _prefs.getUChar("roster", 0);
   _tiltCal.set = false;
   if (_prefs.isKey("tiltcal") && _prefs.getBytesLength("tiltcal") == sizeof(_tiltCal))
     _prefs.getBytes("tiltcal", &_tiltCal, sizeof(_tiltCal));
@@ -86,7 +89,22 @@ inline void petSave() {
   _prefs.putUChar("hat", _pet.hat);
   _prefs.putBool("eggtile", _pet.eggTile);
   _prefs.putUChar("pick", _pet.pick);
+  _prefs.putUChar("roster", _pet.roster);
   _prefs.end();
+}
+
+// Roster 0 was eleven animals in another order. Carry a saved pet over to
+// the same animal in today's list; one whose animal is gone goes back to an
+// egg and keeps everything it has collected. Call once after petLoad().
+inline void petMigrateRoster() {
+  if (_pet.roster == PET_ROSTER) return;
+  // capybara, duck, blob, cat, octopus, owl, penguin, turtle, snail, ghost, rabbit
+  static const uint8_t FROM0[11] = { 0xFF, 2, 0, 1, 5, 0xFF, 6, 0xFF, 0xFF, 4, 0xFF };
+  if (_pet.species < 11) _pet.species = FROM0[_pet.species];
+  if (_pet.species == PET_NO_SPECIES) _pet.hatched = false;
+  if (_pet.pick) _pet.pick = _pet.pick <= 11 ? (uint8_t)(FROM0[_pet.pick - 1] + 1) : 0;   // 0xFF + 1 wraps to "any"
+  _pet.roster = PET_ROSTER;
+  petSave();
 }
 
 // Kept out of petSave(): it only changes when a grown-up calibrates.
@@ -118,6 +136,7 @@ inline void petFactoryReset() {
   _prefs.clear();
   _prefs.end();
   petLoad();
+  _pet.roster = PET_ROSTER;   // nothing saved, so nothing to carry over
   _tiltCal = keep;
   if (keep.set) tiltCalSave();
   petSave();

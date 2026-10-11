@@ -1054,6 +1054,7 @@ void setup() {
   M5.Lcd.setRotation(0);
   M5.Speaker.setVolume(90);      // IMU auto-inits in M5.begin()
   petLoad();
+  petMigrateRoster();
   applyBrightness();
   spr.createSprite(W, H);
   buddyInit();

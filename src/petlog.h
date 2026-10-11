@@ -60,7 +60,19 @@ static void logRow(const char* event) {
 }
 
 static void logBegin(const char* bootEvent) {
-  _logOk = LittleFS.begin(true);
+  // M5.begin() leaves the USB serial port unopened, and an unopened port
+  // answers available() with -1 for ever.
+  Serial.begin(115200);
+  // A partition that has never held the log has to be formatted first: say
+  // so rather than sit on a black screen.
+  _logOk = LittleFS.begin(false);
+  if (!_logOk) {
+    M5.Display.setBrightness(128);
+    M5.Display.setTextColor(0xFFFF, 0x0000);
+    M5.Display.drawString("log: formatting", 8, 110);
+    _logOk = LittleFS.begin(true);
+    M5.Display.fillScreen(0x0000);
+  }
   _logMarkMs = millis();
   logRow(bootEvent);
 }
@@ -68,7 +80,7 @@ static void logBegin(const char* bootEvent) {
 // `L` on the serial port dumps the log between two marker lines, `C` clears
 // it. tools/pull_log.py is the other end.
 static void logSerial() {
-  while (Serial.available()) {
+  while (Serial.available() > 0) {
     int c = Serial.read();
     if (c == 'L') {
 #if defined(BOARD_STICKS3)

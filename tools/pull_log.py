@@ -33,9 +33,7 @@ def open_port(name: str | None) -> serial.Serial:
     port.port = name
     port.baudrate = 115200
     port.timeout = 1
-    # Leave the control lines alone so opening the port doesn't reset the stick.
-    port.dtr = False
-    port.rts = False
+    # DTR and RTS stay at pyserial's defaults: dropping them resets the stick.
     port.open()
     return port
 

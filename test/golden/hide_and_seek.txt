@@ -1,0 +1,66 @@
+      0.250  m5 begin
+      0.250  pm1 led 1
+      0.250  i2c 69 7D=04
+      0.250  brightness 102
+      0.996  beep 1200 60
+      0s      frames=23  draw=85e8b10b1bb99709
+      1.260  beep 1800 25
+      1.425  beep 1800 25
+      1.590  beep 1800 25
+      1.755  beep 1800 25
+      1.920  beep 1800 25
+      1s      frames=30  draw=8ccbc57c788cf0e7
+      2.085  beep 1800 25
+      2.250  beep 1800 25
+      2.415  beep 1800 25
+      2.580  beep 1800 25
+      2.745  beep 1800 25
+      2.910  beep 2400 25
+      2.910  beep 1200 40
+      2s      frames=30  draw=0d454babab39dd4c
+      3s      frames=31  draw=b4ab37ab64149185
+      4.395  beep 1800 25
+      4.560  beep 1800 25
+      4.725  beep 500 60
+      4s      frames=30  draw=8d7a17325933222b
+      5s      frames=30  draw=73f4bc7af7cecee0
+      6.210  beep 1800 25
+      6.375  beep 1800 25
+      6.540  beep 2000 80
+      6s      frames=30  draw=02e5eefe608b34ba
+      7s      frames=31  draw=41f870e44114a55d
+      8.355  beep 1200 40
+      8s      frames=30  draw=4437e72df27ed74d
+      9s      frames=30  draw=384a3b8d69898aa0
+     10.038  beep 1800 25
+     10.203  beep 1800 25
+     10.368  beep 2000 80
+     10s      frames=31  draw=3d492026b64b46aa
+     11s      frames=30  draw=1c322d04c1b309f8
+     12.183  beep 1200 40
+     12s      frames=30  draw=f35692bd6a406e65
+     13.866  beep 1800 25
+     13s      frames=31  draw=2f7bb6ff5ae03834
+     14.031  beep 1800 25
+     14.196  beep 2000 80
+     14s      frames=30  draw=14d78d4a898139b8
+     15s      frames=30  draw=75e20d01c4f9031c
+     16.011  save happy=2
+     16.011  save sound=1
+     16.011  save bright=1
+     16.011  save stayon=0
+     16.011  save awake=0
+     16.011  save food=0
+     16.011  save stickers=0
+     16.011  save color=0
+     16.011  save hat=0
+     16.011  save eggtile=1
+     16.011  save pick=0
+     16.011  beep 1319 90
+     16.116  beep 1568 90
+     16.221  beep 2093 90
+     16s      frames=21  draw=41e504e9c6434374
+     17s      frames=30  draw=e58bede0db629fda
+     18s      frames=31  draw=0aad610589ebb53d
+     19s      frames=30  draw=97dd70e54837cdb0
+     20s      frames=11  draw=a557bced1d4c49b7

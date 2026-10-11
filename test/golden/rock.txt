@@ -1,0 +1,70 @@
+      0.250  m5 begin
+      0.250  pm1 led 1
+      0.250  i2c 69 7D=04
+      0.250  brightness 102
+      0.996  beep 1200 60
+      0s      frames=23  draw=85e8b10b1bb99709
+      1.260  beep 1800 25
+      1.425  beep 1800 25
+      1.590  beep 2400 25
+      1s      frames=30  draw=e1691230c53ae44e
+      2s      frames=30  draw=d750309a502f0c66
+      3s      frames=31  draw=91e85f7ec328e465
+      4.494  beep 520 70
+      4s      frames=30  draw=14f86c5a6a968cc9
+      5s      frames=30  draw=74fc1daa7b05d234
+      6.210  beep 520 70
+      6s      frames=30  draw=22bb4379cacc0330
+      7.926  beep 520 70
+      7s      frames=31  draw=a75291afb8ad9bb7
+      8s      frames=30  draw=2bae73f091cff72d
+      9.642  beep 520 70
+      9s      frames=30  draw=9aa58345e0138a3d
+     10s      frames=31  draw=908ea61d61dbe001
+     11.160  beep 520 70
+     11s      frames=30  draw=42f565982036fd05
+     12.876  beep 520 70
+     12.876  save happy=2
+     12.876  save sound=1
+     12.876  save bright=1
+     12.876  save stayon=0
+     12.876  save awake=0
+     12.876  save food=0
+     12.876  save stickers=0
+     12.876  save color=0
+     12.876  save hat=0
+     12.876  save eggtile=1
+     12.876  save pick=0
+     12.876  beep 1047 140
+     12s      frames=26  draw=0e4b29dedb391b6e
+     13.031  beep 880 140
+     13.186  beep 698 140
+     13.341  brightness 12
+     13s      frames=7   draw=7e6a42b4cba6eed5
+     14s      frames=10  draw=03bbb71b914bbbf9
+     15s      frames=10  draw=c30444fafbbde579
+     16s      frames=10  draw=8b11840f53684501
+     17s      frames=10  draw=d91b13244b901d39
+     18s      frames=10  draw=5743516beb3c50d0
+     19s      frames=10  draw=dd1733d5cb7bf1b2
+     20s      frames=10  draw=beb8bb4c532822ea
+     21s      frames=10  draw=6b8aeaf5c220409d
+     22s      frames=10  draw=dad53a8d717491c8
+     23s      frames=10  draw=ef17539c50d2dacf
+     24s      frames=10  draw=8f2991ac932e52a9
+     25s      frames=10  draw=3d1b557659358dce
+     26s      frames=10  draw=eea9203e3c2f32cc
+     27.941  brightness 0
+     27.941  display sleep
+     27.941  speaker off
+     27.941  i2c 18 12=02
+     27.941  i2c 18 13=00
+     27.941  i2c 18 0D=FC
+     27.941  i2c 18 00=00
+     27.941  i2c 69 7D=00
+     27.941  i2c 69 7C=01
+     27.941  ext output 0
+     27.941  pm1 gpio2 0
+     27.941  pm1 led 0
+     27.941  deep sleep
+     27s      frames=9   draw=a71fbb5e8aef50ed

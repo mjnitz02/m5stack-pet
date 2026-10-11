@@ -1,0 +1,113 @@
+      0.250  m5 begin
+      0.250  pm1 led 1
+      0.250  i2c 69 7D=04
+      0.250  save hatched=0
+      0.250  save species=255
+      0.250  save hunger=2
+      0.250  save happy=2
+      0.250  save sound=1
+      0.250  save bright=1
+      0.250  save stayon=0
+      0.250  save awake=0
+      0.250  save food=0
+      0.250  save stickers=0
+      0.250  save color=0
+      0.250  save hat=0
+      0.250  save eggtile=1
+      0.250  save pick=0
+      0.250  save roster=1
+      0.250  save learned=0
+      0.250  brightness 102
+      0s      frames=23  draw=cf94c6c9c68d7453
+      1.174  beep 880 410
+      1.174  beep 1568 80
+      1s      frames=31  draw=691940658e0ecd14
+      2.758  beep 880 160
+      2.857  beep 1568 80
+      2.923  beep 880 160
+      2s      frames=30  draw=9062b06c5c093c1d
+      3.022  beep 1568 80
+      3.088  beep 880 160
+      3.187  beep 1568 80
+      3s      frames=30  draw=ab996a333661663b
+      4s      frames=30  draw=35b6229d0d5c4953
+      5.233  beep 660 410
+      5s      frames=31  draw=af394b02fd3d9bcf
+      6.784  beep 660 160
+      6.949  beep 660 160
+      6s      frames=30  draw=a12b59eecb5b16d0
+      7.114  beep 660 160
+      7.279  beep 660 160
+      7s      frames=30  draw=1770578b6f8eadbb
+      8.962  beep 880 160
+      8s      frames=31  draw=16b4dcc6868206b5
+      9.127  beep 660 160
+      9.292  beep 880 160
+      9.457  beep 660 160
+      9.622  beep 880 160
+      9.787  beep 660 160
+      9.952  beep 880 160
+      9s      frames=30  draw=4125fbde2b22aceb
+     10.051  beep 1568 80
+     10.117  beep 660 160
+     10.282  beep 880 160
+     10.447  beep 660 160
+     10.612  beep 880 160
+     10.777  beep 660 160
+     10.942  beep 880 160
+     10s      frames=30  draw=7a9f093d0a1cfc9b
+     11.041  beep 1568 80
+     11.107  beep 660 160
+     11.272  beep 880 160
+     11.437  beep 660 160
+     11.602  beep 880 160
+     11.701  beep 1568 80
+     11s      frames=31  draw=ee18d7856f102d64
+     12s      frames=30  draw=a782bdb620159d75
+     13s      frames=30  draw=6f84e00fe84b8953
+     14.440  beep 1568 80
+     14s      frames=30  draw=8994b9444329fbcb
+     15s      frames=31  draw=86cc46d95e1e1b52
+     16s      frames=30  draw=bb7e7add32ddf747
+     17.938  beep 880 160
+     17s      frames=30  draw=17935b1bfba7e0fd
+     18.664  beep 1568 80
+     18s      frames=31  draw=f071ff7604f311b8
+     19.258  beep 880 160
+     19.984  beep 1568 80
+     19s      frames=30  draw=033be40c15d08879
+     20s      frames=30  draw=9cb05d816f7670fe
+     21.106  beep 1047 90
+     21.211  beep 1319 90
+     21.316  beep 1568 90
+     21.421  beep 2093 90
+     21s      frames=19  draw=10f0f25ad96c6fe7
+     22s      frames=30  draw=fe1ecd026aa3a6e3
+     23s      frames=30  draw=bd1a81aa4839197b
+     24.034  save learned=1
+     24.166  beep 650 50
+     24.760  beep 800 50
+     24s      frames=31  draw=64b84edc69d94256
+     25.354  beep 950 50
+     25.948  beep 1100 50
+     25s      frames=30  draw=19f866aaddf4484c
+     26.542  beep 1250 50
+     26s      frames=30  draw=21fec81337585522
+     27.136  beep 1400 50
+     27.730  beep 1550 50
+     27.730  save hatched=1
+     27.730  save species=3
+     27.730  beep 1047 90
+     27.835  beep 1319 90
+     27.940  beep 1568 90
+     27s      frames=23  draw=fb0ffed76e9340d0
+     28.045  beep 2093 90
+     28s      frames=26  draw=5093ef41b4e876cc
+     29s      frames=31  draw=a440b20712d4a157
+     30s      frames=30  draw=447603059b396e81
+     31s      frames=30  draw=ae5ce881ed121e4a
+     32s      frames=30  draw=dc53376869e537df
+     33s      frames=31  draw=749512a5ac7a215b
+     34s      frames=30  draw=a655861642390a93
+     35s      frames=30  draw=59ce5bb7e9151887
+     36s      frames=19  draw=f09a1baf412271ad

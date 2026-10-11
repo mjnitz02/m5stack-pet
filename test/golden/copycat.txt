@@ -1,0 +1,81 @@
+      0.250  m5 begin
+      0.250  pm1 led 1
+      0.250  i2c 69 7D=04
+      0.250  brightness 102
+      0.996  beep 1200 60
+      0s      frames=23  draw=85e8b10b1bb99709
+      1.260  beep 1800 25
+      1.425  beep 1800 25
+      1.590  beep 1800 25
+      1.755  beep 1800 25
+      1.920  beep 1800 25
+      1s      frames=30  draw=8ccbc57c788cf0e7
+      2.085  beep 1800 25
+      2.250  beep 1800 25
+      2.415  beep 1800 25
+      2.580  beep 1800 25
+      2.745  beep 2400 25
+      2s      frames=30  draw=116c56ad01715cf8
+      3.471  beep 660 410
+      3s      frames=31  draw=ec9e457d68b174ec
+      4s      frames=30  draw=f6e1d9e43c069d83
+      5.022  beep 880 160
+      5.022  beep 300 200
+      5s      frames=30  draw=dfa5267b2d0bc6d2
+      6.969  beep 660 410
+      6s      frames=30  draw=38abf7860c0eb6f0
+      7s      frames=31  draw=ce86b29c6d2bd843
+      8.091  beep 660 160
+      8s      frames=30  draw=4f83e02b6456c23a
+      9.741  beep 660 410
+      9s      frames=30  draw=f022f22028a0346d
+     10.467  beep 660 410
+     10s      frames=31  draw=bac12032a1664eb1
+     11s      frames=30  draw=272e24b3b8850733
+     12.183  beep 660 160
+     12.348  beep 660 160
+     12s      frames=30  draw=fd3b39f97fa58dca
+     13.998  beep 660 410
+     13s      frames=31  draw=43e5d307e0b49b66
+     14.724  beep 880 410
+     14s      frames=30  draw=d8e9f1a7294fd1dd
+     15.450  beep 880 410
+     15s      frames=30  draw=159ea62083efdc32
+     16s      frames=30  draw=be346c8db59ae523
+     17.166  beep 660 160
+     17.331  beep 880 160
+     17.496  beep 880 160
+     17s      frames=31  draw=ee922a69ebdc681d
+     18s      frames=30  draw=1a9744da6b30c847
+     19.146  beep 880 410
+     19.872  beep 660 410
+     19s      frames=30  draw=15c4a08df473af45
+     20.598  beep 880 410
+     20s      frames=31  draw=bbaef0b8ef69fbf6
+     21.324  beep 660 410
+     21s      frames=30  draw=71fe5431cb8a2a88
+     22s      frames=30  draw=764ff3ba0a3c7718
+     23.007  beep 880 160
+     23.172  beep 660 160
+     23.337  beep 880 160
+     23.502  beep 660 160
+     23s      frames=31  draw=a510b32dbfc935d0
+     24.426  save happy=2
+     24.426  save sound=1
+     24.426  save bright=1
+     24.426  save stayon=0
+     24.426  save awake=0
+     24.426  save food=0
+     24.426  save stickers=0
+     24.426  save color=0
+     24.426  save hat=0
+     24.426  save eggtile=1
+     24.426  save pick=0
+     24.426  beep 1319 90
+     24.531  beep 1568 90
+     24.636  beep 2093 90
+     24s      frames=20  draw=fb9a62ede8e16ff2
+     25s      frames=31  draw=a69bcd7cb5adc7e4
+     26s      frames=30  draw=1f0fe5a4a71f14d9
+     27s      frames=30  draw=9eeb3b1d5ed23824
+     28s      frames=24  draw=e7369a4760387c94

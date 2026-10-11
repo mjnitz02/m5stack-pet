@@ -1,0 +1,130 @@
+--- hungry ---
+      0.250  m5 begin
+      0.250  pm1 led 1
+      0.250  i2c 69 7D=04
+      0.250  brightness 102
+      0s      frames=23  draw=ff7002e798d3d69f
+      1s      frames=30  draw=47866707ff2b4205
+      2s      frames=30  draw=bba02561b1b027ea
+      3s      frames=31  draw=edb7cd233379adea
+      4s      frames=30  draw=73e5c4087a46182d
+      5s      frames=30  draw=9cce6c8a83cc609e
+      6s      frames=30  draw=74460cdc7c4bd3d6
+      7s      frames=31  draw=582d2eed119a268b
+      8s      frames=30  draw=26969708a5d74651
+      9s      frames=30  draw=015f33d586362bcc
+     10s      frames=31  draw=3c3966d4da6e13d4
+     11s      frames=30  draw=09be91bcf34b83f6
+     12s      frames=30  draw=41fa9d599a1587db
+     13s      frames=31  draw=318f782eca87f690
+     14s      frames=30  draw=cabd504420914632
+     15s      frames=30  draw=fdd995eb88149f89
+     16s      frames=30  draw=a2eea3cee9ca7593
+     17s      frames=31  draw=d83f11392ee28842
+     18s      frames=30  draw=2e28bc9db7861b2a
+     19s      frames=30  draw=e9c4b03857007857
+     20s      frames=9   draw=b70d29b45fb0b4b9
+--- bored ---
+      0.250  m5 begin
+      0.250  pm1 led 1
+      0.250  i2c 69 7D=04
+      0.250  brightness 102
+      0s      frames=23  draw=364e8250c591b493
+      1s      frames=30  draw=cf74cc37601992cf
+      2s      frames=30  draw=5653c1569f724fab
+      3s      frames=31  draw=5e2f4754857191ad
+      4s      frames=30  draw=a9e89ad1bb0fa7c3
+      5s      frames=30  draw=3d40a8de46d32e5b
+      6s      frames=30  draw=245e0d2ce012c5d9
+      7s      frames=31  draw=ed65371fed1f447d
+      8s      frames=30  draw=1aaab694fc9027d4
+      9s      frames=30  draw=6ed8207b2fa25504
+     10s      frames=31  draw=4a0453983d32b91a
+     11s      frames=30  draw=a04d988769a89ece
+     12s      frames=30  draw=642a9fd0161ce0e7
+     13s      frames=31  draw=9ec2d8ad5af00270
+     14s      frames=30  draw=943f58bc8baf0d9a
+     15s      frames=30  draw=22a2816698d269c9
+     16s      frames=30  draw=feb3a527f52228b7
+     17s      frames=31  draw=1ff507b4a9c0908a
+     18s      frames=30  draw=c7d92edd8b8b0e9a
+     19s      frames=30  draw=8ad7e43c1c7ebfea
+     20s      frames=9   draw=f22253edba36e44a
+--- content ---
+      0.250  m5 begin
+      0.250  pm1 led 1
+      0.250  i2c 69 7D=04
+      0.250  brightness 102
+      0s      frames=23  draw=589bfe0868852aa6
+      1s      frames=30  draw=638233c6ae2d227c
+      2s      frames=30  draw=2ec90ff0a19c12c0
+      3s      frames=31  draw=d4181d9935de1afa
+      4s      frames=30  draw=10accdfaf2d03d9e
+      5s      frames=30  draw=0934a9739d8868bd
+      6s      frames=30  draw=4c116125ce16d551
+      7s      frames=31  draw=9d733b52062a1e17
+      8s      frames=30  draw=9b64d1c735fcebab
+      9s      frames=30  draw=d2075bb65105083b
+     10s      frames=31  draw=26f8df4fe8b290da
+     11s      frames=30  draw=9e47bd04c8c4aaa7
+     12s      frames=30  draw=de94f294b351c9ef
+     13s      frames=31  draw=0710aad077d33681
+     14s      frames=30  draw=94846faf122a353b
+     15s      frames=30  draw=91858a7e8adec2b5
+     16s      frames=30  draw=56bbdff0b62d74a3
+     17s      frames=31  draw=e96286facb4fe310
+     18s      frames=30  draw=1ef21b3ac4e80a0c
+     19s      frames=30  draw=149a023b2ca3aefb
+     20s      frames=9   draw=da462a1d114ee679
+--- low battery ---
+      0.250  m5 begin
+      0.250  pm1 led 1
+      0.250  i2c 69 7D=04
+      0.250  brightness 102
+      0s      frames=23  draw=bf58d2b8c5ebfe8f
+      1s      frames=30  draw=d2e45e23b3f93041
+      2s      frames=30  draw=2315e74b8c33978b
+      3s      frames=31  draw=25b0cd2129db4d86
+      4s      frames=30  draw=1b03da0ee23879eb
+      5s      frames=30  draw=164c9b8402d4987e
+      6s      frames=30  draw=6b665f418eb51275
+      7s      frames=31  draw=26fdb00f725341ae
+      8s      frames=30  draw=31195ac615e63d97
+      9s      frames=30  draw=bcdd4c5a6f2bb49a
+     10s      frames=31  draw=30642bfbeeaaabbd
+     11s      frames=30  draw=5950865c19242933
+     12s      frames=30  draw=aa6b7c73f5e621bd
+     13s      frames=31  draw=0b63a62cfdafb935
+     14s      frames=30  draw=e39db6a3d76fcecf
+     15s      frames=30  draw=f282d41370d40ae6
+     16s      frames=30  draw=ef67713b9eaedfff
+     17s      frames=31  draw=a87f38f248f459dc
+     18s      frames=30  draw=bf3e3a25d70c06e1
+     19s      frames=30  draw=384693b4f0ef762b
+     20s      frames=9   draw=a3257a6bde8f912c
+--- full battery ---
+      0.250  m5 begin
+      0.250  pm1 led 1
+      0.250  i2c 69 7D=04
+      0.250  brightness 102
+      0s      frames=23  draw=d6ecdde26076ffb6
+      1s      frames=30  draw=90a494e9614dec9e
+      2s      frames=30  draw=01fd06a36b916731
+      3s      frames=31  draw=92c5c587b9951175
+      4s      frames=30  draw=cd6c7b4a605a6abb
+      5s      frames=30  draw=36e1624ad8ddd05f
+      6s      frames=30  draw=088a5a5d832f119c
+      7s      frames=31  draw=4b509e62e195add3
+      8s      frames=30  draw=e6ac3b016b49eb9b
+      9s      frames=30  draw=838f4dcec64bed6d
+     10s      frames=31  draw=ccbc34cc2175b731
+     11s      frames=30  draw=48aa9f7e7967e0ab
+     12s      frames=30  draw=bb162f53e8c257d1
+     13s      frames=31  draw=c9cdb2d65984da94
+     14s      frames=30  draw=b195fc8a583939d3
+     15s      frames=30  draw=2d04f4396070fcba
+     16s      frames=30  draw=d99bbd34e82a25b3
+     17s      frames=31  draw=9887299f097d9883
+     18s      frames=30  draw=085f28926f3cba04
+     19s      frames=30  draw=d5de14a1ada3ce67
+     20s      frames=9   draw=f4c3601843113b84

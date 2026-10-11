@@ -1,0 +1,192 @@
+      0.250  m5 begin
+      0.250  pm1 led 1
+      0.250  i2c 69 7D=04
+      0.250  brightness 102
+      0s      frames=23  draw=be2842d61632e6f7
+      1s      frames=31  draw=955c1f29be55b71c
+      2s      frames=30  draw=8a7d05236f63ec79
+      3.352  beep 1800 25
+      3.847  beep 1800 25
+      3s      frames=30  draw=8ebe0c53071fc51a
+      4.342  beep 1800 25
+      4s      frames=30  draw=1e4a4be8536fb51d
+      5s      frames=31  draw=6db0fff20674a58c
+      6s      frames=30  draw=b931a073f0acac77
+      7s      frames=30  draw=4c9c4cd78c9267bf
+      8s      frames=31  draw=4f33d6d7de290fa8
+      9.358  beep 2400 25
+      9s      frames=30  draw=69bc837448e33c0c
+     10.051  beep 1800 25
+     10.216  beep 2400 25
+     10s      frames=30  draw=880eecb1c736a448
+     11.437  save happy=1
+     11.437  save sound=1
+     11.437  save bright=1
+     11.437  save stayon=0
+     11.437  save awake=0
+     11.437  save food=1
+     11.437  save stickers=0
+     11.437  save color=0
+     11.437  save hat=0
+     11.437  save eggtile=1
+     11.437  save pick=0
+     11.437  beep 900 70
+     11.522  beep 1175 70
+     11.607  beep 1568 70
+     11.692  beep 2093 70
+     11s      frames=20  draw=d6f3fc8e03bb6c90
+     12s      frames=31  draw=335ca0df16401703
+     13s      frames=30  draw=5e1bb8adc5d3a52b
+     14.582  beep 2400 25
+     14s      frames=30  draw=944f489b4022562b
+     15.275  beep 1800 25
+     15.440  beep 2400 25
+     15s      frames=30  draw=4d9b37cafd9d0372
+     16.661  save hunger=3
+     16.661  save food=2
+     16.661  beep 900 50
+     16.726  beep 700 50
+     16.791  beep 900 50
+     16s      frames=25  draw=574ebcff12d81c9d
+     17s      frames=30  draw=8dac2af6a032d962
+     18s      frames=30  draw=492473a2909c4f58
+     19.826  beep 2400 25
+     19s      frames=31  draw=c400493d99491e6a
+     20.519  beep 1800 25
+     20.684  beep 2400 25
+     20s      frames=30  draw=8888e50d1141940c
+     21.905  save hunger=4
+     21.905  save food=3
+     21.905  beep 900 50
+     21.970  beep 700 50
+     21s      frames=27  draw=c5af5a99e0fb3217
+     22.035  beep 900 50
+     22s      frames=28  draw=4bfb1da8054e0a2f
+     23s      frames=30  draw=a7ed5502b844a7c5
+     24s      frames=30  draw=0ef937e2148b78e4
+     25.070  beep 2400 25
+     25.763  beep 1800 25
+     25.928  beep 2400 25
+     25s      frames=31  draw=99a1afbbfc736708
+     26s      frames=30  draw=2d887d0b005f607f
+     27.149  save food=0
+     27.149  beep 900 50
+     27.214  beep 700 50
+     27.279  beep 900 50
+     27s      frames=24  draw=e3a011432a874a04
+     28s      frames=31  draw=d3540b2f6a5225d5
+     29s      frames=30  draw=786becbcdad03159
+     30s      frames=30  draw=6fbe2022848f07d3
+     31.733  save sound=0
+     31s      frames=31  draw=9718fdb13cea0088
+     32s      frames=30  draw=60b7e09b9bb2eedf
+     33s      frames=30  draw=4bf39fa60e3cb52b
+     34s      frames=30  draw=c8ce1d92d2df59df
+     35.429  save sound=1
+     35.429  beep 1800 80
+     35s      frames=31  draw=d0c756849e44813c
+     36s      frames=30  draw=2ed1e1636f84aa53
+     37s      frames=30  draw=8771de5ab6d91e39
+     38s      frames=31  draw=92232f0857335ac1
+     39s      frames=30  draw=d29a6a603fe6c3f9
+     40s      frames=30  draw=7f1819b2933f916f
+     41s      frames=31  draw=1c4c3bec48471dd9
+     42s      frames=30  draw=1f69485475c47c83
+     43s      frames=30  draw=e7af84952e68bcd5
+     44s      frames=31  draw=c8224a84a8b73f03
+     45s      frames=30  draw=883838a530f5fb03
+     46s      frames=30  draw=09bc9c9a2adc0300
+     47s      frames=30  draw=f8cc1a00acce7de9
+     48s      frames=31  draw=a4bf13125bb3f699
+     49s      frames=30  draw=a8eb6944dbb0a1a5
+     50s      frames=30  draw=e5d2845a8b18d613
+     51s      frames=31  draw=884a11dc67fc655c
+     52s      frames=30  draw=d4835d2b81ad9155
+     53s      frames=30  draw=4e999d079f18fa3f
+     54s      frames=31  draw=650e56cd299fc674
+     55s      frames=30  draw=1609aab1b4f2649e
+     56s      frames=30  draw=b8c98c1686d7a78b
+     57s      frames=30  draw=91bc5fca545f9a8b
+     58s      frames=31  draw=b382418c47aa37f5
+     59s      frames=30  draw=c29cfaa627789a21
+     60s      frames=30  draw=87b2eca7381f796b
+     61s      frames=31  draw=2720f2ff5eaff5ef
+     62s      frames=30  draw=d4f2b0a6106d55ca
+     63s      frames=30  draw=04ffc14da3afad93
+     64s      frames=31  draw=36eadef6700cc7b7
+     65s      frames=30  draw=3d51fab69306ee7b
+     66s      frames=30  draw=45a0e4543c18471b
+     67s      frames=30  draw=3e0a7a49ee27a637
+     68s      frames=31  draw=b19049cf817c272f
+     69s      frames=30  draw=3702568f28b76064
+     70s      frames=30  draw=5098c9f3ece6dcb3
+     71s      frames=31  draw=e21ee81feaf4466a
+     72s      frames=30  draw=cfcf596270b485e3
+     73s      frames=30  draw=c8f466bb8c9b7a61
+     74s      frames=31  draw=224437440b1ee378
+     75s      frames=30  draw=fb6d294b382d75db
+     76s      frames=30  draw=92b0c6afa5d545bc
+     77s      frames=31  draw=adc3122d8a5ac2a5
+     78s      frames=30  draw=04ffc14da3afad93
+     79s      frames=30  draw=236b163457009ea3
+     80s      frames=30  draw=695c5d4a74a8bead
+     81s      frames=31  draw=804c00ba81016bab
+     82s      frames=30  draw=811ceb44f504f9ab
+     83s      frames=30  draw=682db0f7290f3277
+     84s      frames=31  draw=ca85c4502790ed24
+     85s      frames=30  draw=97231b8a2b3e4173
+     86s      frames=30  draw=fe246024fd095c2f
+     87s      frames=31  draw=5687d548d7f5f749
+     88s      frames=30  draw=605e413612fe8bbf
+     89s      frames=30  draw=2b92cf2c3efdebe7
+     90s      frames=30  draw=93ee453c1d3febfb
+     91s      frames=31  draw=a1a11cb9de47dc22
+     92s      frames=30  draw=02365ed4e56180e2
+     93s      frames=30  draw=a15074f48e3aa5ab
+     94s      frames=31  draw=f024a936f37a87f1
+     95.522  brightness 12
+     95s      frames=20  draw=76d23faf2f3a6ff9
+     96s      frames=10  draw=fdb754a047b49617
+     97s      frames=10  draw=63fc8798f4bf6fb3
+     98s      frames=10  draw=18e1f67a04d5e4a9
+     99s      frames=10  draw=246c5c753fd22d0b
+    100s      frames=10  draw=12f275f06ed46bb8
+    101s      frames=10  draw=2a62f7948ad651fd
+    102s      frames=10  draw=fdb754a047b49617
+    103s      frames=10  draw=b4913a99ffb77651
+    104s      frames=10  draw=9e11dabf5b7ad2be
+    105s      frames=10  draw=777ef41fb4afdd8d
+    106s      frames=10  draw=a15fcd2841773c2c
+    107s      frames=10  draw=2989915a8fb195d2
+    108s      frames=10  draw=87f45197870b8550
+    109s      frames=10  draw=bc9318d00f521c1e
+    110.622  save awake=1
+    110.622  brightness 0
+    110.622  display sleep
+    110.622  speaker off
+    110.622  i2c 18 12=02
+    110.622  i2c 18 13=00
+    110.622  i2c 18 0D=FC
+    110.622  i2c 18 00=00
+    110.622  i2c 69 7D=00
+    110.622  i2c 69 7C=01
+    110.622  ext output 0
+    110.622  pm1 gpio2 0
+    110.622  pm1 led 0
+    110.622  deep sleep
+    110s      frames=6   draw=5e656b32bcb9a744
+--- nap timer ---
+      0.250  brightness 0
+      0.250  m5 begin
+      0.250  display sleep
+      0.250  speaker off
+      0.250  i2c 18 12=02
+      0.250  i2c 18 13=00
+      0.250  i2c 18 0D=FC
+      0.250  i2c 18 00=00
+      0.250  i2c 69 7D=00
+      0.250  i2c 69 7C=01
+      0.250  ext output 0
+      0.250  pm1 gpio2 0
+      0.250  pm1 led 0
+      0.250  power off

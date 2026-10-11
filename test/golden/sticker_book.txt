@@ -1,0 +1,51 @@
+--- 0 ---
+      0.250  m5 begin
+      0.250  pm1 led 1
+      0.250  i2c 69 7D=04
+      0.250  brightness 102
+      0.996  beep 1200 60
+      0s      frames=23  draw=ade1f06314c58258
+      1.260  beep 1800 25
+      1.425  beep 1800 25
+      1.590  beep 1800 25
+      1.755  beep 1800 25
+      1.920  beep 1800 25
+      1s      frames=30  draw=8ccbc57c788cf0e7
+      2.085  beep 2400 25
+      2s      frames=30  draw=93f0288e9b56a414
+      3s      frames=31  draw=a3043383a56c75d5
+      4s      frames=4   draw=d4bad31922a8184b
+--- 2643 ---
+      0.250  m5 begin
+      0.250  pm1 led 1
+      0.250  i2c 69 7D=04
+      0.250  brightness 102
+      0.996  beep 1200 60
+      0s      frames=23  draw=ade1f06314c58258
+      1.260  beep 1800 25
+      1.425  beep 1800 25
+      1.590  beep 1800 25
+      1.755  beep 1800 25
+      1.920  beep 1800 25
+      1s      frames=30  draw=8ccbc57c788cf0e7
+      2.085  beep 2400 25
+      2s      frames=30  draw=0c7e2c40c9f43908
+      3s      frames=31  draw=7797aa4296a4d051
+      4s      frames=4   draw=f27be6b1e30497bb
+--- 4095 ---
+      0.250  m5 begin
+      0.250  pm1 led 1
+      0.250  i2c 69 7D=04
+      0.250  brightness 102
+      0.996  beep 1200 60
+      0s      frames=23  draw=ade1f06314c58258
+      1.260  beep 1800 25
+      1.425  beep 1800 25
+      1.590  beep 1800 25
+      1.755  beep 1800 25
+      1.920  beep 1800 25
+      1s      frames=30  draw=8ccbc57c788cf0e7
+      2.085  beep 2400 25
+      2s      frames=30  draw=08b8a78ffb2c1158
+      3s      frames=31  draw=a8458c2920d47739
+      4s      frames=4   draw=047b5b418facaa5b

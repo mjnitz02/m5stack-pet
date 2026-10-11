@@ -1,0 +1,130 @@
+--- first sticker, seed 2 ---
+      0.250  m5 begin
+      0.250  pm1 led 1
+      0.250  i2c 69 7D=04
+      0.250  brightness 102
+      0.369  beep 1800 25
+      0.534  beep 2400 25
+      0s      frames=23  draw=94dca98071e4c7cc
+      1s      frames=30  draw=2c0f73d1cc735d4d
+      2s      frames=30  draw=0eacb3fdd498e977
+      3s      frames=31  draw=6a3cf944843441e5
+      4s      frames=30  draw=3c79ab9b1893af99
+      5.154  beep 1080 60
+      5s      frames=30  draw=7b0b22dfbe1b55a4
+      6s      frames=30  draw=25dcd43fab9d88f0
+      7s      frames=31  draw=0fed023b2c4eb88e
+      8s      frames=30  draw=5a6929beb6db640a
+      9.774  beep 1260 60
+      9s      frames=30  draw=3dce9edf8d6f3652
+     10s      frames=31  draw=a0bb732e4d51f6ad
+     11s      frames=30  draw=516ec64981ced5fa
+     12s      frames=30  draw=bb21b7dc54f5b324
+     13s      frames=31  draw=f38beece748d1aae
+     14.394  beep 1440 60
+     14s      frames=30  draw=adbbd9fc8d4c8899
+     15s      frames=30  draw=3f87c099a14a0db7
+     16s      frames=30  draw=b2ac2ee6918d1d64
+     17s      frames=31  draw=93fdfbebc4af437d
+     18s      frames=30  draw=7789b87f3fa214ee
+     19.014  beep 1620 60
+     19s      frames=30  draw=fb83b1413f72b0ec
+     20s      frames=31  draw=f4e327c260b66ae6
+     21s      frames=30  draw=32f6783d6fd7e576
+     22s      frames=30  draw=0f5a6a0153e6b5fe
+     23.634  beep 1800 60
+     23.634  save happy=2
+     23.634  save sound=1
+     23.634  save bright=1
+     23.634  save stayon=0
+     23.634  save awake=0
+     23.634  save food=0
+     23.634  save stickers=4
+     23.634  save color=0
+     23.634  save hat=0
+     23.634  save eggtile=1
+     23.634  save pick=0
+     23.634  beep 1319 90
+     23.739  beep 1568 90
+     23.844  beep 2093 90
+     23.949  beep 2637 90
+     23s      frames=19  draw=db985bee66610b25
+     24s      frames=29  draw=88ee800aaf018e2c
+     25s      frames=30  draw=0faf2099e67f1977
+     26s      frames=31  draw=f00a0132f9ef91e4
+     27s      frames=30  draw=425401bfbbb7bf4f
+     28s      frames=30  draw=2e39098868203eb0
+     29s      frames=31  draw=c76f8564de896d12
+     30s      frames=30  draw=1f22ce7c8ab91c83
+     31s      frames=30  draw=5c5417a97ef48933
+     32s      frames=31  draw=8f43e733344b752e
+     33s      frames=30  draw=18737edb64e9c6b6
+     34s      frames=30  draw=29c7366b0a2da862
+     35s      frames=30  draw=82e8383c14442c5f
+     36s      frames=31  draw=c2afbb05260f0602
+     37s      frames=19  draw=9aac8e347d947ce7
+--- last sticker, seed 2 ---
+      0.250  m5 begin
+      0.250  pm1 led 1
+      0.250  i2c 69 7D=04
+      0.250  brightness 102
+      0.369  beep 1800 25
+      0.534  beep 2400 25
+      0s      frames=23  draw=94dca98071e4c7cc
+      1s      frames=30  draw=2c0f73d1cc735d4d
+      2s      frames=30  draw=0eacb3fdd498e977
+      3s      frames=31  draw=6a3cf944843441e5
+      4s      frames=30  draw=3c79ab9b1893af99
+      5.154  beep 1080 60
+      5s      frames=30  draw=7b0b22dfbe1b55a4
+      6s      frames=30  draw=25dcd43fab9d88f0
+      7s      frames=31  draw=0fed023b2c4eb88e
+      8s      frames=30  draw=5a6929beb6db640a
+      9.774  beep 1260 60
+      9s      frames=30  draw=3dce9edf8d6f3652
+     10s      frames=31  draw=a0bb732e4d51f6ad
+     11s      frames=30  draw=516ec64981ced5fa
+     12s      frames=30  draw=bb21b7dc54f5b324
+     13s      frames=31  draw=f38beece748d1aae
+     14.394  beep 1440 60
+     14s      frames=30  draw=adbbd9fc8d4c8899
+     15s      frames=30  draw=3f87c099a14a0db7
+     16s      frames=30  draw=b2ac2ee6918d1d64
+     17s      frames=31  draw=93fdfbebc4af437d
+     18s      frames=30  draw=7789b87f3fa214ee
+     19.014  beep 1620 60
+     19s      frames=30  draw=fb83b1413f72b0ec
+     20s      frames=31  draw=f4e327c260b66ae6
+     21s      frames=30  draw=32f6783d6fd7e576
+     22s      frames=30  draw=0f5a6a0153e6b5fe
+     23.634  beep 1800 60
+     23.634  save happy=2
+     23.634  save sound=1
+     23.634  save bright=1
+     23.634  save stayon=0
+     23.634  save awake=0
+     23.634  save food=0
+     23.634  save stickers=4095
+     23.634  save color=0
+     23.634  save hat=0
+     23.634  save eggtile=1
+     23.634  save pick=0
+     23.634  beep 1319 90
+     23.739  beep 1568 90
+     23.844  beep 2093 90
+     23.949  beep 2637 90
+     23s      frames=19  draw=db985bee66610b25
+     24s      frames=29  draw=cfb7b5b519d150d3
+     25s      frames=30  draw=cdfd87d0710ea987
+     26s      frames=31  draw=818e4ac90c5f8472
+     27s      frames=30  draw=331e0cb5c147be6c
+     28s      frames=30  draw=2e39098868203eb0
+     29s      frames=31  draw=06cab824cb7b8eb1
+     30s      frames=30  draw=b39bc05ad8253794
+     31s      frames=30  draw=49a6a72c77fb10fb
+     32s      frames=31  draw=d4d4a7223a6819ee
+     33s      frames=30  draw=8cff6fa459ac1792
+     34s      frames=30  draw=9b76a5e30fb0c47d
+     35s      frames=30  draw=a9eab6391f8dd2b5
+     36s      frames=31  draw=c2afbb05260f0602
+     37s      frames=19  draw=9aac8e347d947ce7

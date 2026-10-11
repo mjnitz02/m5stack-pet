@@ -1,0 +1,79 @@
+      0.250  m5 begin
+      0.250  pm1 led 1
+      0.250  i2c 69 7D=04
+      0.250  brightness 102
+      0.996  beep 1200 60
+      0s      frames=23  draw=0170431c641fc755
+      1.260  beep 1800 25
+      1.425  beep 1800 25
+      1.590  beep 1800 25
+      1.755  beep 1800 25
+      1.920  beep 2400 25
+      1s      frames=30  draw=0c08179a6ff88463
+      2.085  beep 1800 25
+      2.085  save sound=1
+      2.085  save bright=1
+      2.085  save stayon=0
+      2.085  save awake=0
+      2.085  save food=0
+      2.085  save stickers=0
+      2.085  save color=1
+      2.085  save hat=0
+      2.085  save eggtile=1
+      2.085  save pick=0
+      2.877  beep 1800 25
+      2.877  save color=2
+      2s      frames=30  draw=e1c50b99d88a22eb
+      3.669  beep 1800 25
+      3.669  save color=3
+      3s      frames=31  draw=4b1679f1e10517ae
+      4.461  beep 1800 25
+      4.461  save color=4
+      4s      frames=30  draw=d0fa13ac4aa632fc
+      5.253  beep 1800 25
+      5.253  save color=5
+      5s      frames=30  draw=7fcd856d96446418
+      6.045  beep 1800 25
+      6.045  save color=0
+      6.837  beep 2400 25
+      6.837  save hat=1
+      6s      frames=30  draw=b1957984afa94b6b
+      7.629  beep 2400 25
+      7.629  save hat=2
+      7s      frames=31  draw=87cdc09dbb21d046
+      8.421  beep 2400 25
+      8.421  save hat=3
+      8s      frames=30  draw=bb00b1a0c6ecc4d2
+      9.213  beep 2400 25
+      9.213  save hat=4
+      9s      frames=30  draw=6beb5e8006d8bddc
+     10.005  beep 2400 25
+     10.005  save hat=0
+     10.797  beep 2400 25
+     10.797  save hat=1
+     10.962  beep 1800 25
+     10.962  save color=1
+     10s      frames=31  draw=bfac80bde4b571eb
+     11.754  beep 1200 60
+     11s      frames=30  draw=c93bed5b9d3d35ae
+     12s      frames=30  draw=1eeaa6081b7162fd
+     13s      frames=31  draw=5136aafc367c6eb8
+     14s      frames=30  draw=dcf3d5416e3d030f
+     15.648  beep 1200 60
+     15.912  beep 1800 25
+     15s      frames=30  draw=6718da4d48af33fc
+     16.077  beep 1800 25
+     16.242  beep 1800 25
+     16.407  beep 1800 25
+     16.572  beep 1800 25
+     16.737  beep 1800 25
+     16.902  beep 1800 25
+     16s      frames=30  draw=23120d9c629fd55f
+     17.067  beep 1800 25
+     17.232  beep 1800 25
+     17.397  beep 1800 25
+     17.562  beep 2400 25
+     17.562  beep 1200 40
+     17s      frames=31  draw=ccca1c8bb31aec0f
+     18s      frames=30  draw=3cddcc69118f128e
+     19s      frames=19  draw=2794cd607680a705

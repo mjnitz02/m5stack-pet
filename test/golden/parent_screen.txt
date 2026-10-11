@@ -1,0 +1,117 @@
+      0.250  m5 begin
+      0.250  pm1 led 1
+      0.250  i2c 69 7D=04
+      0.250  brightness 102
+      0s      frames=23  draw=3ee137ccedd4ed67
+      1.788  beep 800 80
+      1s      frames=30  draw=d16dc90306f3d635
+      2s      frames=30  draw=e6c4320990b65523
+      3.075  beep 2400 25
+      3.075  brightness 153
+      3.075  save sound=1
+      3.075  save bright=2
+      3.075  save stayon=0
+      3.075  save awake=0
+      3.075  save food=0
+      3.075  save stickers=0
+      3.075  save color=0
+      3.075  save hat=0
+      3.075  save eggtile=1
+      3.075  save pick=0
+      3.570  beep 2400 25
+      3.570  brightness 204
+      3.570  save bright=3
+      3s      frames=31  draw=a3f1d4710feb588a
+      4.065  beep 1800 25
+      4.230  beep 2400 25
+      4.230  save sound=0
+      4.725  save sound=1
+      4s      frames=30  draw=a26907e20c2e1237
+      5.220  beep 1800 25
+      5.385  beep 2400 25
+      5.385  save stayon=1
+      5.880  beep 2400 25
+      5.880  save stayon=0
+      5s      frames=30  draw=bbf2a4593b337997
+      6.375  beep 1800 25
+      6.540  beep 2400 25
+      6.540  save eggtile=0
+      6s      frames=30  draw=7502504798932497
+      7.035  beep 2400 25
+      7.035  save eggtile=1
+      7.530  beep 1800 25
+      7.695  beep 2400 25
+      7.695  save species=0
+      7.695  save pick=1
+      7s      frames=31  draw=6e353f5ff7601a50
+      8.190  beep 2400 25
+      8.190  save species=1
+      8.190  save pick=2
+      8.685  beep 1800 25
+      8.850  beep 2400 25
+      8s      frames=30  draw=a447f44d6fe63577
+      9.543  beep 2400 25
+      9s      frames=30  draw=07b184e4fd3832f3
+     10.104  beep 2000 60
+     10.434  beep 2400 25
+     10.995  beep 2000 60
+     10s      frames=31  draw=23f6c6598daa67eb
+     11.325  beep 2400 25
+     11.886  beep 2000 60
+     11s      frames=30  draw=7be5d5d9dc31bf91
+     12.216  beep 2400 25
+     12.777  beep 2000 60
+     12s      frames=30  draw=99d1a818054642ea
+     13.107  beep 2400 25
+     13.668  beep 2000 60
+     13.668  save tiltcal=<36 bytes>
+     13s      frames=31  draw=c46db71116dbc781
+     14s      frames=30  draw=47bdefce4d766157
+     15.021  beep 1800 25
+     15.186  beep 2400 25
+     15.747  beep 2000 60
+     15s      frames=30  draw=20d0e25c2df4b62a
+     16.077  beep 2400 25
+     16.638  beep 2000 60
+     16.968  beep 2400 25
+     16s      frames=30  draw=ad0b9ef29fd2c419
+     17.529  beep 2000 60
+     17.859  beep 2400 25
+     17s      frames=31  draw=457a917a2bd0a289
+     18.420  beep 2000 60
+     18.750  beep 2400 25
+     18s      frames=30  draw=bc03f063187664b3
+     19.311  beep 2000 60
+     19s      frames=30  draw=aada56b933873eed
+     20.664  beep 2400 25
+     20.829  beep 1800 25
+     20.994  beep 1800 25
+     20s      frames=31  draw=3024f8f3e268a60d
+     21.159  beep 2400 25
+     21s      frames=30  draw=f05a88037384440b
+     22.347  beep 2400 25
+     22.347  save cleared
+     22.347  save tiltcal=<36 bytes>
+     22.347  save hatched=0
+     22.347  save species=255
+     22.347  save hunger=2
+     22.347  save happy=2
+     22.347  save sound=1
+     22.347  save bright=1
+     22.347  save stayon=0
+     22.347  save awake=0
+     22.347  save food=0
+     22.347  save stickers=0
+     22.347  save color=0
+     22.347  save hat=0
+     22.347  save eggtile=1
+     22.347  save pick=0
+     22.347  save roster=1
+     22.347  save learned=0
+     22.347  brightness 102
+     22s      frames=30  draw=f808410a570d59e7
+     23.271  beep 880 410
+     23.271  beep 1568 80
+     23s      frames=31  draw=28af1a8f95d46a3c
+     24s      frames=30  draw=b82d4aed5a49fa9c
+     25s      frames=12  draw=f0b8ff938a4145f7

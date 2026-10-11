@@ -1,0 +1,50 @@
+      0.250  m5 begin
+      0.250  pm1 led 1
+      0.250  i2c 69 7D=04
+      0.250  brightness 102
+      0.996  beep 1200 60
+      0s      frames=23  draw=85e8b10b1bb99709
+      1.260  beep 1800 25
+      1.425  beep 2400 25
+      1s      frames=30  draw=05739c5c537bbcb5
+      2s      frames=30  draw=1969d62a6cabf93d
+      3s      frames=31  draw=8dcc494a397ee83f
+      4.824  beep 1500 40
+      4s      frames=30  draw=f8724e13a99f6e7a
+      5s      frames=30  draw=44e1692e0f8ecd99
+      6.210  beep 1600 40
+      6s      frames=30  draw=b06b70afc23e9285
+      7.596  beep 1700 40
+      7s      frames=31  draw=51300d1820556b98
+      8.916  beep 1800 40
+      8s      frames=30  draw=f362f25e11054e24
+      9s      frames=30  draw=96dd21d12e707304
+     10.236  beep 1900 40
+     10s      frames=31  draw=7d49f2ab69d0e8a7
+     11.622  beep 2000 40
+     11s      frames=30  draw=d9cc51e8d7ee23a9
+     12s      frames=30  draw=22b1a7e118293a99
+     13.008  beep 2100 40
+     13s      frames=31  draw=9c8c138732951db1
+     14.394  beep 2200 40
+     14s      frames=30  draw=5dc3c906d7773d42
+     15s      frames=30  draw=28c84dcba20a545d
+     16.209  save happy=2
+     16.209  save sound=1
+     16.209  save bright=1
+     16.209  save stayon=0
+     16.209  save awake=0
+     16.209  save food=0
+     16.209  save stickers=0
+     16.209  save color=0
+     16.209  save hat=0
+     16.209  save eggtile=1
+     16.209  save pick=0
+     16.209  beep 1319 90
+     16.314  beep 1568 90
+     16.419  beep 2093 90
+     16s      frames=21  draw=d10024f3b1ee1817
+     17s      frames=30  draw=5524d44533b8c560
+     18s      frames=31  draw=aea2f1ab480d1fb5
+     19s      frames=30  draw=d6d503fc2ad213da
+     20s      frames=17  draw=8a7a834dec49bcf4

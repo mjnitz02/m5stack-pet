@@ -61,7 +61,30 @@ jobs:
         run: make lint-tools
 
       - name: Run species art checks
-        run: make test
+        run: make test-art
+
+  # The real src/ compiled for the runner against the fake hardware in
+  # test/fakes/, with the address and undefined-behaviour sanitizers on.
+  host_tests:
+    name: Firmware tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Run the firmware tests
+        run: make test-host
+
+      # What the firmware did, where a stored trace no longer matches.
+      - name: Keep the traces that differed
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: host-test-traces
+          path: .pio/host/*.actual.txt
+          if-no-files-found: ignore
 
   firmware:
     name: Firmware (${{ matrix.env }})
@@ -102,3 +125,7 @@ jobs:
       # Warnings as errors, same as `make lint` locally.
       - name: Build
         run: make lint-firmware PIO_ENV=${{ matrix.env }}
+
+      # The debug build's on-device log (src/petlog.h) is compiled nowhere else.
+      - name: Build (debug)
+        run: make lint-firmware-debug PIO_ENV=${{ matrix.env }}

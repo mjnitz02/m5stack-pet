@@ -73,7 +73,12 @@ bool     swallowA = false, swallowB = false;
 // button.
 const uint32_t IDLE_BED_MS = 60000;   // no input this long → bedtime
 const uint32_t BED_OFF_MS  = 15000;   // asleep this long → screen off, nap
-const uint32_t NAP_MS      = 10UL * 60 * 1000;   // napping this long → power off
+#if defined(PET_LOG)
+// Debug build: a nap long enough for its drain to show in the log overnight.
+const uint32_t NAP_MS      = 12UL * 60 * 60 * 1000;
+#else
+const uint32_t NAP_MS      = 60UL * 60 * 1000;   // napping this long → power off
+#endif
 const uint8_t  BED_BRIGHT  = 12;
 const uint32_t MENU_IDLE_MS = 15000;  // toy box / food tray left alone → back to the pet
 
@@ -260,11 +265,29 @@ static void powerTick(uint32_t now) {
 
 #include "petlog.h"
 
+#if defined(BOARD_STICKS3)
+// Deep sleep only stops the ESP32: every other chip on the board stays in
+// whatever state it was left in, so each one is switched off by hand first.
+// M5.begin() brings all of it back on the next boot.
+static void railsDown() {
+  M5.Speaker.end();                                      // amp enable (PM1 GPIO3) low
+  M5.In_I2C.writeRegister8(0x18, 0x12, 0x02, 100000);    // ES8311 codec: DAC off
+  M5.In_I2C.writeRegister8(0x18, 0x13, 0x00, 100000);    //   output drive off
+  M5.In_I2C.writeRegister8(0x18, 0x0D, 0xFC, 100000);    //   analog off
+  M5.In_I2C.writeRegister8(0x18, 0x00, 0x00, 100000);    //   clocks off
+  M5.In_I2C.writeRegister8(0x69, 0x7D, 0x00, 400000);    // BMI270: accel + gyro off
+  M5.In_I2C.writeRegister8(0x69, 0x7C, 0x01, 400000);    //   suspend
+  M5.Power.setExtOutput(false);                          // 5 V boost (Grove port)
+  M5.Power.M5pm1.setGPIOOutput(m5::M5PM1_Class::gpio2, false);   // LCD rail
+}
+#endif
+
 // The real off switch. Saves nothing, so a nap that has run out can use it
 // without loading the pet first.
 static void powerOffNow() {
   M5.Display.sleep();
 #if defined(BOARD_STICKS3)
+  railsDown();   // for the USB case below, where the PMIC stays up
   // On USB the PMIC can't cut the rail, so powerOff() lands in deep sleep
   // instead. Arm the front button (GPIO11) so that case is still wakeable.
   rtc_gpio_pullup_en(GPIO_NUM_11);
@@ -282,7 +305,7 @@ static void napDown() {
 #if defined(BOARD_STICKS3)
   logRow("nap");
   M5.Display.sleep();
-  M5.Speaker.end();
+  railsDown();
   rtc_gpio_pullup_en(GPIO_NUM_11);
   rtc_gpio_pulldown_dis(GPIO_NUM_11);
   esp_sleep_enable_ext0_wakeup(GPIO_NUM_11, 0);
@@ -1048,6 +1071,10 @@ void setup() {
   M5.begin();
   logBegin(napOver ? "boot:timer" : napWoken ? "boot:button" : "boot:cold");
   if (napOver) { logRow("off"); powerOffNow(); }
+#if defined(BOARD_STICKS3)
+  // Only the accelerometer is ever read; M5.begin() starts the gyro as well.
+  M5.In_I2C.writeRegister8(0x69, 0x7D, 0x04, 400000);    // BMI270: accel only
+#endif
   // No radio and 5 fps animation: 80 MHz is plenty and roughly halves the
   // CPU's share of the battery. (Lowest speed that keeps USB alive.)
   setCpuFrequencyMhz(80);

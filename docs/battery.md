@@ -7,7 +7,7 @@ it.
   on.
 - **It puts itself to bed.** After 60 seconds without input the pet falls
   asleep on a dimmed screen. 15 seconds later the screen goes off and the
-  stick naps. For the next 10 minutes the blue button wakes it; after that it
+  stick naps. For the next 60 minutes the blue button wakes it; after that it
   powers off and the side power button turns it back on.
 - **Slow CPU.** 80 MHz instead of 240. The animations run at 5 frames a
   second, so it is plenty.

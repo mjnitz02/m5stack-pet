@@ -169,3 +169,97 @@ TEST(holding_the_egg_tile_starts_a_new_egg) {
   CHECK_EQ(d.nvs.get("pet/bright"), 3u);
   CHECK_EQ(d.nvs.get("pet/learned"), 1u);
 }
+
+// --- A button down while the screen changes ---------------------------------------
+static bool atHome() { return probe::screen() == "home"; }
+
+// Feed once and say how long the eating took, so the next press can be timed
+// to straddle its end.
+static uint32_t feedOnce(Stick& s) {
+  s.tap(A);
+  s.tap(A);
+  CHECK_EQ(probe::screen(), "feed");
+  uint32_t from = s.now();
+  CHECK(s.runUntil(atHome, 8000));
+  return s.now() - from;
+}
+
+TEST(blue_held_through_the_end_of_feeding_does_not_open_the_toy_box) {
+  Device d = hatchedPet(5, 1, 3);
+  d.boot(Wake::Button, [](Stick& s) {
+    uint32_t eating = feedOnce(s);
+    s.tap(A);
+    s.tap(A);
+    s.run(eating - 300);
+    CHECK_EQ(probe::screen(), "feed");
+    s.press(A);
+    CHECK(s.runUntil(atHome, 1000));
+    s.run(1500);
+    CHECK_EQ(probe::screen(), "home");         // the hold belonged to the screen before
+    s.release(A);
+    s.run(100);
+    CHECK_EQ(probe::screen(), "home");         // and so did letting go
+    s.hold(A, 800);
+    CHECK_EQ(probe::screen(), "menu");         // a fresh hold still works
+  });
+}
+
+TEST(side_let_go_after_feeding_ends_does_not_move_the_frame) {
+  Device d = hatchedPet(5, 1, 3);
+  d.boot(Wake::Button, [](Stick& s) {
+    uint32_t eating = feedOnce(s);
+    s.tap(A);
+    s.tap(A);
+    s.run(eating - 300);
+    s.press(B);
+    CHECK(s.runUntil(atHome, 1000));
+    s.run(100);
+    s.release(B);
+    s.run(100);
+    s.tap(A);
+    CHECK_EQ(probe::screen(), "food");         // the frame is still on feed
+  });
+}
+
+TEST(egg_tile_ring_sounds_the_same_every_time) {
+  Device d = hatchedPet();
+  d.boot(Wake::Button, [](Stick& s) {
+    s.hold(A, 800);
+    for (int i = 0; i < 11; i++) s.tap(B);
+    int before = s.beeps();
+    s.hold(A, 1000);
+    int first = s.beeps() - before;
+    s.run(500);
+    before = s.beeps();
+    s.hold(A, 1000);
+    CHECK_EQ(s.beeps() - before, first);
+  });
+}
+
+// --- The mute picture ---------------------------------------------------------------
+// It is drawn in the top corner for a moment. Hide and seek only repaints
+// the top of its screen now and then, so it has to be wiped away.
+TEST(mute_picture_is_wiped_off_in_hide_and_seek) {
+  Device d = hatchedPet();
+  d.boot(Wake::Button, [](Stick& s) {
+    openTile(s, 10);
+    s.run(1300);
+    s.watchDrawing();
+    s.hold(B, 1600);
+    CHECK(!probe::sound());
+    s.run(2500);
+    CHECK_EQ(probe::screen(), "hide");
+    int shown = -1, wiped = -1;
+    const auto& calls = s.drawn();
+    for (int i = 0; i < (int)calls.size(); i++) {
+      int x, y, w, h;
+      if (calls[i] == "spr fillTri 8 7 8 11 13 4 FA20") shown = i;   // the speaker's cone
+      if (calls[i].rfind("spr fill 0000", 0) == 0) wiped = i;
+      if (sscanf(calls[i].c_str(), "spr fillRect %d %d %d %d 0000", &x, &y, &w, &h) == 4 &&
+          x <= 2 && y <= 2 && x + w >= 24 && y + h >= 16 && !(x == 2 && y == 2 && w == 22 && h == 14 &&
+          i + 1 < (int)calls.size() && calls[i + 1].rfind("spr fillRect 4 7 4 5", 0) == 0)) wiped = i;
+    }
+    CHECK(shown >= 0);
+    CHECK(wiped > shown);
+  });
+}

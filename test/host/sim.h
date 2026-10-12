@@ -9,11 +9,13 @@
 
 // A simulated stick for tests that run on the computer.
 //
-// A Device is what survives a power cycle: the saved settings. Each call to
+// A Device is what survives a power cycle: the saved settings, and the nap
+// memory that lasts only as far as the next cold boot. Each call to
 // boot() starts the real firmware from nothing in a process of its own, runs
 // setup(), and hands the script a Stick to press buttons on and move about.
 // The boot ends when the script returns, or when the firmware naps or powers
 // off. What it saved comes back into the Device, ready for the next boot.
+// A nap is two boots: one that ends in End::Nap, then one with Wake::Button.
 //
 //   sim::Device d = hatchedPet();
 //   sim::Boot b = d.boot(sim::Wake::Cold, [](sim::Stick& s) {
@@ -57,6 +59,10 @@ class Stick {
 
   int brightness() const;
   int beeps() const;                       // since this boot started
+
+  // Every drawing call from here on, oldest first, as "spr fillRect 0 0 8 8 FFFF".
+  void watchDrawing();
+  const std::vector<std::string>& drawn() const;
 };
 
 struct Nvs {
@@ -75,6 +81,7 @@ struct Boot {
 
 struct Device {
   Nvs      nvs;
+  std::vector<uint8_t> napMemory;          // kept through a nap, gone on a cold boot
   uint32_t seed = 1;                       // the firmware's random numbers
   int      batteryMv = 3900;
   int      vbusMv = 0;

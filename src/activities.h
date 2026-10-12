@@ -10,15 +10,21 @@
 // have been tried in small hands, so they sit at the top of each section.
 
 uint32_t actUntil = 0;     // one shared timer for the short cheer/dizzy beats
-static bool actBeat(uint32_t now) { return (int32_t)(now - actUntil) < 0; }
+static bool actBeat(uint32_t now) { return before(now, actUntil); }
 
 static void actBegin(Mode m, bool peek) {
   mode = m;
-  buddySetPeek(peek);
-  spr.fillSprite(BG);
-  buddyInvalidate();
+  clearScreen(peek);
   actUntil = 0;
   lastInteractMs = millis();
+}
+
+// "Any movement adds up": what this frame's motion sample is worth to the
+// activities that fill something by moving. Nothing for a still hand, and a
+// hard shake counts no more than a lively one.
+const float MOVE_FLOOR = 0.06f;   // ignore hand tremor below this
+static float movedBy() {
+  return imuFresh && imuDelta > MOVE_FLOOR ? fminf(imuDelta, 1.0f) - MOVE_FLOOR : 0;
 }
 
 static void drawPips(uint8_t n, uint8_t done, int y) {
@@ -38,7 +44,6 @@ static void drawPips(uint8_t n, uint8_t done, int y) {
 // while the stick is moving, leaving a coloured trail, so the screen answers
 // from the first step and not only when a stone lights. Each walk picks one
 // of a few routes, never the one just walked.
-const float   WALK_FLOOR   = 0.06f;   // ignore hand tremor below this
 const float   WALK_PER_DOT = 18.0f;
 const uint8_t WALK_DOTS    = 10;
 const int     WALK_STONE_R = 5;
@@ -83,17 +88,10 @@ static void startWalk() {
   walkMovedMs = millis() - 1000;
 }
 
-static void walkLine(int x0, int y0, int x1, int y1, uint16_t col) {
-  spr.drawLine(x0, y0, x1, y1, col);
-  spr.drawLine(x0 + 1, y0, x1 + 1, y1, col);
-  spr.drawLine(x0, y0 + 1, x1, y1 + 1, col);
-}
-
 static void tickWalk(uint32_t now) {
-  if (imuFresh && imuDelta > WALK_FLOOR) {
-    walkAcc += fminf(imuDelta, 1.0f) - WALK_FLOOR;
-    walkMovedMs = now;
-  }
+  float moved = movedBy();
+  walkAcc += moved;
+  if (moved > 0) walkMovedMs = now;
   if (walkAcc >= WALK_PER_DOT) {
     walkAcc = 0;
     walkDots++;
@@ -104,7 +102,7 @@ static void tickWalk(uint32_t now) {
   bool moving = now - walkMovedMs < 400;
 
   buddyTick(actBeat(now) ? P_HEART : P_IDLE);
-  spr.fillRect(0, FIELD_TOP, W, H - FIELD_TOP, BG);
+  clearBelow(FIELD_TOP);
   const WalkRoute& r = WALK_ROUTES[walkRoute];
 
   // The walker is part-way from the last lit stone to the next one.
@@ -115,8 +113,8 @@ static void tickWalk(uint32_t now) {
   for (int i = walkDots; i < WALK_DOTS; i++)          // the way still to go
     spr.drawLine(r.pt[i][0], r.pt[i][1], r.pt[i + 1][0], r.pt[i + 1][1], GRID);
   for (int i = 0; i < walkDots; i++)                  // the way walked
-    walkLine(r.pt[i][0], r.pt[i][1], r.pt[i + 1][0], r.pt[i + 1][1], r.col);
-  walkLine(r.pt[walkDots][0], r.pt[walkDots][1], wx, wy, r.col);
+    drawThickLine(r.pt[i][0], r.pt[i][1], r.pt[i + 1][0], r.pt[i + 1][1], r.col);
+  drawThickLine(r.pt[walkDots][0], r.pt[walkDots][1], wx, wy, r.col);
 
   for (int i = 0; i < WALK_DOTS; i++) {
     int x = r.pt[i + 1][0], y = r.pt[i + 1][1];
@@ -163,7 +161,7 @@ static void startDance(uint32_t now) {
 }
 
 static void tickDance(uint32_t now) {
-  if (imuFresh && imuDelta > WALK_FLOOR) danceAcc += fminf(imuDelta, 1.0f) - WALK_FLOOR;
+  danceAcc += movedBy();
   if (imuFresh && imuDelta > DANCE_LIVELY) danceMovedMs = now;
   if (danceAcc >= DANCE_PER_BAR) {
     danceAcc = 0;
@@ -182,7 +180,7 @@ static void tickDance(uint32_t now) {
       drawStar(SPARK[i][0], SPARK[i][1], ((beat + i) & 1) ? 6 : 4, DANCE_COLORS[(beat + i) % DANCE_BARS]);
   }
 
-  spr.fillRect(0, BOTTOM_TOP, W, H - BOTTOM_TOP, BG);
+  clearBelow(BOTTOM_TOP);
   for (int i = 0; i < DANCE_BARS; i++) {
     int x = 10 + i * 24, h = 0;
     spr.drawRoundRect(x, 172, 19, DANCE_BAR_H + 4, 4, GRID);
@@ -226,13 +224,12 @@ static void tickBath(uint32_t now) {
     drawStar(114, 52, tw ? 4 : 6, YEL);
     drawStar(18, 130, tw ? 4 : 5, YEL);
     drawStar(116, 128, tw ? 5 : 4, YEL);
-    spr.fillRect(0, BOTTOM_TOP, W, H - BOTTOM_TOP, BG);
+    clearBelow(BOTTOM_TOP);
     return;
   }
-  if (imuFresh && imuDelta > WALK_FLOOR) {
-    bathAcc += fminf(imuDelta, 1.0f) - WALK_FLOOR;
-    buddyInvalidate();              // wipe the last size of the swelling bubble
-  }
+  float moved = movedBy();
+  bathAcc += moved;
+  if (moved > 0) buddyInvalidate();  // wipe the last size of the swelling bubble
   if (bathAcc >= BATH_PER_BUBBLE) {
     bathAcc = 0;
     bathLeft--;
@@ -245,7 +242,7 @@ static void tickBath(uint32_t now) {
     int swell = i == bathLeft - 1 ? (int)(bathAcc * 5 / BATH_PER_BUBBLE) : 0;
     drawBubble(BUBBLE[i][0], BUBBLE[i][1], BUBBLE[i][2] + swell);
   }
-  spr.fillRect(0, BOTTOM_TOP, W, H - BOTTOM_TOP, BG);
+  clearBelow(BOTTOM_TOP);
   drawText("((      ))", CX + (((now / 250) & 1) ? 2 : -2), 190, 2, DIM);
 }
 
@@ -291,7 +288,7 @@ static void tickRock(uint32_t now) {
   }
 
   buddyTick(rockMoons >= ROCK_MOONS / 2 ? P_SLEEP : P_IDLE);
-  spr.fillRect(0, BOTTOM_TOP, W, H - BOTTOM_TOP, BG);
+  clearBelow(BOTTOM_TOP);
   drawText("<        >", CX, 172, 2, DIM);
   // Slow into each end and out of it again, like something swinging.
   float u = rockPos * rockPos * (3 - 2 * rockPos);
@@ -324,7 +321,7 @@ static void startFreeze(uint32_t now) {
 }
 
 static void tickFreeze(uint32_t now) {
-  bool over = (int32_t)(now - fzUntil) >= 0;
+  bool over = !before(now, fzUntil);
   PetState st = P_SLEEP;
   switch (fzPhase) {
     case FZ_WIGGLE:
@@ -338,7 +335,7 @@ static void tickFreeze(uint32_t now) {
     case FZ_WATCH:
       st = P_ATTENTION;
       lastInteractMs = now;          // standing still is the game, not idling
-      if ((int32_t)(now - fzGraceUntil) >= 0 && imuFresh && imuDelta > FREEZE_MOVE) {
+      if (!before(now, fzGraceUntil) && imuFresh && imuDelta > FREEZE_MOVE) {
         fzPhase = FZ_CAUGHT;
         fzUntil = now + 1600;
         beep(400, 150);
@@ -355,7 +352,7 @@ static void tickFreeze(uint32_t now) {
   }
 
   buddyTick(st);
-  spr.fillRect(0, BOTTOM_TOP, W, H - BOTTOM_TOP, BG);
+  clearBelow(BOTTOM_TOP);
   drawEye(CX, 182, fzPhase == FZ_WATCH);
   for (int i = 0; i < FREEZE_STARS; i++)
     drawStar(CX - (FREEZE_STARS - 1) * 11 + i * 22, 222, 7, i < fzStars ? YEL : DIM, i < fzStars);
@@ -393,7 +390,7 @@ static uint16_t rainbow(float h) {
 }
 
 static void drawFresh() {
-  spr.fillRect(0, FIELD_TOP, W, H - FIELD_TOP, BG);
+  clearBelow(FIELD_TOP);
   penX = CX;
   penY = (FIELD_TOP + H) / 2;
 }
@@ -408,7 +405,7 @@ static void startDraw(uint32_t now) {
 static void tickDraw(uint32_t now, bool a, bool shook) {
   if (a) { drawFresh(); beep(2400, 25); }
   if (shook) {
-    spr.fillRect(0, FIELD_TOP, W, H - FIELD_TOP, BG);
+    clearBelow(FIELD_TOP);
     beep(700, 60);
   }
   uint16_t col = rainbow(drawTravel / PEN_RAINBOW_PX);
@@ -419,10 +416,7 @@ static void tickDraw(uint32_t now, bool a, bool shook) {
     if (nx > W - 3) nx = W - 3;
     if (ny < FIELD_TOP + 2) ny = FIELD_TOP + 2;
     if (ny > H - 3) ny = H - 3;
-    int x0 = (int)penX, y0 = (int)penY, x1 = (int)nx, y1 = (int)ny;
-    spr.drawLine(x0, y0, x1, y1, col);
-    spr.drawLine(x0 + 1, y0, x1 + 1, y1, col);
-    spr.drawLine(x0, y0 + 1, x1, y1 + 1, col);
+    drawThickLine((int)penX, (int)penY, (int)nx, (int)ny, col);
     drawTravel += fabsf(nx - penX) + fabsf(ny - penY);
     penX = nx;
     penY = ny;
@@ -485,7 +479,7 @@ static void tickMarble(uint32_t now, bool a) {
   }
 
   buddyTick(actBeat(now) ? P_HEART : P_IDLE);
-  spr.fillRect(0, FIELD_TOP, W, H - FIELD_TOP, BG);
+  clearBelow(FIELD_TOP);
   drawApple(mbAX, mbAY, 7);
   spr.fillCircle((int)mbX, (int)mbY, 7, AQUA);
   spr.fillCircle((int)mbX - 2, (int)mbY - 2, 2, INK);
@@ -513,7 +507,7 @@ static void ccLight(uint8_t which, uint32_t now, uint16_t ms) {
 // The two button pictures. A cue is the "press this one" pulse the lesson
 // uses: the egg's throbbing blue dot, or an arrow nudging at the white bar.
 static void ccDraw(uint32_t now, bool cueBlue = false, bool cueSide = false) {
-  bool lit = (int32_t)(now - ccLitUntil) < 0, pulse = (now / 400) & 1;
+  bool lit = before(now, ccLitUntil), pulse = (now / 400) & 1;
   if (lit && ccLit == 0) spr.fillCircle(CX, 178, 22, BTN_BLUE);
   else {
     spr.drawCircle(CX, 178, 22, BTN_BLUE);
@@ -552,7 +546,7 @@ static void tickCopy(uint32_t now, bool a, bool b) {
   PetState st = P_IDLE;
   switch (ccPhase) {
     case CC_SHOW:
-      if ((int32_t)(now - ccStepMs) >= 0) {
+      if (!before(now, ccStepMs)) {
         if (ccIdx <= ccRound) { ccLight(ccSeq[ccIdx++], now, 450); ccStepMs = now + 700; }
         else                  { ccPhase = CC_INPUT; ccIdx = 0; }
       }
@@ -584,7 +578,7 @@ static void tickCopy(uint32_t now, bool a, bool b) {
   }
 
   buddyTick(st);
-  spr.fillRect(0, FIELD_TOP, W, H - FIELD_TOP, BG);
+  clearBelow(FIELD_TOP);
   ccDraw(now);
   drawPips(COPY_ROUNDS, ccRound, 232);
 }
@@ -677,7 +671,7 @@ static void tickLearn(uint32_t now, bool a, bool b) {
 
   switch (lsPhase) {
     case LP_SHOW:                    // the screen presses the button itself
-      if ((int32_t)(now - lsUntil) < 0) break;
+      if (before(now, lsUntil)) break;
       if (lsStep == LS_HOLD) {
         held = now - lsUntil;
         ccLit = 0;
@@ -691,7 +685,7 @@ static void tickLearn(uint32_t now, bool a, bool b) {
       lsUntil = now + 1100;
       break;
     case LP_SHOWN:
-      if ((int32_t)(now - lsUntil) < 0) break;
+      if (before(now, lsUntil)) break;
       lsSel = 0;
       lsOpen = false;
       lsPhase = LP_INPUT;
@@ -719,7 +713,7 @@ static void tickLearn(uint32_t now, bool a, bool b) {
     }
     case LP_CHEER:
       lastInteractMs = now;
-      if ((int32_t)(now - lsUntil) < 0) break;
+      if (before(now, lsUntil)) break;
       if (++lsStep < LS_N) { lsBeginStep(now); break; }
       spr.fillSprite(BG);
       spr.pushSprite(0, 0);
@@ -732,7 +726,7 @@ static void tickLearn(uint32_t now, bool a, bool b) {
       return;
     case LP_PARTY: {
       lastInteractMs = now;
-      if ((int32_t)(now - lsUntil) >= 0) {
+      if (!before(now, lsUntil)) {
         pet().learned = true;
         petSave();
         if (pet().hatched) enterHome();
@@ -750,7 +744,7 @@ static void tickLearn(uint32_t now, bool a, bool b) {
     }
   }
 
-  bool popping = (int32_t)(now - lsPopUntil) < 0, cheer = lsPhase == LP_CHEER;
+  bool popping = before(now, lsPopUntil), cheer = lsPhase == LP_CHEER;
   spr.fillSprite(BG);
 
   // The egg watches from the top and jiggles when something goes right.
@@ -763,16 +757,15 @@ static void tickLearn(uint32_t now, bool a, bool b) {
 
   if (lsStep == LS_TAP || (lsStep == LS_HOLD && !lsOpen)) {
     // One thing in a box: something to pick, or something to open.
-    spr.drawRoundRect(CX - 22, LS_MID_Y - 22, 44, 44, 8, INK);
-    spr.drawRoundRect(CX - 21, LS_MID_Y - 21, 42, 42, 7, INK);
+    drawFrame(CX - 22, LS_MID_Y - 22, 44, 44, 8);
     if (lsStep == LS_TAP) lsIcon(lsDone, CX, LS_MID_Y);
     else                  drawStar(CX, LS_MID_Y, 10, YEL);
   } else {
     // Four tiles, the toy box in small. The frame goes right, then down.
     for (uint8_t i = 0; i < 4; i++) {
       int x = lsTileX(i), y = lsTileY(i);
-      spr.drawRoundRect(x - 15, y - 15, 30, 30, 6, i == lsSel ? INK : GRID);
-      if (i == lsSel) spr.drawRoundRect(x - 14, y - 14, 28, 28, 5, INK);
+      if (i == lsSel) drawFrame(x - 15, y - 15, 30, 30, 6);
+      else            spr.drawRoundRect(x - 15, y - 15, 30, 30, 6, GRID);
       if (lsStep != LS_BOTH)                lsIcon(i, x, y);
       else if (i == lsTarget && !cheer)     drawStar(x, y, ((now / 300) & 1) ? 8 : 6, YEL);
     }
@@ -863,8 +856,7 @@ static void tickHide(uint32_t now, bool a, bool b) {
     if (hdPhase == HD_MISS && i == hdMissAt) x += ((now / 60) & 1) ? 2 : -2;
     drawBush(x, 186);
     if (i == hdSel && hdPhase != HD_FOUND) {
-      spr.drawRoundRect(BUSH_X[i] - 21, HIDE_TOP + 1, 42, 52, 6, INK);
-      spr.drawRoundRect(BUSH_X[i] - 20, HIDE_TOP + 2, 40, 50, 5, INK);
+      drawFrame(BUSH_X[i] - 21, HIDE_TOP + 1, 42, 52, 6);
     }
   }
   spr.drawFastHLine(0, 204, W, GREEN);
@@ -882,7 +874,7 @@ static void tickDress(bool a, bool b) {
   if (a || b) { applyLook(); petSave(); }
 
   buddyTick(P_IDLE);
-  spr.fillRect(0, BOTTOM_TOP, W, H - BOTTOM_TOP, BG);
+  clearBelow(BOTTOM_TOP);
   for (int i = 0; i < LOOK_N; i++) {
     int x = 15 + i * 21;
     spr.fillCircle(x, 180, 7, i ? LOOK_TINT[i] : buddyBodyColor());
@@ -892,7 +884,7 @@ static void tickDress(bool a, bool b) {
   for (int i = 0; i < HAT_N; i++) {
     int x = 16 + i * 26;
     if (i == HAT_NONE) spr.drawCircle(x, 219, 6, DIM);
-    else               buddyDrawHat(&spr, i, x, 226, 1);
+    else               buddyDrawHat(i, x, 226, 1);
     if (i == s.hat) spr.drawRoundRect(x - 12, 203, 25, 32, 5, INK);
   }
 }

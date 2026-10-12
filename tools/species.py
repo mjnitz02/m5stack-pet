@@ -7,7 +7,7 @@ from pathlib import Path
 
 PROJECT = Path(__file__).resolve().parent.parent
 SRC = PROJECT / "src" / "buddies"
-STATES = ["sleep", "idle", "busy", "attention", "celebrate", "dizzy", "heart"]
+STATES = ["sleep", "idle", "play", "attention", "celebrate", "dizzy", "heart"]
 
 # Characters that fit across the 135px screen at the home screen's 2x scale
 # (12px per glyph). Wider art would have its edges cut off; the tests refuse it.

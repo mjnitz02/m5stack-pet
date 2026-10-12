@@ -60,9 +60,6 @@ static void logRow(const char* event) {
 }
 
 static void logBegin(const char* bootEvent) {
-  // M5.begin() leaves the USB serial port unopened, and an unopened port
-  // answers available() with -1 for ever.
-  Serial.begin(115200);
   // A partition that has never held the log has to be formatted first: say
   // so rather than sit on a black screen.
   _logOk = LittleFS.begin(false);

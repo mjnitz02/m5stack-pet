@@ -208,3 +208,70 @@ TEST(tilt_calibration_side_button_backs_out_and_clears) {
   });
   CHECK_EQ((int)d.nvs.kv["pet/tiltcal"][0], 0);
 }
+
+// --- Left open ------------------------------------------------------------------
+TEST(parent_screen_left_open_goes_back_to_the_pet_and_naps) {
+  Device d = hatchedPet();
+  Boot b = d.boot(Wake::Button, [](Stick& s) {
+    openParent(s, RESET);
+    s.tap(A);                                  // "really?", then walked away from
+    s.run(59000);
+    CHECK_EQ(probe::screen(), "parent");
+    s.run(2500);
+    CHECK_EQ(probe::screen(), "home");
+    CHECK(probe::hatched());
+    s.run(3 * 60000);
+    CHECK(false);                              // it napped before getting here
+  });
+  CHECK_EQ(b.end, End::Nap);
+  CHECK_EQ(d.nvs.get("pet/hatched"), 1u);
+}
+
+TEST(parent_screen_left_open_over_an_egg_naps_too) {
+  Device d = unhatchedEgg();
+  Boot b = d.boot(Wake::Cold, [](Stick& s) {
+    openParent(s, BRIGHT);
+    s.run(62000);
+    CHECK_EQ(probe::screen(), "egg");
+    s.run(3 * 60000);
+  });
+  CHECK_EQ(b.end, End::Nap);
+}
+
+TEST(tilt_cal_left_open_goes_back_to_the_pet) {
+  Device d = hatchedPet();
+  d.boot(Wake::Button, [](Stick& s) {
+    openParent(s, CAL);
+    s.tap(A);
+    s.tap(A);
+    s.run(700);                                // one pose in
+    CHECK_EQ(probe::screen(), "cal");
+    s.run(62000);
+    CHECK_EQ(probe::screen(), "home");
+  });
+  CHECK(!d.nvs.has("pet/tiltcal"));
+}
+
+TEST(parent_screen_stays_open_with_stay_on) {
+  Device d = hatchedPet();
+  d.nvs.set("pet/stayon", 1);
+  d.boot(Wake::Button, [](Stick& s) {
+    openParent(s, BRIGHT);
+    s.run(10 * 60000);
+    CHECK_EQ(probe::screen(), "parent");
+  });
+}
+
+TEST(tilt_calibration_saves_no_stray_bytes) {
+  Device d = hatchedPet();
+  d.boot(Wake::Button, [](Stick& s) {
+    openParent(s, CAL);
+    s.tap(A);
+    const float pose[5][3] = { { -0.55f, 0.00f, 0.84f }, { -0.54f, 0.63f, 0.55f }, { -0.56f, -0.57f, 0.61f },
+                               { 0.05f, 0.01f, 1.00f }, { -0.98f, 0.01f, 0.14f } };
+    for (auto& p : pose) { s.pose(p[0], p[1], p[2]); s.tap(A); s.run(700); }
+  });
+  const std::vector<uint8_t>& cal = d.nvs.kv["pet/tiltcal"];
+  CHECK_EQ((int)cal.size(), 36);
+  for (int i = 1; i < 4; i++) CHECK_EQ((int)cal[i], 0);    // the gap after the first byte
+}

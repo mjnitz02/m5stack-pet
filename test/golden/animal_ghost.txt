@@ -1,3 +1,4 @@
+      0.250  serial open 115200
       0.250  m5 begin
       0.250  pm1 led 1
       0.250  i2c 69 7D=04

@@ -17,12 +17,19 @@ Flash with `make flash`, unplug USB, and work down the list.
 - [ ] After a nap that has run its full length (an hour), the blue button no
       longer wakes it and the side power button does.
 - [ ] Plugged in to USB, a nap still wakes on the blue button.
+- [ ] Note the awake time on the parent screen, then let it nap and wake it
+      eight times without touching it otherwise. The awake time has gone up
+      by 10 minutes or a little over, not 8.
+- [ ] Hold both buttons for the parent screen and leave it. After a minute
+      it is back on the pet, and it then sleeps as usual.
+- [ ] On USB, `make monitor` prints a battery line every ten seconds.
 
 ## Sound
 
 - [ ] Button beeps and the feeding tune are audible and not harsh.
 - [ ] Hold the side button: the speaker glyph shows crossed out, and the
       stick is silent. Hold again: a chirp, and sound is back.
+- [ ] Do the same in hide and seek: the glyph goes away after a moment.
 - [ ] No hiss or pop from the speaker while it naps or as it wakes.
 
 ## Movement

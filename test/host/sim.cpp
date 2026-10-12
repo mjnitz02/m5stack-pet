@@ -12,6 +12,7 @@
 #include <unistd.h>
 
 #include "M5Unified.h"
+#include "probe.h"
 
 // The firmware's entry points (src/main.cpp, by way of firmware.cpp).
 void setup();
@@ -51,6 +52,8 @@ struct World {
   uint64_t frameHash = 0, secHash = 0;
   bool     secUsed = false, frameUsed = false;
   FILE*    dump = nullptr;
+  bool     watching = false;
+  std::vector<std::string> drawn;
 };
 World w;
 
@@ -163,6 +166,7 @@ void draw(const char* target, const char* fmt, ...) {
   va_end(ap);
   w.frameHash = fnv(fnv(fnv(w.frameUsed ? w.frameHash : FNV_SEED, target), " "), buf);
   w.frameUsed = true;
+  if (w.watching) w.drawn.push_back(std::string(target) + " " + buf);
   if (w.dump) fprintf(w.dump, "%11.3f    %s %s\n", w.ms / 1000.0, target, buf);
 }
 
@@ -258,6 +262,8 @@ void Stick::sway() { w.motion = SWAY; }
 
 int Stick::brightness() const { return w.bright; }
 int Stick::beeps() const { return w.beeps; }
+void Stick::watchDrawing() { w.watching = true; w.drawn.clear(); }
+const std::vector<std::string>& Stick::drawn() const { return w.drawn; }
 
 // --- Saved settings -------------------------------------------------------------
 bool Nvs::has(const std::string& key) const { return kv.count(key) > 0; }
@@ -289,6 +295,10 @@ std::string oneLine(std::string s) {
   w.vbusMv = d.vbusMv;
   w.wake = (int)wake;
   w.btn[A] = d.blueHeldAtBoot;
+  void*  nap;
+  size_t napLen;
+  probe::napMemory(&nap, &napLen);
+  if (wake != Wake::Cold && d.napMemory.size() == napLen) memcpy(nap, d.napMemory.data(), napLen);
   if (const char* path = getenv("SIM_DUMP")) w.dump = fopen(path, "a");
   if (w.dump) fprintf(w.dump, "--- boot (wake %d) ---\n", (int)wake);
 
@@ -314,6 +324,7 @@ std::string oneLine(std::string s) {
   std::string out = std::string("END ") + end + " " + std::to_string(w.timerUs) + " " + (w.buttonArmed ? "1" : "0") + "\n";
   if (!failure.empty()) out += "FAIL " + oneLine(failure) + "\n";
   for (const auto& kv : w.nvs.kv) out += "NVS " + kv.first + " " + hexOf(kv.second) + "\n";
+  out += "NAP " + hexOf(std::vector<uint8_t>((const uint8_t*)nap, (const uint8_t*)nap + napLen)) + "\n";
   out += "TRACE\n" + w.trace;
   for (size_t off = 0; off < out.size();) {
     ssize_t n = write(fd, out.data() + off, out.size() - off);
@@ -371,6 +382,10 @@ Boot Device::boot(Wake wake, const std::function<void(Stick&)>& script) {
       std::string key, hex;
       ls >> key >> hex;
       saved.kv[key] = unhex(hex);
+    } else if (tag == "NAP") {
+      std::string hex;
+      ls >> hex;
+      napMemory = unhex(hex);
     }
   }
   if (!ended) throw Failure{ "the simulated boot crashed (its output is above)" };

@@ -123,3 +123,15 @@ TEST(migration_runs_once) {
   d.boot(Wake::Button, [](Stick&) { CHECK_EQ(probe::species(), "ghost"); });
   CHECK_EQ(d.nvs.get("pet/species"), 4u);
 }
+
+TEST(out_of_range_look_is_put_right_at_the_next_save) {
+  Device d = hatchedPet();
+  d.nvs.set("pet/color", 200);
+  d.nvs.set("pet/hat", 200);
+  d.nvs.set("pet/food", 200);
+  Boot b = d.boot(Wake::Button, [](Stick& s) { s.run(3 * 60000); });
+  CHECK_EQ(b.end, End::Nap);
+  CHECK_EQ(d.nvs.get("pet/color"), 0u);
+  CHECK_EQ(d.nvs.get("pet/hat"), 0u);
+  CHECK_EQ(d.nvs.get("pet/food"), 0u);
+}

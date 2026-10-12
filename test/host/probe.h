@@ -1,4 +1,5 @@
 #pragma once
+#include <cstddef>
 #include <string>
 
 // The tests' only window into the firmware's own variables. Tests go through
@@ -25,6 +26,10 @@ int         copyRound();                      // 0-based
 std::string copySequence();                   // this round's pattern, 'A' blue and 'B' side
 int         hideSpot();                       // the bush the pet is behind, 0..2
 int         hideFrame();                      // the bush the frame is on
+
+// The firmware's variables that a nap keeps and a power-off loses. The
+// simulator copies them out at the end of a boot and back in before the next.
+void napMemory(void** at, size_t* len);
 
 // Run one animal's animation for a state (0 sleep .. 6 heart) for so many
 // animation steps, away from the game. small is the size used beside a game.

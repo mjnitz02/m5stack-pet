@@ -57,6 +57,23 @@ TEST(seven_taps_hatch_the_egg) {
   CHECK(d.nvs.get("pet/species", 99) < 7u);
 }
 
+// The needs timers run on through naps, and through the egg's as well.
+TEST(an_egg_that_napped_for_days_hatches_with_fresh_needs) {
+  Device d = unhatchedEgg();
+  for (int i = 0; i < 8; i++) {                // ten minutes awake as an egg
+    Boot b = d.boot(i ? Wake::Button : Wake::Cold, [](Stick& s) { s.run(10 * 60000); });
+    CHECK_EQ(b.end, End::Nap);
+  }
+  d.boot(Wake::Button, [](Stick& s) {
+    for (int i = 0; i < 7; i++) s.tap(A);
+    CHECK(probe::hatched());
+    s.run(20000);
+    CHECK_EQ(probe::screen(), "home");
+    CHECK_EQ(probe::hunger(), 2);
+    CHECK_EQ(probe::happy(), 2);
+  });
+}
+
 TEST(shaking_hatches_the_egg_too) {
   Device d = unhatchedEgg();
   d.boot(Wake::Cold, [](Stick& s) {

@@ -1,4 +1,5 @@
 --- 0 ---
+      0.250  serial open 115200
       0.250  m5 begin
       0.250  pm1 led 1
       0.250  i2c 69 7D=04
@@ -201,6 +202,7 @@
     195s      frames=5   draw=9851b91401f066ee
     196s      frames=2   draw=00b5ba14188c6693
 --- 1 ---
+      0.250  serial open 115200
       0.250  m5 begin
       0.250  pm1 led 1
       0.250  i2c 69 7D=04
@@ -403,6 +405,7 @@
     195s      frames=5   draw=ddcca3566c3a1ab5
     196s      frames=2   draw=8883a2a32a850800
 --- 2 ---
+      0.250  serial open 115200
       0.250  m5 begin
       0.250  pm1 led 1
       0.250  i2c 69 7D=04
@@ -605,6 +608,7 @@
     195s      frames=5   draw=2963f47428cc0ba9
     196s      frames=2   draw=df8b7d9fde66d7b7
 --- 3 ---
+      0.250  serial open 115200
       0.250  m5 begin
       0.250  pm1 led 1
       0.250  i2c 69 7D=04
@@ -807,6 +811,7 @@
     195s      frames=5   draw=91ffb9667a681ee8
     196s      frames=2   draw=d7736b42364b1467
 --- 4 ---
+      0.250  serial open 115200
       0.250  m5 begin
       0.250  pm1 led 1
       0.250  i2c 69 7D=04
@@ -1009,6 +1014,7 @@
     195s      frames=5   draw=cb226ad3a367ca47
     196s      frames=2   draw=812ece3ac6d76b9a
 --- 5 ---
+      0.250  serial open 115200
       0.250  m5 begin
       0.250  pm1 led 1
       0.250  i2c 69 7D=04
@@ -1211,6 +1217,7 @@
     195s      frames=5   draw=77ddf095a06bf1db
     196s      frames=2   draw=0c18bf337ae819a3
 --- 6 ---
+      0.250  serial open 115200
       0.250  m5 begin
       0.250  pm1 led 1
       0.250  i2c 69 7D=04

@@ -120,6 +120,12 @@ out.
 
 ## Ideas not built
 
+- **A playing animation.** Every animal has a spare seventh animation, `play`,
+  left from the original project's "busy" and shown nowhere. The chick (pecks
+  at a seed), the dog and the cat (a ball) are usable as they are. The blob,
+  ghost, octopus and penguin still show desk work and need drawing again. All
+  seven carry a "..." ticker to take out. Once they are done it could play in
+  Catch, on the feed screen, or now and then on the pet screen.
 - **A nudge toward moving.** The moving activities could give two hearts
   where the sit-still games give one. Today only a good round of Catch does.
 - **Sticker pace.** One in three finishes means roughly 35 to 40 plays to

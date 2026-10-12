@@ -88,7 +88,8 @@ src/
   petlog.h       - the debug build's on-device log
   buddy.cpp      - animal registry and ASCII render helpers
   buddies/       - one file per animal, seven animation functions each
-  compat.h       - maps the old display type names onto M5Unified
+  palette.h      - every colour
+  compat.h       - maps the old display type name onto M5Unified
 test/
   fakes/         - stand-ins for M5Unified, Arduino and the ESP32 calls
   host/          - the simulated stick, the probes and the tests

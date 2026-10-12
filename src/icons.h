@@ -14,6 +14,22 @@ static void drawText(const char* s, int cx, int y, uint8_t size, uint16_t col) {
   spr.setTextSize(1);
 }
 
+// Wipe the screen from this row down.
+static void clearBelow(int top) { spr.fillRect(0, top, W, H - top, BG); }
+
+// The frame round whatever is selected: two outlines, one inside the other.
+static void drawFrame(int x, int y, int w, int h, int r) {
+  spr.drawRoundRect(x, y, w, h, r, INK);
+  spr.drawRoundRect(x + 1, y + 1, w - 2, h - 2, r - 1, INK);
+}
+
+// A line three pixels thick.
+static void drawThickLine(int x0, int y0, int x1, int y1, uint16_t col) {
+  spr.drawLine(x0, y0, x1, y1, col);
+  spr.drawLine(x0 + 1, y0, x1 + 1, y1, col);
+  spr.drawLine(x0, y0 + 1, x1, y1 + 1, col);
+}
+
 static void drawApple(int x, int y, int r, bool filled = true) {
   if (filled) {
     spr.fillCircle(x, y, r, RED);
@@ -191,12 +207,12 @@ static void drawSticker(uint8_t idx, int x, int y) {
     case 3:  drawCrescent(x + 2, y, 10, YEL); break;
     case 4:  drawFlower(x, y, 7); break;
     case 5:  drawBall(x, y, 10); break;
-    case 6:  buddyDrawHat(&spr, HAT_CROWN, x, y + 9, 2); break;
+    case 6:  buddyDrawHat(HAT_CROWN, x, y + 9, 2); break;
     case 7:  drawFood(FOOD_CARROT, x, y); break;
     case 8:  drawFood(FOOD_STRAWBERRY, x, y); break;
     case 9:  drawBubble(x - 3, y + 2, 9); drawBubble(x + 8, y - 7, 4); break;
     case 10: drawFood(FOOD_ICECREAM, x, y - 2); break;
-    default: buddyDrawHat(&spr, HAT_BOW, x, y + 8, 2); break;
+    default: buddyDrawHat(HAT_BOW, x, y + 8, 2); break;
   }
 }
 
@@ -217,7 +233,7 @@ static void drawTileIcon(uint8_t tile, int x, int y) {
       drawText("<  >", x, y + 10, 1, INK);
       break;
     case T_FREEZE:   drawEye(x, y, true); break;
-    case T_DRESS:    buddyDrawHat(&spr, HAT_CROWN, x, y + 9, 2); break;
+    case T_DRESS:    buddyDrawHat(HAT_CROWN, x, y + 9, 2); break;
     case T_STICKERS: drawStar(x, y, 15, YEL); break;
     case T_CATCH:
       drawApple(x + 2, y - 9, 6);

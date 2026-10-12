@@ -1,4 +1,5 @@
-# M5StickS3 - ESP32-S3 8MB flash, single app, large LittleFS for characters.
+# M5StickS3 - ESP32-S3 8MB flash, single app. The LittleFS partition holds the debug
+# build's log (src/petlog.h) and nothing else.
 # Name,     Type, SubType,  Offset,    Size,      Flags
 nvs,        data, nvs,      0x9000,    0x5000,
 otadata,    data, ota,      0xE000,    0x2000,

@@ -38,6 +38,11 @@ std::string copySequence() {
 int hideSpot() { return hdSpot; }
 int hideFrame() { return hdSel; }
 
+void napMemory(void** at, size_t* len) {
+  *at = &napCarry;
+  *len = sizeof(napCarry);
+}
+
 void animate(int species, int state, int steps, bool small) {
   buddySetSpeciesIdx((uint8_t)species);
   buddySetPeek(small);

@@ -1,7 +1,9 @@
+      0.250  serial open 115200
       0.250  m5 begin
       0.250  pm1 led 1
       0.250  i2c 69 7D=04
       0.250  brightness 102
+      0.270  serial bat=3900mV awake=0m
       0.996  beep 1200 60
       0s      frames=23  draw=85e8b10b1bb99709
       1.260  beep 1800 25
@@ -34,6 +36,7 @@
       9s      frames=30  draw=384a3b8d69898aa0
      10.038  beep 1800 25
      10.203  beep 1800 25
+     10.302  serial bat=3900mV awake=0m
      10.368  beep 2000 80
      10s      frames=31  draw=3d492026b64b46aa
      11s      frames=30  draw=1c322d04c1b309f8
@@ -63,4 +66,5 @@
      17s      frames=30  draw=e58bede0db629fda
      18s      frames=31  draw=0aad610589ebb53d
      19s      frames=30  draw=97dd70e54837cdb0
+     20.319  serial bat=3900mV awake=0m
      20s      frames=11  draw=a557bced1d4c49b7

@@ -1,7 +1,9 @@
+      0.250  serial open 115200
       0.250  m5 begin
       0.250  pm1 led 1
       0.250  i2c 69 7D=04
       0.250  brightness 102
+      0.270  serial bat=3900mV awake=0m
       0.996  beep 1200 60
       0s      frames=23  draw=85e8b10b1bb99709
       1.260  beep 1800 25
@@ -19,6 +21,7 @@
       7s      frames=31  draw=2ca4f0cd96d1544b
       8s      frames=30  draw=217948ad3984a153
       9s      frames=30  draw=691283fcd88b765b
+     10.302  serial bat=3900mV awake=0m
      10.698  beep 1400 120
      10s      frames=31  draw=ef5039187cecf58f
      11.358  beep 400 150
@@ -33,6 +36,7 @@
      17s      frames=31  draw=5b7d3ddffb2f1f65
      18s      frames=30  draw=e7b6c352ae6e837d
      19s      frames=30  draw=38c0551e323016a6
+     20.334  serial bat=3900mV awake=0m
      20s      frames=31  draw=e1d16877c21fecb4
      21s      frames=30  draw=d7eec1fda77df7e4
      22s      frames=30  draw=bb6e095fb74f4726
@@ -46,6 +50,7 @@
      28s      frames=30  draw=81cdd060f3f7d390
      29.145  beep 1400 120
      29s      frames=30  draw=cd377027066346df
+     30.366  serial bat=3900mV awake=0m
      30s      frames=31  draw=abbba1a0609a349f
      31.653  beep 2000 80
      31s      frames=30  draw=72fc01ec08be785e
@@ -59,6 +64,7 @@
      37s      frames=30  draw=7d6fd37a902e5e21
      38s      frames=30  draw=38d06846d11574c1
      39s      frames=30  draw=81f640d57513500d
+     40.398  serial bat=3900mV awake=0m
      40s      frames=31  draw=584b162090978e89
      41.751  beep 1400 120
      41s      frames=30  draw=a690340cee6eebff
@@ -87,6 +93,7 @@
      49.842  beep 1568 90
      49.947  beep 2093 90
      49s      frames=22  draw=7e86232a84d978c8
+     50.415  serial bat=3900mV awake=0m
      50s      frames=29  draw=a63f81173f787325
      51s      frames=31  draw=312a0384509b8ac2
      52s      frames=30  draw=6692447d26925dbf

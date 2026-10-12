@@ -173,3 +173,49 @@ TEST(awake_minutes_are_saved_every_five) {
   d.boot(Wake::Button, [](Stick& s) { s.run(11 * 60000 + 30000); });
   CHECK_EQ(d.nvs.get("pet/awake", 0), 10u);
 }
+
+// `make monitor` on an ordinary build: the battery line every ten seconds.
+TEST(battery_line_reaches_the_serial_port) {
+  Device d = hatchedPet();
+  d.batteryMv = 3850;
+  Boot b = d.boot(Wake::Button, [](Stick& s) { s.run(11000); });
+  CHECK(has(b, "serial bat=3850mV awake=0m"));
+}
+
+// Left alone the pet is awake for 75 seconds at a time: a minute on the pet
+// screen, then bed. An apple goes every eight minutes awake and a heart every
+// twelve, however many naps that is spread over.
+static void shortSessions(Device& d, int n) {
+  for (int i = 0; i < n; i++) {
+    Boot b = d.boot(Wake::Button, [](Stick& s) { s.run(10 * 60000); });
+    CHECK_EQ(b.end, End::Nap);
+  }
+}
+
+TEST(needs_keep_dropping_across_naps) {
+  Device d = hatchedPet(5, 3, 3);
+  shortSessions(d, 6);                         // seven and a half minutes
+  CHECK_EQ(d.nvs.get("pet/hunger"), 3u);
+  shortSessions(d, 4);                         // twelve and a half
+  CHECK_EQ(d.nvs.get("pet/hunger"), 2u);
+  CHECK_EQ(d.nvs.get("pet/happy"), 2u);
+}
+
+TEST(a_power_off_starts_the_needs_timers_again) {
+  Device d = hatchedPet(5, 3, 3);
+  shortSessions(d, 6);                         // half a minute short of an apple
+  d.boot(Wake::Cold, [](Stick& s) {
+    CHECK_EQ(probe::hunger(), 2);              // the one a cold start always takes
+    s.tap(B);                                  // keep it up for two minutes
+    s.run(55000);
+    s.tap(B);
+    s.run(55000);
+    CHECK_EQ(probe::hunger(), 2);
+  });
+}
+
+TEST(awake_minutes_keep_the_part_minute_before_a_nap) {
+  Device d = hatchedPet();
+  shortSessions(d, 4);
+  CHECK_EQ(d.nvs.get("pet/awake", 0), 5u);
+}

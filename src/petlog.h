@@ -10,7 +10,9 @@
 // powers off:
 //
 //   t_s         seconds since this boot
-//   event       boot:cold / boot:button / boot:timer, mode, tick, nap, off
+//   event       boot:cold / boot:button / boot:timer, mode, tick, nap, off,
+//               or slow:<step>:<ms> when one step of the loop took over a
+//               second (the steps are named in loop(), in main.cpp)
 //   mode        the screen it is on
 //   bat_mv      battery voltage (the PMIC has no current sensor, so drain
 //               has to be read off how fast this falls)
@@ -28,11 +30,13 @@
 void logBegin(const char* bootEvent);
 void logRow(const char* event);
 void logTick(uint32_t now);   // once per frame, after the buttons and the IMU have been read
+void logStep(const char* name);   // the loop is starting this step; the one before it has ended
 
 #else
 
 static inline void logBegin(const char*) {}
 static inline void logRow(const char*) {}
 static inline void logTick(uint32_t) {}
+static inline void logStep(const char*) {}
 
 #endif

@@ -365,6 +365,9 @@ static void tickFreeze(uint32_t now) {
 // under them. No way to lose — every round ends in a celebration.
 const uint8_t PLAY_ROUNDS = 5;
 const int     BASKET_Y    = 214, CATCH_HALF = 30;
+// The tallest snack stands 12 px above its middle, and nothing above the
+// field is wiped while a game is on: start it wholly inside.
+const int     DROP_TOP    = FIELD_TOP + 12;
 const float   FALL_PX_MS  = 0.055f;
 uint8_t  playRound = 0, playCaught = 0, playHits = 0, dropFood = 0;
 float    basketX = CX;
@@ -400,14 +403,14 @@ static void tickPlay(uint32_t now) {
   if (target > W - 30) target = W - 30;
   basketX += (target - basketX) * 0.3f;
 
-  int dropY = FIELD_TOP + 8 + (int)((now - dropStartMs) * FALL_PX_MS);
+  int dropY = DROP_TOP + (int)((now - dropStartMs) * FALL_PX_MS);
   if (dropY >= BASKET_Y - 4) {
     bool hit = fabsf(dropX - basketX) < CATCH_HALF;
     if (hit) { playCaught++; playHits |= 1 << playRound; playCheerUntil = now + 700; beep(2000, 60); }
     else     { beep(500, 60); }
     if (++playRound >= PLAY_ROUNDS) { endPlay(now); return; }
     spawnDrop(now);
-    dropY = FIELD_TOP + 8;
+    dropY = DROP_TOP;
   }
 
   buddyTick(before(now, playCheerUntil) ? P_HEART : P_IDLE);

@@ -147,7 +147,7 @@ static void hatch() {
   petSave();
   buddySetSpeciesIdx(s.species);
   spr.fillSprite(INK);
-  spr.pushSprite(0, 0);
+  show();
   static const uint16_t TUNE[] = { 1047, 1319, 1568, 2093 };
   jingle(TUNE, 4, 90);
   enterHome();
@@ -278,12 +278,14 @@ static void tickBed(uint32_t now) {
 }
 
 // --- Home -------------------------------------------------------------------
+const uint32_t PLAY_EVERY_MS = 12000;   // the pet plays for this long, one stretch in four
+
 static PetState homeMood(uint32_t now) {
   const PetSave& s = pet();
   if (s.hunger == 0 || s.happy == 0) return P_ATTENTION;
-  if (s.hunger == PET_MAX && s.happy == PET_MAX)
-    return (now / 6000 % 3 == 0) ? P_HEART : P_IDLE;
-  return P_IDLE;
+  if (s.hunger == PET_MAX && s.happy == PET_MAX && now / 6000 % 3 == 0) return P_HEART;
+  // A pet that isn't asking for anything plays by itself now and then.
+  return (now / PLAY_EVERY_MS % 4 == 2) ? P_PLAY : P_IDLE;
 }
 
 static void tickHome(uint32_t now, bool a, bool b, bool shook) {

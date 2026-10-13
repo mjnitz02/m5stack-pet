@@ -27,7 +27,7 @@ drifting characters such as Zs, hearts or confetti.
 | --- | --- |
 | sleep | Bedtime, the second half of Rock to sleep, eyes shut in Freeze |
 | idle | Most of the time |
-| play | Nothing plays it today. Three are ready and four need redrawing: see [Ideas not built](toy-box.md#ideas-not-built). |
+| play | Now and then on the pet screen, for twelve seconds in every 48, when neither need row is empty. Each animal has its own game: the blob bounces a ball on its head, the cat and the dog have a ball, the chick pecks at a seed, the ghost plays peekaboo, the octopus juggles and the penguin skates. |
 | attention | A need row is empty; watching in Freeze |
 | celebrate | Hatching, dancing, finishing an activity, a favourite food |
 | dizzy | The stick was shaken; a miss in Freeze or Copycat |

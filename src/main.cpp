@@ -45,6 +45,21 @@ static void clearScreen(bool smallPet) {
   buddyInvalidate();
 }
 
+// Sending the sprite to the screen is the slowest thing in a frame, and the
+// animals move five times a second, so most frames are the picture that is
+// already up. show() sends only one that differs, going by a checksum.
+static void show() {
+  static uint32_t shown = 0;
+  static bool     any = false;
+  const uint32_t* p = (const uint32_t*)spr.getBuffer();
+  uint32_t sum = 2166136261u;
+  for (size_t n = spr.bufferLength() / 4; n; n--) sum = (sum ^ *p++) * 16777619u;
+  if (any && sum == shown) return;
+  any = true;
+  shown = sum;
+  spr.pushSprite(0, 0);
+}
+
 static void applyBrightness() { M5.Display.setBrightness((pet().bright + 1) * 51); }
 
 static void beep(uint16_t freq, uint16_t dur) {
@@ -225,6 +240,7 @@ void setup() {
 
 void loop() {
   M5.update();
+  motionNewFrame();
   uint32_t now = millis();
   Mode     was = mode;
   powerTick(now);
@@ -292,6 +308,6 @@ void loop() {
 
   if (screenHas(SCR_KID)) drawBatteryTrim();
   if (screenHas(SCR_KID) && before(now, soundFlashUntil)) drawSoundFlash();
-  spr.pushSprite(0, 0);
+  show();
   delay(mode == M_BED ? 100 : 33);
 }

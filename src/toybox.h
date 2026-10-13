@@ -58,7 +58,7 @@ static bool tickEggHold(uint32_t now) {
     swallowA = true;
     eggHoldMs = 0;
     spr.fillSprite(INK);
-    spr.pushSprite(0, 0);
+    show();
     static const uint16_t TUNE[] = { 1568, 1047, 784 };
     jingle(TUNE, 3, 110);
     backToEgg();
@@ -86,7 +86,7 @@ static void tickMenu(uint32_t now, bool a, bool b) {
 
   spr.fillSprite(BG);
   uint8_t page = menuSel / 6;
-  for (uint8_t i = page * 6; i < n && i < page * 6 + 6; i++) {
+  for (int i = page * 6; i < n && i < page * 6 + 6; i++) {
     int x = 6 + (i % 2) * 65, y = 12 + ((i % 6) / 2) * 72;
     if (i == menuSel) {
       drawFrame(x, y, TILE_W, TILE_H, 8);

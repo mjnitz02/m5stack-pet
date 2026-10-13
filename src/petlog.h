@@ -20,7 +20,8 @@
 //   motion      biggest imuDelta since the last row (shake / walk strength)
 //   turn        biggest imuTurn since the last row (tilt / rock strength)
 //   btn_a,btn_b presses since the last row
-//   fps         frames drawn per second since the last row
+//   fps         passes of the loop per second since the last row (only a
+//               picture that changed is sent to the screen)
 
 #if defined(PET_LOG)
 

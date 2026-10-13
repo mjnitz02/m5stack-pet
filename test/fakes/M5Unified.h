@@ -84,9 +84,29 @@ class M5GFX : public lgfx::LGFXBase {
 
 class M5Canvas : public lgfx::LGFXBase {
  public:
-  explicit M5Canvas(lgfx::LGFXBase*) : LGFXBase("spr") {}
+  // The firmware builds its sprite on M5.Lcd before main() runs, so M5 has to
+  // have been built by then. Only some compilers notice when it has not.
+  explicit M5Canvas(lgfx::LGFXBase* parent) : LGFXBase("spr") {
+    if (!parent) {
+      fprintf(stderr, "M5Canvas made before M5: M5 must be defined ahead of the firmware\n");
+      abort();
+    }
+  }
   void* createSprite(int, int) { return this; }
   void  pushSprite(int, int) { sim::hw::pushed(); }
+  // No pixels are kept here. What stands in for them is a checksum of the
+  // drawing calls since the buffer was last asked for, which the firmware
+  // does once a frame. Two frames running that draw the same things then
+  // read as the same picture, which they are: drawing over what is already
+  // there changes nothing.
+  void*  getBuffer() {
+    _pixels = sim::hw::drawnSinceAsked();
+    return &_pixels;
+  }
+  size_t bufferLength() const { return sizeof(_pixels); }
+
+ private:
+  uint64_t _pixels = 0;
 };
 
 namespace m5 {

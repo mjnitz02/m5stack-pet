@@ -1,5 +1,13 @@
 // The firmware itself, compiled for the computer against test/fakes/, and the
 // probes that let tests read its state. See probe.h.
+#include "M5Unified.h"
+
+// Defined here, ahead of the firmware, because the firmware builds its sprite
+// on M5.Lcd before main() runs. Within one file things are built top to
+// bottom; between files the order is the linker's choice, and Linux and macOS
+// choose differently.
+m5::M5Unified M5;
+
 #include "../../src/main.cpp"
 
 #include "probe.h"

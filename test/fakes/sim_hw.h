@@ -33,6 +33,7 @@ void event(const char* fmt, ...) __attribute__((format(printf, 1, 2)));
 // One drawing call. These are folded into a checksum per simulated second.
 void draw(const char* target, const char* fmt, ...) __attribute__((format(printf, 2, 3)));
 void pushed();                               // a finished frame went to the screen
+uint64_t drawnSinceAsked();                  // checksum of the sprite drawing since the last call
 
 void armButtonWake();
 void armTimerWake(uint64_t us);

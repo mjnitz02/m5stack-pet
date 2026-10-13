@@ -52,25 +52,19 @@ static void doIdle(uint32_t t) {
   buddyPrintBody(P[SEQ[beat]]);
 }
 
-// ─── PLAY ───  ~10s cycle, 6 poses + dot ticker
-// Not played anywhere yet: see "A playing animation" in docs/toy-box.md.
-// Types and sips a coffee: desk work from the original project. Redraw.
+// ─── PLAY ───  ~10s cycle, 5 poses (skates one way, then the other, then twirls)
 static void doPlay(uint32_t t) {
-  static const char* const TYPE_A[5]  = { "   .---.    ", "  ( v>v )   ", " /(     )\\  ", " /`-----`\\  ", "   J   L    " };
-  static const char* const TYPE_B[5]  = { "   .---.    ", "  ( v>v )   ", " \\(     )/  ", " \\`-----`/  ", "   J   L    " };
-  static const char* const THINK[5]   = { "      ?     ", "   .---.    ", "  ( ^>^ )   ", " /(  .  )\\  ", "   J   L    " };
-  static const char* const SIP[5]     = { "    [_]     ", "   .---.|   ", "  ( o>o |   ", " /(     )\\  ", "   J   L    " };
-  static const char* const EUREKA[5]  = { "      *     ", "   .---.    ", "  ( O>O )   ", " /(  ^  )\\  ", "   J   L    " };
-  static const char* const RELIEF[5]  = { "    ~~~     ", "   .---.    ", "  ( ->- )   ", " /(  _  )\\  ", "   J   L    " };
+  static const char* const PUSH_L[5]  = { "   .---.    ", "  ( ^>^ )   ", "/(     )    ", "  `-----`   ", "  J    L    " };
+  static const char* const PUSH_R[5]  = { "   .---.    ", "  ( ^>^ )   ", " (     )\\   ", "  `-----`   ", "   J    L   " };
+  static const char* const GLIDE[5]   = { "   .---.    ", "  ( ^>^ )   ", " /(     )\\  ", "  `-----`   ", "   J   L    " };
+  static const char* const TWIRL_L[5] = { "   .---.    ", "  ( <>< )   ", "/(     )    ", "  `-----`   ", "   /   \\    " };
+  static const char* const TWIRL_R[5] = { "   .---.    ", "  (>< ><)   ", " (     )\\   ", "  `-----`   ", "   \\   /    " };
 
-  const char* const* P[6] = { TYPE_A, TYPE_B, THINK, SIP, EUREKA, RELIEF };
-  static const uint8_t SEQ[] = {
-    0,1,0,1,0,1, 2,2, 0,1,0,1, 3,3, 2,4, 0,1,0,1,5
-  };
-  uint8_t beat = (t / 5) % sizeof(SEQ);
-  buddyPrintBody(P[SEQ[beat]]);
-
-  buddyDots(t);
+  const char* const* P[5] = { PUSH_L, PUSH_R, GLIDE, TWIRL_L, TWIRL_R };
+  static const uint8_t SEQ[]    = {  0,  2,  2,  1,  2,  2,  2,  0,  2,  2,  3,  4,  3,  4,  2,  2 };
+  static const int8_t X_SHIFT[] = { -2, -4, -5, -3,  0,  3,  5,  4,  2,  0,  0,  0,  0,  0,  0,  0 };
+  uint8_t beat = (t / 3) % sizeof(SEQ);
+  buddyPrintBody(P[SEQ[beat]], 0, X_SHIFT[beat]);
 }
 
 // ─── ATTENTION ───  ~8s cycle, 6 poses + ! pulse, alert flippers up

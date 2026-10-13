@@ -62,28 +62,23 @@ static void doIdle(uint32_t t) {
   buddyPrintBody(P[SEQ[beat]], Y_BOB[beat]);
 }
 
-// ─── PLAY ───  ~10s cycle, 6 poses + dot ticker
-// Not played anywhere yet: see "A playing animation" in docs/toy-box.md.
-// Desk work from the original project. Only the sparkle pose (CONJURE) is worth keeping. Redraw.
+// ─── PLAY ───  ~10s cycle, 8 poses (peekaboo: fades away, then boo)
 static void doPlay(uint32_t t) {
-  static const char* const WORK_A[5]  = { "            ", "  .------.  ", " ( v    v ) ", " |   --   | ", " /~^~^^~^~\\ " };
-  static const char* const WORK_B[5]  = { "            ", "  .------.  ", " ( v    v ) ", " |   __   | ", " \\~^~^^~^~/ " };
-  static const char* const THINK[5]   = { "      ?     ", "  .------.  ", " ( ^    ^ ) ", " |   ..   | ", " '~^~^^~^~' " };
-  static const char* const CONJURE[5] = { "    * . *   ", "  .------.  ", " ( O    O ) ", " |   oo   | ", " '~^~^^~^~' " };
-  static const char* const EUREKA[5]  = { "      !     ", "  .------.  ", " ( O    O ) ", " |   ^^   | ", " /~^~^^~^~\\ " };
-  static const char* const RELIEF[5]  = { "    ~ ~ ~   ", "  .------.  ", " ( -    - ) ", " |   __   | ", " '^~^~~^~^' " };
+  static const char* const HOVER[5]   = { "            ", "  .------.  ", " ( o    o ) ", " |   uu   | ", " '~^~^^~^~' " };
+  static const char* const FADE[5]    = { "            ", "  . .  . .  ", " :  o  o  : ", " :        : ", " ' ~ ^^ ~ ' " };
+  static const char* const GONE[5]    = { "            ", "            ", "   o    o   ", "            ", "            " };
+  static const char* const GONE_BL[5] = { "            ", "            ", "   -    -   ", "            ", "            " };
+  static const char* const BOO[5]     = { "  \\(    )/  ", "  .------.  ", " ( O    O ) ", " |   OO   | ", " /~^~^^~^~\\ " };
+  static const char* const GIGGLE_A[5]= { "            ", "  .------.  ", " ( ^    ^ ) ", " |   ww   | ", " /~^~^^~^~\\ " };
+  static const char* const GIGGLE_B[5]= { "            ", "  .------.  ", " ( ^    ^ ) ", " |   ww   | ", " \\~^~^^~^~/ " };
+  static const char* const TADA[5]    = { "    * . *   ", "  .------.  ", " ( ^    ^ ) ", " |   WW   | ", " '~^~^^~^~' " };
 
-  const char* const* P[6] = { WORK_A, WORK_B, THINK, CONJURE, EUREKA, RELIEF };
+  const char* const* P[8] = { HOVER, FADE, GONE, GONE_BL, BOO, GIGGLE_A, GIGGLE_B, TADA };
   static const uint8_t SEQ[] = {
-    0,1,0,1,0,1, 2,2, 0,1,0,1, 3,3, 2,4, 0,1,0,1,5
+    0,0, 1, 2,3,2, 4,4, 5,6,5,6, 7,7
   };
-  uint8_t beat = (t / 5) % sizeof(SEQ);
+  uint8_t beat = (t / 4) % sizeof(SEQ);
   buddyPrintBody(P[SEQ[beat]]);
-
-  static const char* const DOTS[] = { "o  ", "oO ", "oOo", " Oo", "  o", "   " };
-  buddySetColor(AQUA);
-  buddySetCursor(BUDDY_X_CENTER + 22, BUDDY_Y_OVERLAY + 14);
-  buddyPrint(DOTS[t % 6]);
 }
 
 // ─── ATTENTION ───  ~8s cycle, 6 poses + BOO! pulse

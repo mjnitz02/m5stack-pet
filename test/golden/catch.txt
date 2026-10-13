@@ -5,16 +5,16 @@
       0.250  brightness 102
       0.270  serial bat=3900mV awake=0m
       0.996  beep 1200 60
-      0s      frames=23  draw=85e8b10b1bb99709
+      0s      frames=8   draw=5548b328adeaa834
       1.260  beep 1800 25
       1.425  beep 1800 25
       1.590  beep 1800 25
       1.755  beep 1800 25
       1.920  beep 1800 25
-      1s      frames=30  draw=8ccbc57c788cf0e7
+      1s      frames=5   draw=c3de45d8dd6d3add
       2.085  beep 1800 25
       2.250  beep 2400 25
-      2s      frames=30  draw=2937e7a5b471819c
+      2s      frames=14  draw=c80ece924e097cc5
       3s      frames=31  draw=aa128805093c7e1e
       4.857  beep 2000 60
       4s      frames=30  draw=9c696c0886c57070
@@ -45,9 +45,9 @@
      13.305  beep 1319 90
      13.410  beep 1568 90
      13.515  beep 2093 90
-     13s      frames=21  draw=c9b988ef9c74e807
-     14s      frames=30  draw=5712f1a06bc6497c
-     15s      frames=31  draw=6fbdcc84be363a2f
-     16s      frames=30  draw=34d06063582fa4d6
-     17s      frames=30  draw=62de19690836879e
-     18s      frames=14  draw=9894af3489ce7663
+     13s      frames=14  draw=4689a1a0d01e737f
+     14s      frames=8   draw=1d84e55560a0a514
+     15s      frames=10  draw=14e525e8e34d1bbd
+     16s      frames=8   draw=56f8ab99311b7639
+     17s      frames=9   draw=26df086a9805ad9c
+     18s      frames=4   draw=a1535db2ad0d207f

@@ -19,7 +19,6 @@ void setup();
 void loop();
 
 SerialFake    Serial;
-m5::M5Unified M5;
 
 namespace sim {
 
@@ -31,6 +30,8 @@ namespace {
 
 enum Motion { STILL, SHAKE, WIGGLE, SWAY };
 const float HELD[3] = { -0.55f, 0.0f, 0.84f };   // motion.cpp, TILT_DEFAULT's readings
+
+const uint64_t FNV_SEED = 1469598103934665603ull;
 
 struct World {
   uint32_t ms = 250;                 // a real boot is already a moment old at setup()
@@ -49,15 +50,13 @@ struct World {
   // drawing in each second that drew anything.
   std::string trace;
   uint32_t sec = 0, frames = 0;
-  uint64_t frameHash = 0, secHash = 0;
+  uint64_t frameHash = 0, secHash = 0, askedHash = FNV_SEED;
   bool     secUsed = false, frameUsed = false;
   FILE*    dump = nullptr;
   bool     watching = false;
   std::vector<std::string> drawn;
 };
 World w;
-
-const uint64_t FNV_SEED = 1469598103934665603ull;
 
 uint64_t fnv(uint64_t h, const char* s) {
   for (; *s; s++) { h ^= (uint8_t)*s; h *= 1099511628211ull; }
@@ -166,6 +165,7 @@ void draw(const char* target, const char* fmt, ...) {
   va_end(ap);
   w.frameHash = fnv(fnv(fnv(w.frameUsed ? w.frameHash : FNV_SEED, target), " "), buf);
   w.frameUsed = true;
+  if (!strcmp(target, "spr")) w.askedHash = fnv(fnv(w.askedHash, buf), "\n");
   if (w.watching) w.drawn.push_back(std::string(target) + " " + buf);
   if (w.dump) fprintf(w.dump, "%11.3f    %s %s\n", w.ms / 1000.0, target, buf);
 }
@@ -177,6 +177,12 @@ void pushed() {
   foldFrame();
   w.frames++;
   if (w.dump) fprintf(w.dump, "%11.3f    push\n", w.ms / 1000.0);
+}
+
+uint64_t drawnSinceAsked() {
+  uint64_t h = w.askedHash;
+  w.askedHash = FNV_SEED;
+  return h;
 }
 
 void armButtonWake() { w.buttonArmed = true; }

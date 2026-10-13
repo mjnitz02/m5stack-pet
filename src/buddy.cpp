@@ -116,11 +116,6 @@ void buddyZs(uint32_t t, uint8_t period, uint8_t lag2, uint8_t lag3, int x, int 
   glyphAt("z", DIM,   x - 4 + p3 / 2, y3 - p3 / 2);
 }
 
-void buddyDots(uint32_t t, uint16_t color) {
-  static const char* const DOTS[] = { ".  ", ".. ", "...", " ..", "  .", "   " };
-  glyphAt(DOTS[t % 6], color, 22, 14);
-}
-
 void buddyBangs(uint32_t t, int dx) {
   if ((t / 2) & 1) glyphAt("!", YEL, -dx, 0);
   if ((t / 3) & 1) glyphAt("!", YEL, dx, 4);
@@ -207,6 +202,11 @@ void buddySetLook(uint16_t tint, uint8_t hat) {
 }
 
 uint16_t buddyInkColor() { return _tint ? _tint : buddyBodyColor(); }
+
+int buddyHatHeight() {
+  static const uint8_t TALL[HAT_N] = { 0, 8, 9, 14, 10 };
+  return TALL[_hat];
+}
 
 // Only redraw when tickCount actually changes — animations run at TICK_MS
 // (5 fps), the loop runs faster, and the redraw is identical between

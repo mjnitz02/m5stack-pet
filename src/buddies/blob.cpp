@@ -57,31 +57,21 @@ static void doIdle(uint32_t t) {
   buddyPrintBody(P[SEQ[beat]]);
 }
 
-// ─── PLAY ───  ~10s cycle, 6 poses + dot ticker
-// Not played anywhere yet: see "A playing animation" in docs/toy-box.md.
-// Frowns, churns and wonders: reads as worried, not playing. Redraw.
+// ─── PLAY ───  1.6s a bounce, 3 poses (bounces a ball on its head)
 static void doPlay(uint32_t t) {
-  static const char* const FOCUS_A[5] = { "            ", "   .----.   ", "  ( v  v )  ", "  (   --  ) ", "   `----`   " };
-  static const char* const FOCUS_B[5] = { "            ", "   .----.   ", "  ( v  v )  ", "  (   __  ) ", "   `----`   " };
-  static const char* const CHURN[5]   = { "            ", "  .~----~.  ", " ( v    v ) ", " (   oo   )", "  `~----~`  " };
-  static const char* const THINK[5]   = { "      ?     ", "   .----.   ", "  ( ^  ^ )  ", "  (   ..  ) ", "   `----`   " };
-  static const char* const PROCESS[5] = { "      *     ", "  .------.  ", " ( O    O ) ", " (   ==   )", "  `------`  " };
-  static const char* const DRIP_W[5]  = { "            ", "   .----.   ", "  ( v  v )  ", "  (   --  ) ", "  `--.----` " };
+  static const char* const WATCH[5] = { "            ", "   .----.   ", "  ( ^  ^ )  ", "  (  ww  )  ", "   `----`   " };
+  static const char* const READY[5] = { "            ", "   .----.   ", "  ( o  o )  ", "  (  uu  )  ", "   `----`   " };
+  static const char* const BONK[5]  = { "            ", "  .------.  ", " ( >    < ) ", " (   ww   ) ", "  `------`  " };
 
-  const char* const* P[6] = { FOCUS_A, FOCUS_B, CHURN, THINK, PROCESS, DRIP_W };
-  static const uint8_t SEQ[] = {
-    0,1,0,1,0,1, 2,2, 0,1,0,1, 3,3, 4,4, 0,1,5,5,2
-  };
-  uint8_t beat = (t / 5) % sizeof(SEQ);
-  buddyPrintBody(P[SEQ[beat]]);
+  // Where the ball is, from on the head to the top of its bounce and back.
+  static const int8_t UP[8] = { 0, 6, 12, 16, 18, 16, 12, 6 };
+  uint8_t p = t % 8;
+  buddyPrintBody(p == 0 ? BONK : (p == 1 || p == 7) ? READY : WATCH);
 
-  buddyDots(t);
-
-  // tiny bubble rising inside the slime
-  int b = (t / 2) % 8;
-  buddySetColor(AQUA);
-  buddySetCursor(BUDDY_X_CENTER - 2, BUDDY_Y_OVERLAY + 18 - b);
-  buddyPrint(b < 6 ? "o" : " ");
+  buddySetColor(YEL);
+  int y = BUDDY_Y_OVERLAY + 21 - buddyHatHeight() - UP[p];
+  buddySetCursor(BUDDY_X_CENTER - 3, y < 1 ? 1 : y);   // a tall hat leaves less room under the top edge
+  buddyPrint("o");
 }
 
 // ─── ATTENTION ───  ~8s cycle, 6 poses + ! pulse

@@ -52,30 +52,24 @@ static void doIdle(uint32_t t) {
   buddyPrintBody(P[SEQ[beat]]);
 }
 
-// ─── PLAY ───  ~10s cycle, 6 poses + dot ticker
-// Not played anywhere yet: see "A playing animation" in docs/toy-box.md.
-// Types and reads a clipboard: desk work from the original project. Redraw.
+// ─── PLAY ───  1.6s a throw, 4 poses (juggles two balls)
 static void doPlay(uint32_t t) {
-  static const char* const TYPE_A[5]  = { "            ", "   .----.   ", "  ( v  v )  ", "  (__--__)  ", "  /)\\/\\/(\\  " };
-  static const char* const TYPE_B[5]  = { "            ", "   .----.   ", "  ( v  v )  ", "  (__==__)  ", "  (\\/\\/\\/)  " };
-  static const char* const THINK[5]   = { "      ?     ", "   .----.   ", "  ( ^  ^ )  ", "  (__..__)  ", "  /\\/\\/\\/\\  " };
-  static const char* const SCRIBE[5]  = { "    [_]     ", "   .---|.   ", "  ( o  o|)  ", "  (__--__)  ", "  /\\(\\/\\/\\  " };
-  static const char* const EUREKA[5]  = { "      *     ", "   .----.   ", "  ( O  O )  ", "  (__^^__)  ", " //\\/\\/\\\\\\ " };
-  static const char* const RELIEF[5]  = { "    ~~~     ", "   .----.   ", "  ( -  - )  ", "  (__--__)  ", "  /\\/\\/\\/\\  " };
+  static const char* const EYE_L[5]  = { "            ", "   .----.   ", " \\(o   o )/ ", "  (__ww__)  ", "  /\\/\\/\\/\\  " };
+  static const char* const EYE_R[5]  = { "            ", "   .----.   ", " \\( o   o)/ ", "  (__ww__)  ", "  \\/\\/\\/\\/  " };
+  static const char* const UP_A[5]   = { "            ", "   .----.   ", " \\( ^  ^ )/ ", "  (__ww__)  ", "  /\\/\\/\\/\\  " };
+  static const char* const UP_B[5]   = { "            ", "   .----.   ", " \\( ^  ^ )/ ", "  (__ww__)  ", "  \\/\\/\\/\\/  " };
 
-  const char* const* P[6] = { TYPE_A, TYPE_B, THINK, SCRIBE, EUREKA, RELIEF };
-  static const uint8_t SEQ[] = {
-    0,1,0,1,0,1, 2,2, 0,1,0,1, 3,3, 2,4, 0,1,0,1,5
-  };
-  uint8_t beat = (t / 5) % sizeof(SEQ);
-  buddyPrintBody(P[SEQ[beat]]);
+  // Each ball goes up from its arm and comes back; the eyes follow whichever
+  // is about to land.
+  static const int8_t UP[8] = { 0, 7, 13, 17, 19, 17, 13, 7 };
+  uint8_t p = t % 8;
+  buddyPrintBody(p == 0 ? EYE_L : p == 4 ? EYE_R : (p & 1) ? UP_A : UP_B);
 
-  buddyDots(t, AQUA);
-
-  // Tiny bubbles drift up
-  int b = (t * 2) % 18;
-  buddySetColor(INK);
-  buddySetCursor(BUDDY_X_CENTER - 30, BUDDY_Y_OVERLAY + 18 - b);
+  buddySetColor(YEL);
+  buddySetCursor(BUDDY_X_CENTER - 30, BUDDY_Y_OVERLAY + 26 - UP[p]);
+  buddyPrint("o");
+  buddySetColor(AQUA);
+  buddySetCursor(BUDDY_X_CENTER + 24, BUDDY_Y_OVERLAY + 26 - UP[(p + 4) % 8]);
   buddyPrint("o");
 }
 

@@ -780,7 +780,7 @@ static void tickLearn(uint32_t now, bool a, bool b) {
       if (before(now, lsUntil)) break;
       if (++lsStep < LS_N) { lsBeginStep(now); break; }
       spr.fillSprite(BG);
-      spr.pushSprite(0, 0);
+      show();
       {
         static const uint16_t TUNE[] = { 1047, 1319, 1568, 2093 };
         jingle(TUNE, 4, 90);

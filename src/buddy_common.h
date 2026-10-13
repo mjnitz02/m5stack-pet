@@ -26,6 +26,9 @@ void buddyPrintBody(const char* const* lines, int yOffset = 0, int xOff = 0);
 void buddySetCursor(int x, int y);
 void buddySetColor(uint16_t fg);
 void buddyPrint(const char* s);
+// How far today's hat stands above the head at 1x, for anything that has to
+// land on top of it.
+int  buddyHatHeight();
 
 // The drifting characters most animals share. Positions are 1x pixels from
 // (BUDDY_X_CENTER, BUDDY_Y_OVERLAY); the arguments are where animals differ.
@@ -33,7 +36,6 @@ void buddyPrint(const char* s);
 // first; y3 is the third's own height.
 void buddyZs(uint32_t t, uint8_t period, uint8_t lag2, uint8_t lag3, int x, int y, int y3,
              uint16_t first = DIM);
-void buddyDots(uint32_t t, uint16_t color = INK);             // "..." ticker
 void buddyBangs(uint32_t t, int dx);                                  // two blinking "!"
 // Falling "*" and one other glyph, in five colours.
 void buddyConfetti(uint32_t t, const char* other, uint16_t fourth = INK, uint16_t fifth = GREEN);

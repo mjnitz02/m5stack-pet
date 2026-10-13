@@ -51,9 +51,7 @@ static void doIdle(uint32_t t) {
   buddyPrintBody(P[SEQ[beat]]);
 }
 
-// ─── PLAY ───  ~10s cycle, 6 poses + dot ticker
-// Not played anywhere yet: see "A playing animation" in docs/toy-box.md.
-// Walks, pecks at a seed and gulps. Usable as it is; would also suit the feed screen.
+// ─── PLAY ───  ~10s cycle, 6 poses (walks, pecks at a seed and gulps)
 static void doPlay(uint32_t t) {
   static const char* const STEP_A[5] = { "    ,,     ", "  <(o )__  ", "   (  ._>  ", "    `--'   ", "    ^ ^    " };
   static const char* const STEP_B[5] = { "    ,,     ", "  <(o )__  ", "   (  ._>  ", "    `--'   ", "     ^^    " };
@@ -68,8 +66,6 @@ static void doPlay(uint32_t t) {
   };
   uint8_t beat = (t / 5) % sizeof(SEQ);
   buddyPrintBody(P[SEQ[beat]]);
-
-  buddyDots(t);
 }
 
 // ─── ATTENTION ───  ~8s cycle, tuft straight up + ! pulse

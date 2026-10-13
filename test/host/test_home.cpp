@@ -130,3 +130,31 @@ TEST(low_battery_changes_nothing_but_the_picture) {
     CHECK_EQ(probe::screen(), "food");
   });
 }
+
+// The octopus juggles a yellow ball and an aqua one; nothing else on the pet
+// screen draws a yellow "o".
+static bool juggling(Stick& s) {
+  s.watchDrawing();
+  s.run(2000);
+  for (const std::string& call : s.drawn())
+    if (call.find("FFE0/0000 \"o\"") != std::string::npos) return true;
+  return false;
+}
+
+TEST(pet_plays_by_itself_now_and_then) {
+  hatchedPet().boot(Wake::Button, [](Stick& s) {
+    s.run(5000);
+    CHECK(!juggling(s));
+    s.run(20000);                              // 24 to 36 seconds in is a playing stretch
+    CHECK(juggling(s));
+    s.run(12000);
+    CHECK(!juggling(s));
+  });
+}
+
+TEST(pet_asking_for_something_does_not_play) {
+  hatchedPet(5, 0, 3).boot(Wake::Button, [](Stick& s) {
+    s.run(26000);
+    CHECK(!juggling(s));
+  });
+}

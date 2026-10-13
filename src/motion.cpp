@@ -3,7 +3,21 @@
 #include "input.h"
 #include "pet.h"
 
-// Every read of the accelerometer is in this file.
+// The one read of the accelerometer. A frame can ask for it several times
+// over (the shake sample, the tilt, face-down); the sensor is read for the
+// first and the rest get the same answer.
+static float accel[3] = { 0, 0, 1 };
+static bool  accelRead = false;
+
+void motionNewFrame() { accelRead = false; }
+
+static const float* readAccel() {
+  if (!accelRead) {
+    M5.Imu.getAccel(&accel[0], &accel[1], &accel[2]);
+    accelRead = true;
+  }
+  return accel;
+}
 
 // One motion sample every 50 ms, shared by everything that cares about
 // movement: how far the pull on the stick is from resting 1 g.
@@ -18,8 +32,8 @@ void sampleMotion(uint32_t now) {
   imuFresh = false;
   if (now - lastImuMs < 50) return;
   lastImuMs = now;
-  float ax, ay, az;
-  M5.Imu.getAccel(&ax, &ay, &az);
+  const float* v = readAccel();
+  float ax = v[0], ay = v[1], az = v[2];
   float mag = sqrtf(ax*ax + ay*ay + az*az);
   imuDelta = fabsf(mag - accelBaseline);
   accelBaseline = accelBaseline * 0.95f + mag * 0.05f;
@@ -101,8 +115,7 @@ static void tiltSetLevel() {
 }
 
 bool tiltUpdate(uint32_t now) {
-  float a[3];
-  M5.Imu.getAccel(&a[0], &a[1], &a[2]);
+  const float* a = readAccel();
   if (before(now, tiltZeroUntil)) {
     for (int i = 0; i < 3; i++) tiltSum[i] += a[i];
     tiltN++;
@@ -124,9 +137,8 @@ bool tiltUpdate(uint32_t now) {
 
 // Face-down = Z-axis dominant and negative. Debounced so a toss doesn't count.
 bool isFaceDown() {
-  float ax, ay, az;
-  M5.Imu.getAccel(&ax, &ay, &az);
-  return az < -0.7f && fabsf(ax) < 0.4f && fabsf(ay) < 0.4f;
+  const float* v = readAccel();
+  return v[2] < -0.7f && fabsf(v[0]) < 0.4f && fabsf(v[1]) < 0.4f;
 }
 
-void motionRaw(float* v) { M5.Imu.getAccel(&v[0], &v[1], &v[2]); }
+void motionRaw(float* v) { memcpy(v, readAccel(), sizeof(accel)); }

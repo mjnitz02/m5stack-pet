@@ -4,6 +4,10 @@
 // The accelerometer, three ways: how hard the stick is being moved, which
 // way it is tilted, and whether it is lying on its face.
 
+// Call at the top of each frame. The sensor is then read at most once in it,
+// and not at all on a frame where nothing asks.
+void motionNewFrame();
+
 // One motion sample every 50 ms, shared by everything that cares about
 // movement.
 extern float imuDelta;      // how far the pull on the stick is from resting 1 g

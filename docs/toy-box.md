@@ -1,7 +1,9 @@
 # Toy box
 
 Hold the blue button on the pet screen to open it, and hold it again from
-anywhere to go back to the pet.
+anywhere to go back to the pet. An activity that is set down, or that a kid
+cannot work out, goes back to the pet by itself after 20 seconds without a
+button or any movement; the toy box itself does after 15.
 
 ## The rules every activity keeps
 
@@ -60,7 +62,7 @@ belongs with these.
 | Activity | What you do | Ends |
 | --- | --- | --- |
 | **Catch** | Five snacks fall one at a time. Tilt left and right to slide the basket under them. | After the fifth. Three or more catches is worth two hearts. |
-| **Draw** | An Etch A Sketch. Tilt moves the pen and the line drifts through the rainbow as it goes. Blue starts a fresh page from the middle; a shake wipes the page. | Never. Hold blue to leave. |
+| **Draw** | An Etch A Sketch. Tilt moves the pen and the line drifts through the rainbow as it goes. Blue starts a fresh page from the middle; a shake wipes the page. | Never. Hold blue to leave, or set it down. |
 | **Marble** | Roll a ball, with a little momentum, onto three apples one at a time. Blue starts it over. | After the third apple. |
 
 Nobody holds the stick level, so every tilt activity spends its first half

@@ -9,6 +9,10 @@ it.
   asleep on a dimmed screen. 15 seconds later the screen goes off and the
   stick naps. For the next 60 minutes the blue button wakes it; after that it
   powers off and the side power button turns it back on.
+- **It leaves a game nobody is playing.** An activity with no button
+  pressed and the stick not moving for 20 seconds goes back to the pet, and
+  the toy box and the food tray do the same after 15. The pet screen is the
+  one that goes to bed, so a stick set down anywhere ends up asleep.
 - **Slow CPU.** 80 MHz instead of 240. The animations run at 5 frames a
   second, so it is plenty.
 - **Low brightness.** 1 of 4 by default, changed on the parent screen.

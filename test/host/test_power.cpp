@@ -129,18 +129,45 @@ TEST(toy_box_left_alone_goes_back_to_the_pet) {
   });
 }
 
-TEST(an_activity_left_alone_goes_to_bed) {
+TEST(an_activity_left_alone_goes_back_to_the_pet_then_to_bed) {
   Device d = hatchedPet();
   Boot b = d.boot(Wake::Button, [](Stick& s) {
     openTile(s, 10);
     CHECK_EQ(probe::screen(), "hide");
-    s.run(59000);
+    s.run(19000);
     CHECK_EQ(probe::screen(), "hide");
-    s.run(2500);
+    s.run(2000);
+    CHECK_EQ(probe::screen(), "home");
+    s.run(61000);
     CHECK_EQ(probe::screen(), "bed");
     s.run(30000);
   });
   CHECK_EQ(b.end, End::Nap);
+}
+
+// Stay-on keeps the stick awake; it does not keep it in a game nobody is playing.
+TEST(stay_on_still_leaves_an_activity_left_alone) {
+  Device d = hatchedPet();
+  d.nvs.set("pet/stayon", 1);
+  Boot b = d.boot(Wake::Button, [](Stick& s) {
+    openTile(s, 7);
+    CHECK_EQ(probe::screen(), "draw");
+    s.run(22000);
+    CHECK_EQ(probe::screen(), "home");
+    s.run(5 * 60000);
+    CHECK_EQ(probe::screen(), "home");
+  });
+  CHECK_EQ(b.end, End::Running);
+}
+
+// Moving is playing: no button is pressed on a walk.
+TEST(an_activity_being_moved_is_not_left_alone) {
+  Device d = hatchedPet();
+  d.boot(Wake::Button, [](Stick& s) {
+    openTile(s, 7);
+    for (int i = 0; i < 40; i++) { s.tilt(i % 2 ? -1.0f : 1.0f, 0.2f); s.run(1500); }
+    CHECK_EQ(probe::screen(), "draw");
+  });
 }
 
 TEST(moving_the_stick_keeps_an_activity_awake) {

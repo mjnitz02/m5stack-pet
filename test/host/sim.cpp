@@ -30,7 +30,7 @@ namespace sim {
 namespace {
 
 enum Motion { STILL, SHAKE, WIGGLE, SWAY };
-const float HELD[3] = { -0.55f, 0.0f, 0.84f };   // main.cpp, TILT_DEFAULT's readings
+const float HELD[3] = { -0.55f, 0.0f, 0.84f };   // motion.cpp, TILT_DEFAULT's readings
 
 struct World {
   uint32_t ms = 250;                 // a real boot is already a moment old at setup()

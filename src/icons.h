@@ -2,7 +2,7 @@
 #include <math.h>
 
 // Every picture on the kid-facing screens, drawn from circles, rectangles,
-// lines and triangles — no bitmaps. Header-only like pet.h: include from
+// lines and triangles — no bitmaps. Header-only like activities.h: include from
 // main.cpp only, after the sprite, the colours and the tile/food enums.
 
 static void drawText(const char* s, int cx, int y, uint8_t size, uint16_t col) {

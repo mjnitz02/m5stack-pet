@@ -51,9 +51,13 @@ HOST_FLAGS = -std=gnu++17 -g -O1 -funsigned-char -ffp-contract=off \
 	-fsanitize=address,undefined -fno-sanitize-recover=undefined \
 	-DBOARD_STICKS3 -Itest/fakes -Itest/host
 
+# main.cpp is left out of the list: test/host/firmware.cpp includes it, so the
+# probes can read the screens' own variables.
+HOST_SRC = $(filter-out src/main.cpp,$(wildcard src/*.cpp)) $(wildcard src/buddies/*.cpp)
+
 $(HOST_BIN): $(wildcard test/host/* test/fakes/* test/fakes/driver/* src/* src/buddies/*)
 	@mkdir -p $(dir $@)
-	$(HOST_CXX) $(HOST_FLAGS) test/host/*.cpp src/buddy.cpp src/buddies/*.cpp -o $@
+	$(HOST_CXX) $(HOST_FLAGS) test/host/*.cpp $(HOST_SRC) -o $@
 
 test-host: $(HOST_BIN)
 	$(HOST_BIN) $(HOST_TEST)

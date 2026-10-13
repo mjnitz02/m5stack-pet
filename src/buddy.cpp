@@ -5,7 +5,7 @@
 
 extern TFT_eSprite spr;
 
-// Mirrors PetState in main.cpp
+// Mirrors PetState in app.h
 enum { B_SLEEP, B_IDLE, B_PLAY, B_ATTENTION, B_CELEBRATE, B_DIZZY, B_HEART };
 
 // ──────────────── shared geometry ────────────────

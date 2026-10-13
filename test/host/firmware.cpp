@@ -6,14 +6,7 @@
 
 namespace probe {
 
-std::string screen() {
-  static const char* const NAME[] = {
-    "egg", "home", "food", "feed", "play", "bed", "parent", "menu", "reward", "cal", "learn",
-    "walk", "bath", "rock", "freeze", "dress", "stickers",
-    "draw", "marble", "copy", "hide", "dance" };
-  static_assert(sizeof(NAME) / sizeof(NAME[0]) == M_DANCE + 1, "NAME is out of step with Mode");
-  return NAME[mode];
-}
+std::string screen() { return screenName(); }
 
 bool hatched() { return pet().hatched; }
 bool learned() { return pet().learned; }

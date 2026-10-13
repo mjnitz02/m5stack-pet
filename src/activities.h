@@ -1,13 +1,15 @@
 #pragma once
 
-// The toy box activities. Header-only with file-static state, like pet.h:
-// include from main.cpp only, after the IMU helpers and finishActivity().
+// The toy box activities. Header-only with file-static state: include from
+// main.cpp only, after home.h, which has finishActivity().
 //
 // Rules they all keep: no words, no score, no way to lose. Each ends by
 // calling finishActivity(), which adds a heart and sometimes a sticker.
 // The ones on the first page of the toy box are the ones that get a kid
 // moving; the numbers that decide "enough movement" are guesses until they
 // have been tried in small hands, so they sit at the top of each section.
+
+const int FIELD_TOP = 86;  // the games' field starts under the small pet
 
 uint32_t actUntil = 0;     // one shared timer for the short cheer/dizzy beats
 static bool actBeat(uint32_t now) { return before(now, actUntil); }
@@ -356,6 +358,68 @@ static void tickFreeze(uint32_t now) {
   drawEye(CX, 182, fzPhase == FZ_WATCH);
   for (int i = 0; i < FREEZE_STARS; i++)
     drawStar(CX - (FREEZE_STARS - 1) * 11 + i * 22, 222, 7, i < fzStars ? YEL : DIM, i < fzStars);
+}
+
+// --- Catch ------------------------------------------------------------------
+// Snacks fall one at a time; tilt the stick left/right to slide the basket
+// under them. No way to lose — every round ends in a celebration.
+const uint8_t PLAY_ROUNDS = 5;
+const int     BASKET_Y    = 214, CATCH_HALF = 30;
+const float   FALL_PX_MS  = 0.055f;
+uint8_t  playRound = 0, playCaught = 0, playHits = 0, dropFood = 0;
+float    basketX = CX;
+int      dropX = CX;
+uint32_t dropStartMs = 0, playCheerUntil = 0;
+
+static void spawnDrop(uint32_t now) {
+  dropX = 16 + esp_random() % (W - 32);
+  dropFood = esp_random() % FOOD_N;
+  dropStartMs = now;
+}
+
+static void startPlay(uint32_t now) {
+  mode = M_PLAY;
+  playRound = playCaught = playHits = 0;
+  basketX = CX;
+  clearScreen(true);
+  spawnDrop(now);
+  tiltBegin(now);
+}
+
+static void endPlay(uint32_t now) {
+  finishActivity(now, playCaught >= 3 ? 2 : 1);
+}
+
+static void tickPlay(uint32_t now) {
+  lastInteractMs = now;
+
+  // Nothing falls until the tilt centre has been captured.
+  if (!tiltUpdate(now)) dropStartMs = now;
+  float target = CX + tiltX * 110.0f;
+  if (target < 30) target = 30;
+  if (target > W - 30) target = W - 30;
+  basketX += (target - basketX) * 0.3f;
+
+  int dropY = FIELD_TOP + 8 + (int)((now - dropStartMs) * FALL_PX_MS);
+  if (dropY >= BASKET_Y - 4) {
+    bool hit = fabsf(dropX - basketX) < CATCH_HALF;
+    if (hit) { playCaught++; playHits |= 1 << playRound; playCheerUntil = now + 700; beep(2000, 60); }
+    else     { beep(500, 60); }
+    if (++playRound >= PLAY_ROUNDS) { endPlay(now); return; }
+    spawnDrop(now);
+    dropY = FIELD_TOP + 8;
+  }
+
+  buddyTick(before(now, playCheerUntil) ? P_HEART : P_IDLE);
+
+  clearBelow(FIELD_TOP);
+  drawFood(dropFood, dropX, dropY);
+  drawText("\\___/", (int)basketX, BASKET_Y, 2, INK);
+  for (int i = 0; i < PLAY_ROUNDS; i++) {
+    int x = CX - (PLAY_ROUNDS - 1) * 8 + i * 16;
+    if (i < playRound) drawApple(x, 234, 3, playHits & (1 << i));
+    else               spr.drawPixel(x, 234, DIM);
+  }
 }
 
 // --- Draw -------------------------------------------------------------------

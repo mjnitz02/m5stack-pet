@@ -81,11 +81,18 @@ the short list to run on a real stick for those.
 
 ```
 src/
-  main.cpp       - game loop, core screens, toy box, power handling
-  activities.h   - the toy box activities
+  main.cpp       - setup, the loop, and the table of screens
+  app.h          - what every file shares: the sprite, the list of screens
+  home.h         - the pet's own screens: egg, home, food, bed, sticker reward
+  activities.h   - the toy box activities and the buttons lesson
+  toybox.h       - the toy box menu
+  parent.h       - the parent screen and tilt calibration
   icons.h        - every icon, drawn from shapes
-  pet.h          - saved state (needs, settings, stickers, dress-up)
-  petlog.h       - the debug build's on-device log
+  motion.*       - the accelerometer: shake, tilt, face-down
+  power.*        - battery, awake minutes, nap and power-off
+  input.*        - the two buttons: taps and holds
+  pet.*          - saved state (needs, settings, stickers, dress-up)
+  petlog.*       - the debug build's on-device log
   buddy.cpp      - animal registry and ASCII render helpers
   buddies/       - one file per animal, seven animation functions each
   palette.h      - every colour
@@ -102,6 +109,12 @@ tools/
   pull_log.py        - reads the on-device log over USB
 ```
 
+The screens (`home.h`, `activities.h`, `toybox.h`, `parent.h`) and
+`icons.h` are compiled as part of `main.cpp` and share its variables. A new
+screen is a new `Mode` in `app.h` and a row in the `SCREENS` table in
+`main.cpp`, which says what the loop does for it: whether hold-blue goes
+back to the pet, what happens when it is left alone, and so on.
+
 ## Tuning
 
 The numbers that decide how the toy feels sit at the top of their sections
@@ -110,12 +123,12 @@ in small hands.
 
 | What | Where | Constants |
 | --- | --- | --- |
-| Time to bed, nap and power-off | `main.cpp` | `IDLE_BED_MS`, `BED_OFF_MS`, `NAP_MS` |
-| How fast apples and hearts drop | `main.cpp` | `HUNGER_DECAY_MS`, `HAPPY_DECAY_MS` |
-| Taps to hatch | `main.cpp` | `EGG_TAPS` |
-| How hard a shake is | `main.cpp` | `SHAKE_DELTA` |
-| Sticker odds | `main.cpp` | `STICKER_ODDS` |
-| Catch speed and basket width | `main.cpp` | `FALL_PX_MS`, `CATCH_HALF` |
+| Time to bed, nap and power-off | `power.h` | `IDLE_BED_MS`, `BED_OFF_MS`, `NAP_MS` |
+| How fast apples and hearts drop | `home.h` | `HUNGER_DECAY_MS`, `HAPPY_DECAY_MS` |
+| Taps to hatch | `home.h` | `EGG_TAPS` |
+| How hard a shake is | `motion.h` | `SHAKE_DELTA` |
+| Sticker odds | `home.h` | `STICKER_ODDS` |
+| Catch speed and basket width | `activities.h` | `FALL_PX_MS`, `CATCH_HALF` |
 | Sound level | `main.cpp`, `setup()` | `M5.Speaker.setVolume(90)` |
 | How much moving each activity needs | `activities.h` | `WALK_PER_DOT`, `DANCE_PER_BAR`, `BATH_PER_BUBBLE`, `ROCK_PER_CROSS` |
 | Freeze: how still, for how long | `activities.h` | `FREEZE_MOVE`, `FREEZE_GRACE_MS`, `FREEZE_HOLD_MS` |

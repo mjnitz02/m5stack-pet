@@ -1,0 +1,360 @@
+--- seed 1 ---
+      0.250  serial open 115200
+      0.250  m5 begin
+      0.250  pm1 led 1
+      0.250  i2c 69 7D=04
+      0.250  brightness 102
+      0.270  serial bat=3900mV awake=0m
+      0.996  beep 1200 60
+      0s      frames=8   draw=5548b328adeaa834
+      1.260  beep 2400 25
+      1s      frames=8   draw=9cf030f0fae15cd8
+      2s      frames=9   draw=827b8d7ec437139a
+      3s      frames=14  draw=e4c77516490ac182
+      4s      frames=18  draw=da1cd99d38bab2b0
+      5s      frames=21  draw=a8bae65b2dfdd4c8
+      6s      frames=19  draw=9b68fcf37f1a5840
+      7.332  beep 1190 50
+      7s      frames=17  draw=650fb698357dcb6a
+      8s      frames=21  draw=fdc8f1705d3b2bd9
+      9s      frames=16  draw=1f596129a0cd8fbd
+     10.302  serial bat=3900mV awake=0m
+     10s      frames=20  draw=51ffc4fd488f3f7f
+     11.292  beep 1280 50
+     11s      frames=19  draw=3f9853aa6813c8f6
+     12s      frames=18  draw=75d4e949ba591356
+     13s      frames=14  draw=f7e52ead06809c1f
+     14s      frames=9   draw=ff4ad2c064343474
+     15s      frames=13  draw=c66dda45ac995db0
+     16s      frames=17  draw=532f5e1c2c154477
+     17.298  beep 1370 50
+     17s      frames=20  draw=8cd14fb98f2f1001
+     18s      frames=20  draw=8d327001da9c49a3
+     19s      frames=18  draw=a0956e6efb069fdc
+     20.334  serial bat=3900mV awake=0m
+     20s      frames=22  draw=8c7b48a3009188f9
+     21.324  beep 1460 50
+     21s      frames=19  draw=c017d2fcfb8a27d7
+     22s      frames=16  draw=76805d02b871b287
+     23s      frames=21  draw=b64bd288ea2f6f92
+     24s      frames=20  draw=1effc96d75e3de23
+     25.350  beep 1550 50
+     25s      frames=16  draw=c69d50228a67f2bd
+     26s      frames=20  draw=8a3b1d5abc8d2674
+     27s      frames=18  draw=8ac7489263dc6247
+     28s      frames=19  draw=5c7d4f88f0b673fd
+     29.376  beep 1640 50
+     29s      frames=20  draw=2c530519873e0272
+     30.366  serial bat=3900mV awake=0m
+     30s      frames=20  draw=1fce3c55aed55f0b
+     31s      frames=17  draw=049338e79fc8bc02
+     32s      frames=21  draw=860908fb37230312
+     33.402  beep 1730 50
+     33s      frames=19  draw=fbf40ca41a8e0b58
+     34s      frames=18  draw=c906de1b421ae41b
+     35s      frames=19  draw=0668342ee60a9f13
+     36s      frames=19  draw=3b56e099b47afa38
+     37.428  beep 1820 50
+     37s      frames=15  draw=d1998083362f1ef5
+     38s      frames=20  draw=55c3af70f9aa73cc
+     39s      frames=20  draw=a44d410494456573
+     40.398  serial bat=3900mV awake=0m
+     40s      frames=17  draw=44c217652becb26f
+     41.454  beep 1910 50
+     41s      frames=17  draw=cd374d91e1beffb8
+     42s      frames=19  draw=71fa260645a12f4e
+     43s      frames=16  draw=fad0a24fd855e7e9
+     44s      frames=19  draw=e34d3eed260e836f
+     45.480  beep 2000 50
+     45.480  save happy=2
+     45.480  save sound=1
+     45.480  save bright=1
+     45.480  save stayon=0
+     45.480  save awake=0
+     45.480  save food=0
+     45.480  save stickers=2048
+     45.480  save color=0
+     45.480  save hat=0
+     45.480  save eggtile=1
+     45.480  save pick=0
+     45.480  beep 1319 90
+     45.585  beep 1568 90
+     45.690  beep 2093 90
+     45.795  beep 2637 90
+     45s      frames=12  draw=5ca9ff76bebc78ee
+     46s      frames=11  draw=37fd4169f4148ddd
+     47s      frames=12  draw=8b9e54fbfefd25ce
+     48s      frames=14  draw=26a82ccf0b99610b
+     49s      frames=11  draw=f495cec7e86afac6
+     50.421  serial bat=3900mV awake=0m
+     50s      frames=8   draw=47e0f581921a547a
+     51s      frames=10  draw=249acb0def39483b
+     52s      frames=8   draw=560510043766e90a
+     53s      frames=4   draw=613a1d0d4d586353
+--- seed 2 ---
+      0.250  serial open 115200
+      0.250  m5 begin
+      0.250  pm1 led 1
+      0.250  i2c 69 7D=04
+      0.250  brightness 102
+      0.270  serial bat=3900mV awake=0m
+      0.996  beep 1200 60
+      0s      frames=8   draw=5548b328adeaa834
+      1.260  beep 2400 25
+      1s      frames=8   draw=e5165c25d33e6b5d
+      2s      frames=9   draw=c3a1e964a29d2017
+      3s      frames=14  draw=f7798215f8f7020e
+      4s      frames=17  draw=30520420a69a687f
+      5s      frames=21  draw=d9e3633c91df70e5
+      6s      frames=18  draw=7306cce93de28359
+      7.332  beep 1190 50
+      7s      frames=17  draw=89f695f005a8b52d
+      8s      frames=19  draw=100c74a7af7ed681
+      9s      frames=18  draw=766cc18d6c1ba478
+     10.302  serial bat=3900mV awake=0m
+     10s      frames=18  draw=532d026976ee42a7
+     11.292  beep 1280 50
+     11s      frames=22  draw=2ec1729d0ce9be89
+     12s      frames=19  draw=45f13bc4be2102d7
+     13s      frames=14  draw=f17eab418a0ef117
+     14s      frames=9   draw=d5526e8a4b8d77d1
+     15s      frames=14  draw=0438a08335f4362c
+     16s      frames=14  draw=e7a48f99762f9836
+     17.298  beep 1370 50
+     17s      frames=21  draw=fdb320f9a89f2b36
+     18s      frames=18  draw=d25048244a484172
+     19s      frames=15  draw=e412a4a820c41adf
+     20.334  serial bat=3900mV awake=0m
+     20s      frames=21  draw=9c68abb514a7feb0
+     21.324  beep 1460 50
+     21s      frames=20  draw=f1f6f572293a4380
+     22s      frames=17  draw=89c334b002b951ea
+     23s      frames=20  draw=996c5d2816e20897
+     24s      frames=20  draw=784b19136f907900
+     25.350  beep 1550 50
+     25s      frames=16  draw=b3337180e73457e5
+     26s      frames=19  draw=ad1abb7045236ea8
+     27s      frames=19  draw=69012fb93bf0bdf1
+     28s      frames=17  draw=2db9ef9bcc9f7cc9
+     29.376  beep 1640 50
+     29s      frames=20  draw=ec9ebf729cb16c9a
+     30.366  serial bat=3900mV awake=0m
+     30s      frames=20  draw=7f30dadbc74c5b10
+     31s      frames=16  draw=d980b0d9c3545239
+     32s      frames=20  draw=0d2fdda16e62a46b
+     33.402  beep 1730 50
+     33s      frames=18  draw=636f91cac467a325
+     34s      frames=17  draw=3262f5b4a87c7581
+     35s      frames=19  draw=344f2ae262ece5f2
+     36s      frames=19  draw=ef2087d7d2cd40c5
+     37.428  beep 1820 50
+     37s      frames=15  draw=242add56e039e5de
+     38s      frames=20  draw=76d4290ce15236ad
+     39s      frames=20  draw=829de10149003d56
+     40.398  serial bat=3900mV awake=0m
+     40s      frames=17  draw=f4bdb0c4577f0152
+     41.454  beep 1910 50
+     41s      frames=18  draw=7106127d4b889775
+     42s      frames=19  draw=30ed85403eeafe7a
+     43s      frames=16  draw=76740fdd3855d13f
+     44s      frames=19  draw=169a8f5d17442f7d
+     45.480  beep 2000 50
+     45.480  save happy=2
+     45.480  save sound=1
+     45.480  save bright=1
+     45.480  save stayon=0
+     45.480  save awake=0
+     45.480  save food=0
+     45.480  save stickers=0
+     45.480  save color=0
+     45.480  save hat=0
+     45.480  save eggtile=1
+     45.480  save pick=0
+     45.480  beep 1319 90
+     45.585  beep 1568 90
+     45.690  beep 2093 90
+     45s      frames=12  draw=fd78b80140d1da4e
+     46s      frames=9   draw=53a294dd56b07f9f
+     47s      frames=9   draw=875880701fbce867
+     48s      frames=8   draw=d6474fe4e2117b79
+     49s      frames=9   draw=2373a98dfde461ec
+--- seed 3 ---
+      0.250  serial open 115200
+      0.250  m5 begin
+      0.250  pm1 led 1
+      0.250  i2c 69 7D=04
+      0.250  brightness 102
+      0.270  serial bat=3900mV awake=0m
+      0.996  beep 1200 60
+      0s      frames=8   draw=5548b328adeaa834
+      1.260  beep 2400 25
+      1s      frames=8   draw=844fd274ba23bfad
+      2s      frames=9   draw=9b7a1026385f8ce7
+      3s      frames=13  draw=41abe34057eeb5c1
+      4s      frames=17  draw=173ddeeb820633d5
+      5s      frames=20  draw=b5c9db63c6538bf2
+      6s      frames=20  draw=1633a99d54679960
+      7.332  beep 1190 50
+      7s      frames=17  draw=ae68c4d8f1d4f595
+      8s      frames=21  draw=f885d27789d9789d
+      9s      frames=18  draw=51ae0302b34977aa
+     10.302  serial bat=3900mV awake=0m
+     10s      frames=16  draw=3b64e931b010ce65
+     11.292  beep 1280 50
+     11s      frames=23  draw=485ad668898c343a
+     12s      frames=22  draw=83d22418de172ea0
+     13s      frames=13  draw=eb85d410e76c0b09
+     14s      frames=9   draw=d1249ed6b23c823e
+     15s      frames=14  draw=d4c4a3848ceac732
+     16s      frames=16  draw=758db8316f848055
+     17.298  beep 1370 50
+     17s      frames=21  draw=fb1aa715f3a7815c
+     18s      frames=20  draw=a168c87e4ae5c3ac
+     19s      frames=19  draw=ee5690eb56b1a3c1
+     20.334  serial bat=3900mV awake=0m
+     20s      frames=21  draw=05d86e2b5cd76286
+     21.324  beep 1460 50
+     21s      frames=17  draw=5f38392f996958c6
+     22s      frames=16  draw=80a02c5f23a1e35b
+     23s      frames=18  draw=9e9004fa1d11e1aa
+     24s      frames=20  draw=523c134cb6a8b77c
+     25.350  beep 1550 50
+     25s      frames=16  draw=89a00399212df631
+     26s      frames=22  draw=94b7f09108dec461
+     27s      frames=18  draw=14cdf3706adf42cd
+     28s      frames=15  draw=f83e5cbef19fe2bb
+     29.376  beep 1640 50
+     29s      frames=19  draw=7137cef680b869db
+     30.366  serial bat=3900mV awake=0m
+     30s      frames=23  draw=fabf6d9ffc5a1c5e
+     31s      frames=14  draw=9c575dda23819236
+     32s      frames=20  draw=7055d47761a5d7df
+     33.402  beep 1730 50
+     33s      frames=19  draw=85c0638dcee3e555
+     34s      frames=17  draw=fe8d1c32e9867fde
+     35s      frames=19  draw=72e8bcc3e9c6a03f
+     36s      frames=18  draw=90cf94d3bde2c57e
+     37.428  beep 1820 50
+     37s      frames=16  draw=f34c0fa0d6d5ba91
+     38s      frames=22  draw=608c6f74dd52d5aa
+     39s      frames=19  draw=39d08e57df8f4b58
+     40.398  serial bat=3900mV awake=0m
+     40s      frames=15  draw=b7d241456744aaec
+     41.454  beep 1910 50
+     41s      frames=18  draw=8ace60eb8bcdd6ec
+     42s      frames=20  draw=7c450e7ef456d016
+     43s      frames=16  draw=a9fbd2875cb8b4ea
+     44s      frames=20  draw=0e2fba133d1cc1b8
+     45.480  beep 2000 50
+     45.480  save happy=2
+     45.480  save sound=1
+     45.480  save bright=1
+     45.480  save stayon=0
+     45.480  save awake=0
+     45.480  save food=0
+     45.480  save stickers=512
+     45.480  save color=0
+     45.480  save hat=0
+     45.480  save eggtile=1
+     45.480  save pick=0
+     45.480  beep 1319 90
+     45.585  beep 1568 90
+     45.690  beep 2093 90
+     45.795  beep 2637 90
+     45s      frames=12  draw=e220f5e61d1266e1
+     46s      frames=11  draw=ff9fe920ffc9be9a
+     47s      frames=12  draw=83521fc980baab8e
+     48s      frames=14  draw=32c0241a3ed33eff
+     49s      frames=11  draw=92fb56b9c2665b60
+     50.421  serial bat=3900mV awake=0m
+     50s      frames=8   draw=47e0f581921a547a
+     51s      frames=10  draw=249acb0def39483b
+     52s      frames=8   draw=560510043766e90a
+     53s      frames=4   draw=613a1d0d4d586353
+--- seed 4 ---
+      0.250  serial open 115200
+      0.250  m5 begin
+      0.250  pm1 led 1
+      0.250  i2c 69 7D=04
+      0.250  brightness 102
+      0.270  serial bat=3900mV awake=0m
+      0.996  beep 1200 60
+      0s      frames=8   draw=5548b328adeaa834
+      1.260  beep 2400 25
+      1s      frames=8   draw=e5165c25d33e6b5d
+      2s      frames=9   draw=c3a1e964a29d2017
+      3s      frames=14  draw=f7798215f8f7020e
+      4s      frames=17  draw=30520420a69a687f
+      5s      frames=21  draw=d9e3633c91df70e5
+      6s      frames=18  draw=7306cce93de28359
+      7.332  beep 1190 50
+      7s      frames=17  draw=89f695f005a8b52d
+      8s      frames=19  draw=100c74a7af7ed681
+      9s      frames=18  draw=766cc18d6c1ba478
+     10.302  serial bat=3900mV awake=0m
+     10s      frames=18  draw=532d026976ee42a7
+     11.292  beep 1280 50
+     11s      frames=22  draw=2ec1729d0ce9be89
+     12s      frames=19  draw=45f13bc4be2102d7
+     13s      frames=14  draw=f17eab418a0ef117
+     14s      frames=9   draw=d5526e8a4b8d77d1
+     15s      frames=14  draw=0438a08335f4362c
+     16s      frames=14  draw=e7a48f99762f9836
+     17.298  beep 1370 50
+     17s      frames=21  draw=fdb320f9a89f2b36
+     18s      frames=18  draw=d25048244a484172
+     19s      frames=15  draw=e412a4a820c41adf
+     20.334  serial bat=3900mV awake=0m
+     20s      frames=21  draw=9c68abb514a7feb0
+     21.324  beep 1460 50
+     21s      frames=20  draw=f1f6f572293a4380
+     22s      frames=17  draw=89c334b002b951ea
+     23s      frames=20  draw=996c5d2816e20897
+     24s      frames=20  draw=784b19136f907900
+     25.350  beep 1550 50
+     25s      frames=16  draw=b3337180e73457e5
+     26s      frames=19  draw=ad1abb7045236ea8
+     27s      frames=19  draw=69012fb93bf0bdf1
+     28s      frames=17  draw=2db9ef9bcc9f7cc9
+     29.376  beep 1640 50
+     29s      frames=20  draw=ec9ebf729cb16c9a
+     30.366  serial bat=3900mV awake=0m
+     30s      frames=20  draw=7f30dadbc74c5b10
+     31s      frames=16  draw=d980b0d9c3545239
+     32s      frames=20  draw=0d2fdda16e62a46b
+     33.402  beep 1730 50
+     33s      frames=18  draw=636f91cac467a325
+     34s      frames=17  draw=3262f5b4a87c7581
+     35s      frames=19  draw=344f2ae262ece5f2
+     36s      frames=19  draw=ef2087d7d2cd40c5
+     37.428  beep 1820 50
+     37s      frames=15  draw=242add56e039e5de
+     38s      frames=20  draw=76d4290ce15236ad
+     39s      frames=20  draw=829de10149003d56
+     40.398  serial bat=3900mV awake=0m
+     40s      frames=17  draw=f4bdb0c4577f0152
+     41.454  beep 1910 50
+     41s      frames=18  draw=7106127d4b889775
+     42s      frames=19  draw=30ed85403eeafe7a
+     43s      frames=16  draw=76740fdd3855d13f
+     44s      frames=19  draw=169a8f5d17442f7d
+     45.480  beep 2000 50
+     45.480  save happy=2
+     45.480  save sound=1
+     45.480  save bright=1
+     45.480  save stayon=0
+     45.480  save awake=0
+     45.480  save food=0
+     45.480  save stickers=0
+     45.480  save color=0
+     45.480  save hat=0
+     45.480  save eggtile=1
+     45.480  save pick=0
+     45.480  beep 1319 90
+     45.585  beep 1568 90
+     45.690  beep 2093 90
+     45s      frames=12  draw=fd78b80140d1da4e
+     46s      frames=9   draw=53a294dd56b07f9f
+     47s      frames=9   draw=875880701fbce867
+     48s      frames=8   draw=d6474fe4e2117b79
+     49s      frames=9   draw=2373a98dfde461ec

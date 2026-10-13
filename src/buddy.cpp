@@ -5,8 +5,8 @@
 
 extern TFT_eSprite spr;
 
-// Mirrors PetState in main.cpp
-enum { B_SLEEP, B_IDLE, B_BUSY, B_ATTENTION, B_CELEBRATE, B_DIZZY, B_HEART };
+// Mirrors PetState in app.h
+enum { B_SLEEP, B_IDLE, B_PLAY, B_ATTENTION, B_CELEBRATE, B_DIZZY, B_HEART };
 
 // ──────────────── shared geometry ────────────────
 const int BUDDY_X_CENTER = 67;
@@ -16,24 +16,7 @@ const int BUDDY_Y_OVERLAY = 6;
 const int BUDDY_CHAR_W   = 6;
 const int BUDDY_CHAR_H   = 8;
 
-// ──────────────── shared colors ────────────────
-const uint16_t BUDDY_BG     = 0x0000;
-const uint16_t BUDDY_HEART  = 0xF810;
-const uint16_t BUDDY_DIM    = 0x8410;
-const uint16_t BUDDY_YEL    = 0xFFE0;
-const uint16_t BUDDY_WHITE  = 0xFFFF;
-const uint16_t BUDDY_CYAN   = 0x07FF;
-const uint16_t BUDDY_GREEN  = 0x07E0;
-const uint16_t BUDDY_PURPLE = 0xA01F;
-const uint16_t BUDDY_RED    = 0xF800;
-const uint16_t BUDDY_BLUE   = 0x041F;
-
 // ──────────────── shared rendering helpers ────────────────
-// Render target indirection: defaults to the sprite, but can retarget to
-// M5.Lcd via buddyRenderTo (both inherit TFT_eSPI). Coords stay
-// fixed — species hardcode BUDDY_X_CENTER/BUDDY_Y_OVERLAY in their
-// particle calls, so retargeting position would only move the body.
-static TFT_eSPI* _tgt = &spr;
 // 2× on home screen, 1× in peek (mini-game). Species
 // art is space-padded to a fixed width for alignment at 1×; at 2× we trim
 // and re-center per line so the padding doesn't push ink off-screen.
@@ -47,56 +30,55 @@ void buddyPrintLine(const char* line, int yPx, uint16_t color, int xOff) {
   }
   int w = len * BUDDY_CHAR_W * _scale;
   int x = BUDDY_X_CENTER - w / 2 + xOff * _scale;
-  _tgt->setTextColor(color, BUDDY_BG);
-  _tgt->setCursor(x, yPx);
-  for (int i = 0; i < len; i++) _tgt->print(line[i]);
+  spr.setTextColor(color, BG);
+  spr.setCursor(x, yPx);
+  for (int i = 0; i < len; i++) spr.print(line[i]);
 }
 
 // ──────────────── dress-up ────────────────
 static uint16_t _tint = 0;
 static uint8_t  _hat  = HAT_NONE;
 
-void buddyDrawHat(TFT_eSPI* tgt, uint8_t hat, int x, int y, int k) {
+void buddyDrawHat(uint8_t hat, int x, int y, int k) {
   switch (hat) {
     case HAT_BOW:
-      tgt->fillTriangle(x, y - 4*k, x - 6*k, y - 8*k, x - 6*k, y, 0xFB76);
-      tgt->fillTriangle(x, y - 4*k, x + 6*k, y - 8*k, x + 6*k, y, 0xFB76);
-      tgt->fillCircle(x, y - 4*k, k + 1, BUDDY_WHITE);
+      spr.fillTriangle(x, y - 4*k, x - 6*k, y - 8*k, x - 6*k, y, ROSE);
+      spr.fillTriangle(x, y - 4*k, x + 6*k, y - 8*k, x + 6*k, y, ROSE);
+      spr.fillCircle(x, y - 4*k, k + 1, INK);
       break;
     case HAT_CROWN:
-      tgt->fillRect(x - 7*k, y - 3*k, 14*k + 1, 3*k, BUDDY_YEL);
-      tgt->fillTriangle(x - 7*k, y - 3*k, x - 7*k, y - 8*k, x - 2*k, y - 3*k, BUDDY_YEL);
-      tgt->fillTriangle(x - 4*k, y - 3*k, x,       y - 9*k, x + 4*k, y - 3*k, BUDDY_YEL);
-      tgt->fillTriangle(x + 7*k, y - 3*k, x + 7*k, y - 8*k, x + 2*k, y - 3*k, BUDDY_YEL);
+      spr.fillRect(x - 7*k, y - 3*k, 14*k + 1, 3*k, YEL);
+      spr.fillTriangle(x - 7*k, y - 3*k, x - 7*k, y - 8*k, x - 2*k, y - 3*k, YEL);
+      spr.fillTriangle(x - 4*k, y - 3*k, x,       y - 9*k, x + 4*k, y - 3*k, YEL);
+      spr.fillTriangle(x + 7*k, y - 3*k, x + 7*k, y - 8*k, x + 2*k, y - 3*k, YEL);
       break;
     case HAT_PARTY:
-      tgt->fillTriangle(x - 5*k, y, x + 5*k, y, x, y - 12*k, BUDDY_CYAN);
-      tgt->fillRect(x - 3*k, y - 6*k, 6*k + 1, k, 0xFB76);
-      tgt->fillCircle(x, y - 12*k, 2*k, BUDDY_YEL);
+      spr.fillTriangle(x - 5*k, y, x + 5*k, y, x, y - 12*k, AQUA);
+      spr.fillRect(x - 3*k, y - 6*k, 6*k + 1, k, ROSE);
+      spr.fillCircle(x, y - 12*k, 2*k, YEL);
       break;
     case HAT_FLOWER: {
       static const int8_t PX[5] = { 0, 3, 2, -2, -3 }, PY[5] = { -3, -1, 2, 2, -1 };
       for (int i = 0; i < 5; i++)
-        tgt->fillCircle(x + PX[i]*k, y - 5*k + PY[i]*k, 2*k, 0xFB76);
-      tgt->fillCircle(x, y - 5*k, 2*k - 1, BUDDY_YEL);
+        spr.fillCircle(x + PX[i]*k, y - 5*k + PY[i]*k, 2*k, ROSE);
+      spr.fillCircle(x, y - 5*k, 2*k - 1, YEL);
       break;
     }
   }
 }
 
-void buddyPrintSprite(const char* const* lines, uint8_t nLines, int yOffset, uint16_t color, int xOff) {
-  bool body = (color == buddyBodyColor());
-  if (body && _tint) color = _tint;
-  _tgt->setTextSize(_scale);
+void buddyPrintBody(const char* const* lines, int yOffset, int xOff) {
+  const uint8_t nLines = 5;
+  spr.setTextSize(_scale);
   int yBase = BUDDY_Y_BASE * _scale - (_scale - 1) * 14;
   for (uint8_t i = 0; i < nLines; i++) {
-    buddyPrintLine(lines[i], yBase + (yOffset + i * BUDDY_CHAR_H) * _scale, color, xOff);
+    buddyPrintLine(lines[i], yBase + (yOffset + i * BUDDY_CHAR_H) * _scale, buddyInkColor(), xOff);
   }
 
   // The hat sits on the first row with ink in it, so it follows bobs, jumps
   // and the curled-up sleep pose. 2× re-centres every row; 1× keeps the
   // padding, so find the ink's own centre there.
-  if (!body || _hat == HAT_NONE || nLines != 5) return;
+  if (_hat == HAT_NONE) return;
   for (uint8_t i = 0; i < nLines; i++) {
     const char* l = lines[i];
     int len = strlen(l), first = 0, last = len - 1;
@@ -105,7 +87,7 @@ void buddyPrintSprite(const char* const* lines, uint8_t nLines, int yOffset, uin
     while (l[last] == ' ') last--;
     int x = BUDDY_X_CENTER + xOff * _scale;
     if (_scale == 1) x += (first + last + 1 - len) * BUDDY_CHAR_W / 2;
-    buddyDrawHat(_tgt, _hat, x, yBase + (yOffset + i * BUDDY_CHAR_H + 3) * _scale, _scale);
+    buddyDrawHat(_hat, x, yBase + (yOffset + i * BUDDY_CHAR_H + 3) * _scale, _scale);
     return;
   }
 }
@@ -113,10 +95,64 @@ void buddyPrintSprite(const char* const* lines, uint8_t nLines, int yOffset, uin
 // Species pass 1× coords (relative to BUDDY_X_CENTER / BUDDY_Y_OVERLAY);
 // transform here so the species files stay scale-agnostic.
 void buddySetCursor(int x, int y) {
-  _tgt->setCursor(BUDDY_X_CENTER + (x - BUDDY_X_CENTER) * _scale, y * _scale);
+  spr.setCursor(BUDDY_X_CENTER + (x - BUDDY_X_CENTER) * _scale, y * _scale);
 }
-void buddySetColor(uint16_t fg)   { _tgt->setTextColor(fg, BUDDY_BG); }
-void buddyPrint(const char* s)    { _tgt->setTextSize(_scale); _tgt->print(s); }
+void buddySetColor(uint16_t fg)   { spr.setTextColor(fg, BG); }
+void buddyPrint(const char* s)    { spr.setTextSize(_scale); spr.print(s); }
+
+// ──────────────── shared overlays ────────────────
+static void glyphAt(const char* s, uint16_t color, int dx, int dy) {
+  buddySetColor(color);
+  buddySetCursor(BUDDY_X_CENTER + dx, BUDDY_Y_OVERLAY + dy);
+  buddyPrint(s);
+}
+
+void buddyZs(uint32_t t, uint8_t period, uint8_t lag2, uint8_t lag3, int x, int y, int y3, uint16_t first) {
+  int p1 = t % period;
+  int p2 = (t + lag2) % period;
+  int p3 = (t + lag3) % period;
+  glyphAt("z", first,       x + p1,         y - p1 * 2);
+  glyphAt("Z", INK, x + 6 + p2,     y - 4 - p2);
+  glyphAt("z", DIM,   x - 4 + p3 / 2, y3 - p3 / 2);
+}
+
+void buddyBangs(uint32_t t, int dx) {
+  if ((t / 2) & 1) glyphAt("!", YEL, -dx, 0);
+  if ((t / 3) & 1) glyphAt("!", YEL, dx, 4);
+}
+
+void buddyConfetti(uint32_t t, const char* other, uint16_t fourth, uint16_t fifth) {
+  const uint16_t cols[] = { YEL, HEART, AQUA, fourth, fifth };
+  for (int i = 0; i < 6; i++) {
+    int phase = (t * 2 + i * 11) % 22;
+    int y = BUDDY_Y_OVERLAY - 6 + phase;
+    if (y > BUDDY_Y_BASE + 20 || y < 0) continue;
+    glyphAt((i + (int)(t / 2)) & 1 ? "*" : other, cols[i % 5], -36 + i * 14, -6 + phase);
+  }
+}
+
+void buddyOrbit(uint32_t t, const char* glyph, uint16_t color, int y) {
+  static const int8_t OX[] = { 0, 5, 7, 5, 0, -5, -7, -5 };
+  static const int8_t OY[] = { -5, -3, 0, 3, 5, 3, 0, -3 };
+  uint8_t p = t % 8;
+  glyphAt(glyph, color, OX[p] - 2, y + OY[p]);
+}
+
+void buddyStars(uint32_t t, int y, uint16_t second) {
+  buddyOrbit(t, "*", AQUA, y);
+  buddyOrbit(t + 4, "*", second, y);
+}
+
+void buddyHearts(uint32_t t) {
+  buddySetColor(HEART);
+  for (int i = 0; i < 5; i++) {
+    int phase = (t + i * 4) % 16;
+    int y = BUDDY_Y_OVERLAY + 16 - phase;
+    if (y < -2 || y > BUDDY_Y_BASE) continue;
+    buddySetCursor(BUDDY_X_CENTER - 20 + i * 8 + ((phase / 3) & 1) * 2 - 1, y);
+    buddyPrint("v");
+  }
+}
 
 // ──────────────── species registry ────────────────
 extern const Species BLOB_SPECIES;
@@ -157,8 +193,6 @@ const char* buddySpeciesName() {
 
 uint8_t buddySpeciesCount() { return N_SPECIES; }
 
-uint8_t buddySpeciesIdx() { return currentSpeciesIdx; }
-
 uint16_t buddyBodyColor() { return SPECIES_TABLE[currentSpeciesIdx]->bodyColor; }
 
 void buddySetLook(uint16_t tint, uint8_t hat) {
@@ -169,9 +203,14 @@ void buddySetLook(uint16_t tint, uint8_t hat) {
 
 uint16_t buddyInkColor() { return _tint ? _tint : buddyBodyColor(); }
 
+int buddyHatHeight() {
+  static const uint8_t TALL[HAT_N] = { 0, 8, 9, 14, 10 };
+  return TALL[_hat];
+}
+
 // Only redraw when tickCount actually changes — animations run at TICK_MS
-// (5 fps), the loop runs at 60 fps, and the redraw is identical between
-// ticks. Gating saves ~12× the fillRect + sprite-print work. State changes
+// (5 fps), the loop runs faster, and the redraw is identical between
+// ticks. State changes
 // also need a redraw even mid-tick so transitions appear instantly.
 static uint8_t lastDrawnState = 0xFF;
 static uint8_t lastDrawnSpecies = 0xFF;
@@ -182,21 +221,6 @@ void buddySetPeek(bool peek) {
   if (s == _scale) return;
   _scale = s;
   buddyInvalidate();
-}
-
-// One-shot render to an arbitrary TFT_eSPI surface. Bypasses tick gating
-// and the sprite fillRect — caller owns clearing. Advances the frame
-// counter so animation runs even when buddyTick is bypassed. Always 1×.
-void buddyRenderTo(TFT_eSPI* tgt, uint8_t personaState) {
-  uint8_t prevS = _scale; _scale = 1;
-  if (personaState >= 7) personaState = B_IDLE;
-  uint32_t now = millis();
-  if ((int32_t)(now - nextTickAt) >= 0) { nextTickAt = now + TICK_MS; tickCount++; }
-  TFT_eSPI* prev = _tgt;
-  _tgt = tgt;
-  const Species* sp = SPECIES_TABLE[currentSpeciesIdx];
-  if (sp->states[personaState]) sp->states[personaState](tickCount);
-  _tgt = prev; _scale = prevS;
 }
 
 void buddyTick(uint8_t personaState) {
@@ -218,7 +242,7 @@ void buddyTick(uint8_t personaState) {
 
   // Clear the whole render strip — at 2× the body reaches y≈126, at 1× ≈82.
   spr.fillRect(0, 0, BUDDY_CANVAS_W,
-               (BUDDY_Y_BASE + 5 * BUDDY_CHAR_H + 12) * _scale, BUDDY_BG);
+               (BUDDY_Y_BASE + 5 * BUDDY_CHAR_H + 12) * _scale, BG);
 
   const Species* sp = SPECIES_TABLE[currentSpeciesIdx];
   if (sp->states[personaState]) sp->states[personaState](tickCount);

@@ -1,0 +1,140 @@
+--- first sticker, seed 2 ---
+      0.250  serial open 115200
+      0.250  m5 begin
+      0.250  pm1 led 1
+      0.250  i2c 69 7D=04
+      0.250  brightness 102
+      0.270  serial bat=3900mV awake=0m
+      0.369  beep 1800 25
+      0.534  beep 2400 25
+      0s      frames=16  draw=a29937a23e95eab2
+      1s      frames=20  draw=15a681d56f0b9938
+      2s      frames=20  draw=0fffa14e6b17c1c8
+      3s      frames=23  draw=f5a65331fa6550ea
+      4s      frames=19  draw=3a2a50cd12577109
+      5.154  beep 1080 60
+      5s      frames=21  draw=fff1b01add292398
+      6s      frames=22  draw=47fbb641a3061c2a
+      7s      frames=24  draw=e6720c9cf075bc04
+      8s      frames=22  draw=26a07fa3abad4001
+      9.774  beep 1260 60
+      9s      frames=25  draw=a790a4ccebd309fe
+     10.302  serial bat=3900mV awake=0m
+     10s      frames=24  draw=2df4ba03e4c38a0a
+     11s      frames=21  draw=aab29d2f511964c9
+     12s      frames=22  draw=4e1e802be1bd4810
+     13s      frames=21  draw=9e18d23d1dedec1b
+     14.394  beep 1440 60
+     14s      frames=23  draw=8570b9b620ce0319
+     15s      frames=23  draw=cc9348ecf83da663
+     16s      frames=24  draw=6006c18dd7384013
+     17s      frames=21  draw=240aa6e59347e632
+     18s      frames=21  draw=a31d0ae2716f45b9
+     19.014  beep 1620 60
+     19s      frames=20  draw=1d44c8ef522ddd7f
+     20.334  serial bat=3900mV awake=0m
+     20s      frames=21  draw=f0968bad085a872b
+     21s      frames=26  draw=9217d12eb62c4084
+     22s      frames=23  draw=ec08016d6d7b772e
+     23.634  beep 1800 60
+     23.634  save happy=2
+     23.634  save sound=1
+     23.634  save bright=1
+     23.634  save stayon=0
+     23.634  save awake=0
+     23.634  save food=0
+     23.634  save stickers=4
+     23.634  save color=0
+     23.634  save hat=0
+     23.634  save eggtile=1
+     23.634  save pick=0
+     23.634  beep 1319 90
+     23.739  beep 1568 90
+     23.844  beep 2093 90
+     23.949  beep 2637 90
+     23s      frames=14  draw=4c0a56fd3622d4fe
+     24s      frames=12  draw=15ec03aaf623d4ad
+     25s      frames=14  draw=36b784b6bef2a666
+     26s      frames=11  draw=da0efa3fb37ff4d2
+     27s      frames=13  draw=0d9a8f181b368f23
+     28s      frames=10  draw=c80dc2ba00cdce95
+     29s      frames=9   draw=dd660102654d1cd2
+     30.357  serial bat=3900mV awake=0m
+     30s      frames=8   draw=9e52c31180b4fa0b
+     31s      frames=10  draw=bb937e64862411d6
+     32s      frames=8   draw=397f94a7623fc609
+     33s      frames=8   draw=eb67bb06bfb7f291
+     34s      frames=10  draw=29340adec8b3cc1b
+     35s      frames=8   draw=dde263cd7bba7f65
+     36s      frames=10  draw=cb5773167124871b
+     37s      frames=6   draw=1fdac76745fdcd96
+--- last sticker, seed 2 ---
+      0.250  serial open 115200
+      0.250  m5 begin
+      0.250  pm1 led 1
+      0.250  i2c 69 7D=04
+      0.250  brightness 102
+      0.270  serial bat=3900mV awake=0m
+      0.369  beep 1800 25
+      0.534  beep 2400 25
+      0s      frames=16  draw=a29937a23e95eab2
+      1s      frames=20  draw=15a681d56f0b9938
+      2s      frames=20  draw=0fffa14e6b17c1c8
+      3s      frames=23  draw=f5a65331fa6550ea
+      4s      frames=19  draw=3a2a50cd12577109
+      5.154  beep 1080 60
+      5s      frames=21  draw=fff1b01add292398
+      6s      frames=22  draw=47fbb641a3061c2a
+      7s      frames=24  draw=e6720c9cf075bc04
+      8s      frames=22  draw=26a07fa3abad4001
+      9.774  beep 1260 60
+      9s      frames=25  draw=a790a4ccebd309fe
+     10.302  serial bat=3900mV awake=0m
+     10s      frames=24  draw=2df4ba03e4c38a0a
+     11s      frames=21  draw=aab29d2f511964c9
+     12s      frames=22  draw=4e1e802be1bd4810
+     13s      frames=21  draw=9e18d23d1dedec1b
+     14.394  beep 1440 60
+     14s      frames=23  draw=8570b9b620ce0319
+     15s      frames=23  draw=cc9348ecf83da663
+     16s      frames=24  draw=6006c18dd7384013
+     17s      frames=21  draw=240aa6e59347e632
+     18s      frames=21  draw=a31d0ae2716f45b9
+     19.014  beep 1620 60
+     19s      frames=20  draw=1d44c8ef522ddd7f
+     20.334  serial bat=3900mV awake=0m
+     20s      frames=21  draw=f0968bad085a872b
+     21s      frames=26  draw=9217d12eb62c4084
+     22s      frames=23  draw=ec08016d6d7b772e
+     23.634  beep 1800 60
+     23.634  save happy=2
+     23.634  save sound=1
+     23.634  save bright=1
+     23.634  save stayon=0
+     23.634  save awake=0
+     23.634  save food=0
+     23.634  save stickers=4095
+     23.634  save color=0
+     23.634  save hat=0
+     23.634  save eggtile=1
+     23.634  save pick=0
+     23.634  beep 1319 90
+     23.739  beep 1568 90
+     23.844  beep 2093 90
+     23.949  beep 2637 90
+     23s      frames=14  draw=4c0a56fd3622d4fe
+     24s      frames=12  draw=ae70e3ea0f4b3ca4
+     25s      frames=14  draw=500d75da8ef32ef6
+     26s      frames=11  draw=0fe822bcc40f23d3
+     27s      frames=13  draw=e7a958ed963122af
+     28s      frames=10  draw=c80dc2ba00cdce95
+     29s      frames=8   draw=d34e78882b59fd65
+     30.357  serial bat=3900mV awake=0m
+     30s      frames=8   draw=55fae38fc85d9c16
+     31s      frames=10  draw=c96cf9b8462529c2
+     32s      frames=8   draw=50990943cf0c0492
+     33s      frames=8   draw=98c5fae962af6e3b
+     34s      frames=10  draw=cc7507359f20069b
+     35s      frames=9   draw=1d2f198d71b0636c
+     36s      frames=10  draw=cb5773167124871b
+     37s      frames=6   draw=1fdac76745fdcd96

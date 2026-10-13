@@ -8,7 +8,7 @@ the parent screen's `pet` line names one.
 | Animal | Colour | Notes |
 | --- | --- | --- |
 | **Blob** | Green | A wobbly jelly that melts into a puddle to sleep. |
-| **Cat** | Rust | Twitching ears and tail; knocks things off tables when busy. |
+| **Cat** | Rust | Twitching ears and tail; knocks things off tables. |
 | **Chick** | Yellow | Started as a duck that the testers called a chicken. Pecks at seeds. |
 | **Dog** | Tan | The cat's body with floppy ears; pants, wags and noses a ball along. |
 | **Ghost** | White | Friendly. Floats, and fades out and back in its sleep. |
@@ -27,7 +27,7 @@ drifting characters such as Zs, hearts or confetti.
 | --- | --- |
 | sleep | Bedtime, the second half of Rock to sleep, eyes shut in Freeze |
 | idle | Most of the time |
-| busy | Nothing plays it today. It is kept from the original project. |
+| play | Now and then on the pet screen, for twelve seconds in every 48, when neither need row is empty. Each animal has its own game: the blob bounces a ball on its head, the cat and the dog have a ball, the chick pecks at a seed, the ghost plays peekaboo, the octopus juggles and the penguin skates. |
 | attention | A need row is empty; watching in Freeze |
 | celebrate | Hatching, dancing, finishing an activity, a favourite food |
 | dizzy | The stick was shaken; a miss in Freeze or Copycat |

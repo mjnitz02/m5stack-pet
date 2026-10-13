@@ -120,6 +120,9 @@ out.
 
 ## Ideas not built
 
+- **The playing animation in more places.** It plays now and then on the pet
+  screen. It could also play in Catch, and the chick's (pecking at a seed)
+  would suit the feed screen.
 - **A nudge toward moving.** The moving activities could give two hearts
   where the sit-still games give one. Today only a good round of Catch does.
 - **Sticker pace.** One in three finishes means roughly 35 to 40 plays to

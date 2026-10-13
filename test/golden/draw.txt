@@ -1,0 +1,70 @@
+      0.250  serial open 115200
+      0.250  m5 begin
+      0.250  pm1 led 1
+      0.250  i2c 69 7D=04
+      0.250  brightness 102
+      0.270  serial bat=3900mV awake=0m
+      0.996  beep 1200 60
+      0s      frames=8   draw=5548b328adeaa834
+      1.260  beep 1800 25
+      1.425  beep 1800 25
+      1.590  beep 1800 25
+      1.755  beep 1800 25
+      1.920  beep 1800 25
+      1s      frames=5   draw=c3de45d8dd6d3add
+      2.085  beep 1800 25
+      2.250  beep 1800 25
+      2.415  beep 2400 25
+      2s      frames=9   draw=cc2f71d6e5029877
+      3s      frames=23  draw=f1b5ceeeab5d8c29
+      4s      frames=30  draw=f9dce2c2890348d6
+      5s      frames=30  draw=635b58b36ff05373
+      6s      frames=30  draw=1f638bea6eb6dc48
+      7s      frames=31  draw=f66898203dcfaa50
+      8s      frames=30  draw=66dc9d3da06adb32
+      9.543  beep 2400 25
+      9s      frames=30  draw=cc159f3afc258f47
+     10.302  serial bat=3900mV awake=0m
+     10s      frames=31  draw=84e1d1c089e702fb
+     11s      frames=30  draw=8e1cb15677d43ea5
+     12s      frames=30  draw=82b6677014996e17
+     13.998  beep 700 60
+     13s      frames=31  draw=e4576bfc2c68aacc
+     14.064  beep 700 60
+     14.130  beep 700 60
+     14.196  beep 700 60
+     14.262  beep 700 60
+     14.328  beep 700 60
+     14.394  beep 700 60
+     14.460  beep 700 60
+     14.526  beep 700 60
+     14.592  beep 700 60
+     14.658  beep 700 60
+     14.724  beep 700 60
+     14.790  beep 700 60
+     14.856  beep 700 60
+     14.922  beep 700 60
+     14s      frames=30  draw=043fbee843917ed6
+     15s      frames=30  draw=01a67e3c6a1081c6
+     16s      frames=30  draw=9b3a2285323d8a6d
+     17.232  beep 1200 60
+     17.232  save happy=2
+     17.232  save sound=1
+     17.232  save bright=1
+     17.232  save stayon=0
+     17.232  save awake=0
+     17.232  save food=0
+     17.232  save stickers=0
+     17.232  save color=0
+     17.232  save hat=0
+     17.232  save eggtile=1
+     17.232  save pick=0
+     17.232  beep 1319 90
+     17.337  beep 1568 90
+     17.442  beep 2093 90
+     17s      frames=11  draw=66909d1db8f8cb75
+     18s      frames=10  draw=bad0c1ba7318f1f4
+     19s      frames=8   draw=5c8cb6d49cf71c7b
+     20.319  serial bat=3900mV awake=0m
+     20s      frames=8   draw=506d7ebff5355561
+     21s      frames=8   draw=9c385ac7a5d0b474

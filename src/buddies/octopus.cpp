@@ -1,9 +1,4 @@
-#include "../buddy.h"
 #include "../buddy_common.h"
-#include "../compat.h"
-#include <string.h>
-
-extern TFT_eSprite spr;
 
 namespace octopus {
 
@@ -25,21 +20,9 @@ static void doSleep(uint32_t t) {
     0,5,1,1
   };
   uint8_t beat = (t / 5) % sizeof(SEQ);
-  buddyPrintSprite(P[SEQ[beat]], 5, 0, 0xA01F);
+  buddyPrintBody(P[SEQ[beat]]);
 
-  // Z particles drift up
-  int p1 = (t)     % 10;
-  int p2 = (t + 4) % 10;
-  int p3 = (t + 7) % 10;
-  buddySetColor(BUDDY_DIM);
-  buddySetCursor(BUDDY_X_CENTER + 18 + p1, BUDDY_Y_OVERLAY + 16 - p1 * 2);
-  buddyPrint("z");
-  buddySetColor(BUDDY_WHITE);
-  buddySetCursor(BUDDY_X_CENTER + 24 + p2, BUDDY_Y_OVERLAY + 12 - p2);
-  buddyPrint("Z");
-  buddySetColor(BUDDY_DIM);
-  buddySetCursor(BUDDY_X_CENTER + 14 + p3 / 2, BUDDY_Y_OVERLAY + 8 - p3 / 2);
-  buddyPrint("z");
+  buddyZs(t, 10, 4, 7, 18, 16, 8);
 }
 
 // ─── IDLE ───  ~14s cycle, 10 poses
@@ -66,34 +49,27 @@ static void doIdle(uint32_t t) {
     9,9,0,1
   };
   uint8_t beat = (t / 5) % sizeof(SEQ);
-  buddyPrintSprite(P[SEQ[beat]], 5, 0, 0xA01F);
+  buddyPrintBody(P[SEQ[beat]]);
 }
 
-// ─── BUSY ───  ~10s cycle, 6 poses + bubble ticker
-static void doBusy(uint32_t t) {
-  static const char* const TYPE_A[5]  = { "            ", "   .----.   ", "  ( v  v )  ", "  (__--__)  ", "  /)\\/\\/(\\  " };
-  static const char* const TYPE_B[5]  = { "            ", "   .----.   ", "  ( v  v )  ", "  (__==__)  ", "  (\\/\\/\\/)  " };
-  static const char* const THINK[5]   = { "      ?     ", "   .----.   ", "  ( ^  ^ )  ", "  (__..__)  ", "  /\\/\\/\\/\\  " };
-  static const char* const SCRIBE[5]  = { "    [_]     ", "   .---|.   ", "  ( o  o|)  ", "  (__--__)  ", "  /\\(\\/\\/\\  " };
-  static const char* const EUREKA[5]  = { "      *     ", "   .----.   ", "  ( O  O )  ", "  (__^^__)  ", " //\\/\\/\\\\\\ " };
-  static const char* const RELIEF[5]  = { "    ~~~     ", "   .----.   ", "  ( -  - )  ", "  (__--__)  ", "  /\\/\\/\\/\\  " };
+// ─── PLAY ───  1.6s a throw, 4 poses (juggles two balls)
+static void doPlay(uint32_t t) {
+  static const char* const EYE_L[5]  = { "            ", "   .----.   ", " \\(o   o )/ ", "  (__ww__)  ", "  /\\/\\/\\/\\  " };
+  static const char* const EYE_R[5]  = { "            ", "   .----.   ", " \\( o   o)/ ", "  (__ww__)  ", "  \\/\\/\\/\\/  " };
+  static const char* const UP_A[5]   = { "            ", "   .----.   ", " \\( ^  ^ )/ ", "  (__ww__)  ", "  /\\/\\/\\/\\  " };
+  static const char* const UP_B[5]   = { "            ", "   .----.   ", " \\( ^  ^ )/ ", "  (__ww__)  ", "  \\/\\/\\/\\/  " };
 
-  const char* const* P[6] = { TYPE_A, TYPE_B, THINK, SCRIBE, EUREKA, RELIEF };
-  static const uint8_t SEQ[] = {
-    0,1,0,1,0,1, 2,2, 0,1,0,1, 3,3, 2,4, 0,1,0,1,5
-  };
-  uint8_t beat = (t / 5) % sizeof(SEQ);
-  buddyPrintSprite(P[SEQ[beat]], 5, 0, 0xA01F);
+  // Each ball goes up from its arm and comes back; the eyes follow whichever
+  // is about to land.
+  static const int8_t UP[8] = { 0, 7, 13, 17, 19, 17, 13, 7 };
+  uint8_t p = t % 8;
+  buddyPrintBody(p == 0 ? EYE_L : p == 4 ? EYE_R : (p & 1) ? UP_A : UP_B);
 
-  static const char* const DOTS[] = { ".  ", ".. ", "...", " ..", "  .", "   " };
-  buddySetColor(BUDDY_CYAN);
-  buddySetCursor(BUDDY_X_CENTER + 22, BUDDY_Y_OVERLAY + 14);
-  buddyPrint(DOTS[t % 6]);
-
-  // Tiny bubbles drift up
-  int b = (t * 2) % 18;
-  buddySetColor(BUDDY_WHITE);
-  buddySetCursor(BUDDY_X_CENTER - 30, BUDDY_Y_OVERLAY + 18 - b);
+  buddySetColor(YEL);
+  buddySetCursor(BUDDY_X_CENTER - 30, BUDDY_Y_OVERLAY + 26 - UP[p]);
+  buddyPrint("o");
+  buddySetColor(AQUA);
+  buddySetCursor(BUDDY_X_CENTER + 24, BUDDY_Y_OVERLAY + 26 - UP[(p + 4) % 8]);
   buddyPrint("o");
 }
 
@@ -113,18 +89,9 @@ static void doAttention(uint32_t t) {
   uint8_t beat = (t / 5) % sizeof(SEQ);
   uint8_t pose = SEQ[beat];
   int xOff = (pose == 4) ? ((t & 1) ? 1 : -1) : 0;
-  buddyPrintSprite(P[pose], 5, 0, 0xA01F, xOff);
+  buddyPrintBody(P[pose], 0, xOff);
 
-  if ((t / 2) & 1) {
-    buddySetColor(BUDDY_YEL);
-    buddySetCursor(BUDDY_X_CENTER - 6, BUDDY_Y_OVERLAY);
-    buddyPrint("!");
-  }
-  if ((t / 3) & 1) {
-    buddySetColor(BUDDY_YEL);
-    buddySetCursor(BUDDY_X_CENTER + 6, BUDDY_Y_OVERLAY + 4);
-    buddyPrint("!");
-  }
+  buddyBangs(t, 6);
 }
 
 // ─── CELEBRATE ───  ~5.6s cycle, 6 poses + confetti rain
@@ -140,18 +107,9 @@ static void doCelebrate(uint32_t t) {
   static const uint8_t SEQ[] = { 0,1,2,1,0, 3,4,3,4, 0,1,2,1,0, 5,5 };
   static const int8_t Y_SHIFT[] = { 0,-3,-6,-3,0, 0,0,0,0, 0,-3,-6,-3,0, 0,0 };
   uint8_t beat = (t / 3) % sizeof(SEQ);
-  buddyPrintSprite(P[SEQ[beat]], 5, Y_SHIFT[beat], 0xA01F);
+  buddyPrintBody(P[SEQ[beat]], Y_SHIFT[beat]);
 
-  static const uint16_t cols[] = { BUDDY_YEL, BUDDY_HEART, BUDDY_CYAN, BUDDY_WHITE, BUDDY_GREEN };
-  for (int i = 0; i < 6; i++) {
-    int phase = (t * 2 + i * 11) % 22;
-    int x = BUDDY_X_CENTER - 36 + i * 14;
-    int y = BUDDY_Y_OVERLAY - 6 + phase;
-    if (y > BUDDY_Y_BASE + 20 || y < 0) continue;
-    buddySetColor(cols[i % 5]);
-    buddySetCursor(x, y);
-    buddyPrint((i + (int)(t/2)) & 1 ? "*" : "o");
-  }
+  buddyConfetti(t, "o");
 }
 
 // ─── DIZZY ───  ~5.6s cycle, 5 poses + orbiting stars + ink cloud
@@ -166,24 +124,14 @@ static void doDizzy(uint32_t t) {
   static const uint8_t SEQ[] = { 0,1,0,1, 2,3, 0,1,0,1, 4,4, 2,3 };
   static const int8_t X_SHIFT[] = { -3,3,-3,3, 0,0, -3,3,-3,3, 0,0, 0,0 };
   uint8_t beat = (t / 4) % sizeof(SEQ);
-  buddyPrintSprite(P[SEQ[beat]], 5, 0, 0xA01F, X_SHIFT[beat]);
+  buddyPrintBody(P[SEQ[beat]], 0, X_SHIFT[beat]);
 
-  // Orbiting stars
-  static const int8_t OX[] = { 0, 5, 7, 5, 0, -5, -7, -5 };
-  static const int8_t OY[] = { -5, -3, 0, 3, 5, 3, 0, -3 };
-  uint8_t p1 = t % 8;
-  uint8_t p2 = (t + 4) % 8;
-  buddySetColor(BUDDY_CYAN);
-  buddySetCursor(BUDDY_X_CENTER + OX[p1] - 2, BUDDY_Y_OVERLAY + 4 + OY[p1]);
-  buddyPrint("*");
-  buddySetColor(BUDDY_PURPLE);
-  buddySetCursor(BUDDY_X_CENTER + OX[p2] - 2, BUDDY_Y_OVERLAY + 4 + OY[p2]);
-  buddyPrint("*");
+  buddyStars(t, 4, PLUM);
 
   // Ink cloud puff drifts down occasionally
   if ((t / 8) & 1) {
     int puff = (t % 8);
-    buddySetColor(BUDDY_DIM);
+    buddySetColor(DIM);
     buddySetCursor(BUDDY_X_CENTER - 24 - puff, BUDDY_Y_OVERLAY + 10 + puff);
     buddyPrint("o");
     buddySetCursor(BUDDY_X_CENTER + 24 + puff, BUDDY_Y_OVERLAY + 10 + puff);
@@ -206,17 +154,9 @@ static void doHeart(uint32_t t) {
   };
   static const int8_t Y_BOB[] = { 0,-1,0,-1, 0,-1,0, -1,0,0, -1,0,0,0, -1,0,-1,0, 0,-1,0,-1 };
   uint8_t beat = (t / 5) % sizeof(SEQ);
-  buddyPrintSprite(P[SEQ[beat]], 5, Y_BOB[beat], 0xA01F);
+  buddyPrintBody(P[SEQ[beat]], Y_BOB[beat]);
 
-  buddySetColor(BUDDY_HEART);
-  for (int i = 0; i < 5; i++) {
-    int phase = (t + i * 4) % 16;
-    int y = BUDDY_Y_OVERLAY + 16 - phase;
-    if (y < -2 || y > BUDDY_Y_BASE) continue;
-    int x = BUDDY_X_CENTER - 20 + i * 8 + ((phase / 3) & 1) * 2 - 1;
-    buddySetCursor(x, y);
-    buddyPrint("v");
-  }
+  buddyHearts(t);
 }
 
 }  // namespace octopus
@@ -224,6 +164,6 @@ static void doHeart(uint32_t t) {
 extern const Species OCTOPUS_SPECIES = {
   "octopus",
   0xA01F,
-  { octopus::doSleep, octopus::doIdle, octopus::doBusy, octopus::doAttention,
+  { octopus::doSleep, octopus::doIdle, octopus::doPlay, octopus::doAttention,
     octopus::doCelebrate, octopus::doDizzy, octopus::doHeart }
 };

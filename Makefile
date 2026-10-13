@@ -1,6 +1,6 @@
 PIO_ENV ?= m5stack-sticks3
 
-.PHONY: help build flash flash-debug log log-clear monitor test lint lint-tools lint-firmware secrets-scan install-hooks species clean
+.PHONY: help build flash flash-debug log log-clear monitor test test-art test-host test-host-update lint lint-tools lint-firmware lint-firmware-debug secrets-scan install-hooks species clean
 
 help:
 	@echo "build    compile firmware for $(PIO_ENV)"
@@ -9,7 +9,8 @@ help:
 	@echo "log      copy the on-device log to logs/ (debug build only)"
 	@echo "log-clear  empty the on-device log"
 	@echo "monitor  serial log (battery mV + awake minutes every 10s)"
-	@echo "test     species art checks"
+	@echo "test     species art checks, then the firmware tests on this computer"
+	@echo "test-host-update  rewrite the stored traces in test/golden/"
 	@echo "lint     ruff on tools/, then a build with warnings as errors"
 	@echo "secrets-scan   gitleaks over the git history"
 	@echo "install-hooks  pre-commit hook (ruff + art checks + secret scan)"
@@ -36,16 +37,48 @@ log-clear:
 monitor:
 	pio device monitor -e $(PIO_ENV)
 
-test:
+test: test-art test-host
+
+test-art:
 	uv run --no-project python -m unittest discover -s tools -v
+
+# The firmware in src/ built for this computer against the fake hardware in
+# test/fakes/ and driven by the tests in test/host/. HOST_TEST=text runs only
+# the tests with text in their name; SIM_DUMP=file writes every drawing call.
+HOST_CXX ?= c++
+HOST_BIN = .pio/host/pet_tests
+HOST_FLAGS = -std=gnu++17 -g -O1 -funsigned-char -ffp-contract=off \
+	-fsanitize=address,undefined -fno-sanitize-recover=undefined \
+	-DBOARD_STICKS3 -Itest/fakes -Itest/host
+
+# main.cpp is left out of the list: test/host/firmware.cpp includes it, so the
+# probes can read the screens' own variables.
+HOST_SRC = $(filter-out src/main.cpp,$(wildcard src/*.cpp)) $(wildcard src/buddies/*.cpp)
+
+$(HOST_BIN): $(wildcard test/host/* test/fakes/* test/fakes/driver/* src/* src/buddies/*)
+	@mkdir -p $(dir $@)
+	$(HOST_CXX) $(HOST_FLAGS) test/host/*.cpp $(HOST_SRC) -o $@
+
+test-host: $(HOST_BIN)
+	$(HOST_BIN) $(HOST_TEST)
+
+test-host-update: $(HOST_BIN)
+	UPDATE_GOLDEN=1 $(HOST_BIN) $(HOST_TEST)
 
 lint: lint-tools lint-firmware
 
 lint-tools:
 	uvx ruff check tools
 
+LINT_FLAGS = -Wall -Wextra -Werror -Wno-error=unused-variable
+
 lint-firmware:
-	PLATFORMIO_BUILD_SRC_FLAGS="-Wall -Wextra -Werror -Wno-error=unused-variable" pio run -e $(PIO_ENV)
+	PLATFORMIO_BUILD_SRC_FLAGS="$(LINT_FLAGS)" pio run -e $(PIO_ENV)
+
+# The debug build (src/petlog.h) is not what `make lint` or the tests compile,
+# so it gets a build of its own to keep it from rotting.
+lint-firmware-debug:
+	PLATFORMIO_BUILD_SRC_FLAGS="$(LINT_FLAGS) -DPET_LOG" pio run -e $(PIO_ENV)
 
 secrets-scan:
 	gitleaks detect --config .gitleaks.toml --redact --no-banner -v

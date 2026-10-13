@@ -1,9 +1,4 @@
-#include "../buddy.h"
 #include "../buddy_common.h"
-#include "../compat.h"
-#include <string.h>
-
-extern TFT_eSprite spr;
 
 namespace blob {
 
@@ -25,25 +20,13 @@ static void doSleep(uint32_t t) {
     1,2,1,0
   };
   uint8_t beat = (t / 5) % sizeof(SEQ);
-  buddyPrintSprite(P[SEQ[beat]], 5, 0, 0x07F0);
+  buddyPrintBody(P[SEQ[beat]]);
 
-  // Z particles drift up-right + a slow drip falling
-  int p1 = (t)     % 10;
-  int p2 = (t + 4) % 10;
-  int p3 = (t + 7) % 10;
-  buddySetColor(BUDDY_DIM);
-  buddySetCursor(BUDDY_X_CENTER + 20 + p1, BUDDY_Y_OVERLAY + 18 - p1 * 2);
-  buddyPrint("z");
-  buddySetColor(BUDDY_WHITE);
-  buddySetCursor(BUDDY_X_CENTER + 26 + p2, BUDDY_Y_OVERLAY + 14 - p2);
-  buddyPrint("Z");
-  buddySetColor(BUDDY_DIM);
-  buddySetCursor(BUDDY_X_CENTER + 16 + p3 / 2, BUDDY_Y_OVERLAY + 10 - p3 / 2);
-  buddyPrint("z");
+  buddyZs(t, 10, 4, 7, 20, 18, 10);
 
   // slow droplet falling under the puddle
   int dphase = (t / 2) % 12;
-  buddySetColor(0x07F0);
+  buddySetColor(buddyBodyColor());
   buddySetCursor(BUDDY_X_CENTER - 6, BUDDY_Y_BASE + 26 + dphase);
   buddyPrint(dphase < 8 ? "." : " ");
 }
@@ -71,35 +54,24 @@ static void doIdle(uint32_t t) {
     0,0,2,2
   };
   uint8_t beat = (t / 5) % sizeof(SEQ);
-  buddyPrintSprite(P[SEQ[beat]], 5, 0, 0x07F0);
+  buddyPrintBody(P[SEQ[beat]]);
 }
 
-// ─── BUSY ───  ~10s cycle, 6 poses + dot ticker
-static void doBusy(uint32_t t) {
-  static const char* const FOCUS_A[5] = { "            ", "   .----.   ", "  ( v  v )  ", "  (   --  ) ", "   `----`   " };
-  static const char* const FOCUS_B[5] = { "            ", "   .----.   ", "  ( v  v )  ", "  (   __  ) ", "   `----`   " };
-  static const char* const CHURN[5]   = { "            ", "  .~----~.  ", " ( v    v ) ", " (   oo   )", "  `~----~`  " };
-  static const char* const THINK[5]   = { "      ?     ", "   .----.   ", "  ( ^  ^ )  ", "  (   ..  ) ", "   `----`   " };
-  static const char* const PROCESS[5] = { "      *     ", "  .------.  ", " ( O    O ) ", " (   ==   )", "  `------`  " };
-  static const char* const DRIP_W[5]  = { "            ", "   .----.   ", "  ( v  v )  ", "  (   --  ) ", "  `--.----` " };
+// ─── PLAY ───  1.6s a bounce, 3 poses (bounces a ball on its head)
+static void doPlay(uint32_t t) {
+  static const char* const WATCH[5] = { "            ", "   .----.   ", "  ( ^  ^ )  ", "  (  ww  )  ", "   `----`   " };
+  static const char* const READY[5] = { "            ", "   .----.   ", "  ( o  o )  ", "  (  uu  )  ", "   `----`   " };
+  static const char* const BONK[5]  = { "            ", "  .------.  ", " ( >    < ) ", " (   ww   ) ", "  `------`  " };
 
-  const char* const* P[6] = { FOCUS_A, FOCUS_B, CHURN, THINK, PROCESS, DRIP_W };
-  static const uint8_t SEQ[] = {
-    0,1,0,1,0,1, 2,2, 0,1,0,1, 3,3, 4,4, 0,1,5,5,2
-  };
-  uint8_t beat = (t / 5) % sizeof(SEQ);
-  buddyPrintSprite(P[SEQ[beat]], 5, 0, 0x07F0);
+  // Where the ball is, from on the head to the top of its bounce and back.
+  static const int8_t UP[8] = { 0, 6, 12, 16, 18, 16, 12, 6 };
+  uint8_t p = t % 8;
+  buddyPrintBody(p == 0 ? BONK : (p == 1 || p == 7) ? READY : WATCH);
 
-  static const char* const DOTS[] = { ".  ", ".. ", "...", " ..", "  .", "   " };
-  buddySetColor(BUDDY_WHITE);
-  buddySetCursor(BUDDY_X_CENTER + 22, BUDDY_Y_OVERLAY + 14);
-  buddyPrint(DOTS[t % 6]);
-
-  // tiny bubble rising inside the slime
-  int b = (t / 2) % 8;
-  buddySetColor(BUDDY_CYAN);
-  buddySetCursor(BUDDY_X_CENTER - 2, BUDDY_Y_OVERLAY + 18 - b);
-  buddyPrint(b < 6 ? "o" : " ");
+  buddySetColor(YEL);
+  int y = BUDDY_Y_OVERLAY + 21 - buddyHatHeight() - UP[p];
+  buddySetCursor(BUDDY_X_CENTER - 3, y < 1 ? 1 : y);   // a tall hat leaves less room under the top edge
+  buddyPrint("o");
 }
 
 // ─── ATTENTION ───  ~8s cycle, 6 poses + ! pulse
@@ -118,20 +90,20 @@ static void doAttention(uint32_t t) {
   uint8_t beat = (t / 5) % sizeof(SEQ);
   uint8_t pose = SEQ[beat];
   int xOff = (pose == 4) ? ((t & 1) ? 1 : -1) : 0;
-  buddyPrintSprite(P[pose], 5, 0, 0x07F0, xOff);
+  buddyPrintBody(P[pose], 0, xOff);
 
   if ((t / 2) & 1) {
-    buddySetColor(BUDDY_YEL);
+    buddySetColor(YEL);
     buddySetCursor(BUDDY_X_CENTER - 8, BUDDY_Y_OVERLAY - 4);
     buddyPrint("!");
   }
   if ((t / 3) & 1) {
-    buddySetColor(BUDDY_RED);
+    buddySetColor(RED);
     buddySetCursor(BUDDY_X_CENTER + 8, BUDDY_Y_OVERLAY);
     buddyPrint("!");
   }
   if ((t / 4) & 1) {
-    buddySetColor(BUDDY_YEL);
+    buddySetColor(YEL);
     buddySetCursor(BUDDY_X_CENTER, BUDDY_Y_OVERLAY - 8);
     buddyPrint("!");
   }
@@ -150,20 +122,9 @@ static void doCelebrate(uint32_t t) {
   static const uint8_t SEQ[] = { 0,1,2,1,0, 3,4,3,4, 0,1,2,1,0, 5,5 };
   static const int8_t Y_SHIFT[] = { 0,-2,-7,-2,0, 0,0,0,0, 0,-2,-7,-2,0, 0,0 };
   uint8_t beat = (t / 3) % sizeof(SEQ);
-  buddyPrintSprite(P[SEQ[beat]], 5, Y_SHIFT[beat], 0x07F0);
+  buddyPrintBody(P[SEQ[beat]], Y_SHIFT[beat]);
 
-  static const uint16_t cols[] = { BUDDY_YEL, BUDDY_HEART, BUDDY_CYAN, 0x07F0, BUDDY_GREEN };
-  for (int i = 0; i < 6; i++) {
-    int phase = (t * 2 + i * 11) % 22;
-    int x = BUDDY_X_CENTER - 36 + i * 14;
-    int y = BUDDY_Y_OVERLAY - 6 + phase;
-    if (y > BUDDY_Y_BASE + 20 || y < 0) continue;
-    buddySetColor(cols[i % 5]);
-    buddySetCursor(x, y);
-    // alternating splat-droplets and stars
-    const char* glyph = (i + (int)(t/2)) & 1 ? "*" : "o";
-    buddyPrint(glyph);
-  }
+  buddyConfetti(t, "o", buddyBodyColor());
 }
 
 // ─── DIZZY ───  ~5.6s cycle, 5 poses + orbiting stars
@@ -178,22 +139,10 @@ static void doDizzy(uint32_t t) {
   static const uint8_t SEQ[] = { 0,1,0,1, 2,3, 0,1,0,1, 4,4, 2,3 };
   static const int8_t X_SHIFT[] = { -3,3,-3,3, 0,0, -3,3,-3,3, 0,0, 0,0 };
   uint8_t beat = (t / 4) % sizeof(SEQ);
-  buddyPrintSprite(P[SEQ[beat]], 5, 0, 0x07F0, X_SHIFT[beat]);
+  buddyPrintBody(P[SEQ[beat]], 0, X_SHIFT[beat]);
 
-  static const int8_t OX[] = { 0, 5, 7, 5, 0, -5, -7, -5 };
-  static const int8_t OY[] = { -5, -3, 0, 3, 5, 3, 0, -3 };
-  uint8_t p1 = t % 8;
-  uint8_t p2 = (t + 4) % 8;
-  uint8_t p3 = (t + 2) % 8;
-  buddySetColor(BUDDY_CYAN);
-  buddySetCursor(BUDDY_X_CENTER + OX[p1] - 2, BUDDY_Y_OVERLAY + 6 + OY[p1]);
-  buddyPrint("*");
-  buddySetColor(BUDDY_YEL);
-  buddySetCursor(BUDDY_X_CENTER + OX[p2] - 2, BUDDY_Y_OVERLAY + 6 + OY[p2]);
-  buddyPrint("*");
-  buddySetColor(BUDDY_WHITE);
-  buddySetCursor(BUDDY_X_CENTER + OX[p3] - 2, BUDDY_Y_OVERLAY + 6 + OY[p3]);
-  buddyPrint("o");
+  buddyStars(t);
+  buddyOrbit(t + 2, "o", INK);
 }
 
 // ─── HEART ───  ~10s cycle, 5 poses + rising heart stream
@@ -210,17 +159,9 @@ static void doHeart(uint32_t t) {
   };
   static const int8_t Y_BOB[] = { 0,-1,0,-1, 0,-1,0, -1,0,0, -1,0,0,0, -1,0,-1,0, -1,0 };
   uint8_t beat = (t / 5) % sizeof(SEQ);
-  buddyPrintSprite(P[SEQ[beat]], 5, Y_BOB[beat], 0x07F0);
+  buddyPrintBody(P[SEQ[beat]], Y_BOB[beat]);
 
-  buddySetColor(BUDDY_HEART);
-  for (int i = 0; i < 5; i++) {
-    int phase = (t + i * 4) % 16;
-    int y = BUDDY_Y_OVERLAY + 16 - phase;
-    if (y < -2 || y > BUDDY_Y_BASE) continue;
-    int x = BUDDY_X_CENTER - 20 + i * 8 + ((phase / 3) & 1) * 2 - 1;
-    buddySetCursor(x, y);
-    buddyPrint("v");
-  }
+  buddyHearts(t);
 }
 
 }  // namespace blob
@@ -228,6 +169,6 @@ static void doHeart(uint32_t t) {
 extern const Species BLOB_SPECIES = {
   "blob",
   0x07F0,
-  { blob::doSleep, blob::doIdle, blob::doBusy, blob::doAttention,
+  { blob::doSleep, blob::doIdle, blob::doPlay, blob::doAttention,
     blob::doCelebrate, blob::doDizzy, blob::doHeart }
 };

@@ -1,0 +1,145 @@
+--- hungry ---
+      0.250  serial open 115200
+      0.250  m5 begin
+      0.250  pm1 led 1
+      0.250  i2c 69 7D=04
+      0.250  brightness 102
+      0.270  serial bat=3900mV awake=0m
+      0s      frames=8   draw=6bb5f9e1c740866c
+      1s      frames=8   draw=9a44514b4b3ca147
+      2s      frames=9   draw=628eb2c9603136ba
+      3s      frames=10  draw=928aa6019b4d3904
+      4s      frames=8   draw=e9e6fa2f1cedf621
+      5s      frames=8   draw=579f87bf44792109
+      6s      frames=9   draw=11b1b9a8d772364c
+      7s      frames=9   draw=a77573d1e686d44f
+      8s      frames=8   draw=ddc4812ab30e80fd
+      9s      frames=9   draw=9c0f0b8328753018
+     10.302  serial bat=3900mV awake=0m
+     10s      frames=9   draw=3489032987d5cf00
+     11s      frames=8   draw=b965faf1c16f2d33
+     12s      frames=9   draw=690163f4725067ea
+     13s      frames=9   draw=ed370ea99fa1ed39
+     14s      frames=8   draw=c51123153debe8a6
+     15s      frames=9   draw=7e226936d9149380
+     16s      frames=9   draw=40ea3da91cd6d63b
+     17s      frames=8   draw=90e4eaa0c45f5d49
+     18s      frames=9   draw=febc99cc389dcfd0
+     19s      frames=9   draw=ed35c160653d7547
+     20s      frames=2   draw=0a838ba2ba7bb73b
+--- bored ---
+      0.250  serial open 115200
+      0.250  m5 begin
+      0.250  pm1 led 1
+      0.250  i2c 69 7D=04
+      0.250  brightness 102
+      0.270  serial bat=3900mV awake=0m
+      0s      frames=8   draw=b8fb2a84eba9249e
+      1s      frames=8   draw=59f97cce5b14ed45
+      2s      frames=9   draw=0e5cead2216d44af
+      3s      frames=10  draw=923a6b678f5a5e15
+      4s      frames=8   draw=855ae6bb4c2792cb
+      5s      frames=8   draw=c96d8cc3f2d1d304
+      6s      frames=9   draw=7669566c79076a34
+      7s      frames=9   draw=ec23d91c71579212
+      8s      frames=8   draw=59094ca8932e8f9b
+      9s      frames=9   draw=70fceffdd182093b
+     10.302  serial bat=3900mV awake=0m
+     10s      frames=9   draw=715abcd715e2c88c
+     11s      frames=8   draw=75b07a45615412f6
+     12s      frames=9   draw=a0270cc7a1af22f2
+     13s      frames=9   draw=9f773f18b5f704df
+     14s      frames=8   draw=6ff2b6a4890a95a9
+     15s      frames=9   draw=fb02095ae8d77b59
+     16s      frames=9   draw=d66afbb38f054b69
+     17s      frames=8   draw=afdf0f0c03ee3126
+     18s      frames=9   draw=2ae3b276a4c55033
+     19s      frames=9   draw=2c86ee3e18246fdc
+     20s      frames=2   draw=6ac700643285c761
+--- content ---
+      0.250  serial open 115200
+      0.250  m5 begin
+      0.250  pm1 led 1
+      0.250  i2c 69 7D=04
+      0.250  brightness 102
+      0.270  serial bat=3900mV awake=0m
+      0s      frames=8   draw=1dd58f02bd8be475
+      1s      frames=8   draw=7150e9cb67a2e9e3
+      2s      frames=9   draw=b941c42a40c40f9b
+      3s      frames=10  draw=73b04c6db635d654
+      4s      frames=8   draw=7d2fee4bb94145da
+      5s      frames=8   draw=2cc910868d66cecf
+      6s      frames=9   draw=d005dc67f2521ad6
+      7s      frames=9   draw=29514948fb12548f
+      8s      frames=8   draw=e76a593bb12cd483
+      9s      frames=9   draw=0d8667f26c199aed
+     10.302  serial bat=3900mV awake=0m
+     10s      frames=9   draw=0194f2b7be5f73d4
+     11s      frames=8   draw=48ddc2767fcff2db
+     12s      frames=9   draw=2d5b9dbe98e675b4
+     13s      frames=9   draw=0ddb688bbe3f5cde
+     14s      frames=8   draw=c7b35c07c886a213
+     15s      frames=9   draw=97c38f588e182bc5
+     16s      frames=9   draw=29514948fb12548f
+     17s      frames=8   draw=bf017f4a5a1bf3a5
+     18s      frames=10  draw=2a453cb3bcf8aa0e
+     19s      frames=9   draw=3a385d808ac52b33
+     20s      frames=2   draw=24eed33a2b45c8ce
+--- low battery ---
+      0.250  serial open 115200
+      0.250  m5 begin
+      0.250  pm1 led 1
+      0.250  i2c 69 7D=04
+      0.250  brightness 102
+      0.270  serial bat=3250mV awake=0m
+      0s      frames=8   draw=c6e63c507503cde7
+      1s      frames=8   draw=de9553cd4f79f444
+      2s      frames=8   draw=9742385113941a1d
+      3s      frames=10  draw=712ceedb5d19eb39
+      4s      frames=8   draw=45a965ca6cb378c7
+      5s      frames=8   draw=21967c46cda40a68
+      6s      frames=9   draw=63ae098d03c37ecc
+      7s      frames=9   draw=4336c209a88d20ea
+      8s      frames=8   draw=fb879b23a6ac521b
+      9s      frames=9   draw=364e01993d77c489
+     10.302  serial bat=3250mV awake=0m
+     10s      frames=9   draw=48d74c355b90faca
+     11s      frames=8   draw=7dad109450bca50b
+     12s      frames=9   draw=94c3854615492fcb
+     13s      frames=9   draw=faa7c5bdeb493e61
+     14s      frames=8   draw=a8cdbde6ac1395cb
+     15s      frames=9   draw=b1afb16392760994
+     16s      frames=9   draw=4336c209a88d20ea
+     17s      frames=8   draw=c262789c26ce0816
+     18s      frames=9   draw=21c05830d3280ac4
+     19s      frames=9   draw=9435459680d9b58a
+     20s      frames=2   draw=5acb862f687338a5
+--- full battery ---
+      0.250  serial open 115200
+      0.250  m5 begin
+      0.250  pm1 led 1
+      0.250  i2c 69 7D=04
+      0.250  brightness 102
+      0.270  serial bat=4200mV awake=0m
+      0s      frames=8   draw=552d601ff81ae83a
+      1s      frames=8   draw=c93e20b2acdd190d
+      2s      frames=8   draw=482168a8058f9cd5
+      3s      frames=10  draw=525566adcef28adf
+      4s      frames=8   draw=0ab4936003996477
+      5s      frames=8   draw=dea3c786eef8d6f0
+      6s      frames=9   draw=79a6f26301e3f289
+      7s      frames=9   draw=4be7b1ab114ab21b
+      8s      frames=8   draw=ea60c427b799bbbb
+      9s      frames=9   draw=dc40b38e99a6a42c
+     10.302  serial bat=4200mV awake=0m
+     10s      frames=9   draw=a23d690b6cea126e
+     11s      frames=8   draw=e0cb5014b12436c7
+     12s      frames=9   draw=82062a59e52335e2
+     13s      frames=9   draw=a87d02043a88d709
+     14s      frames=8   draw=27bf08574625108b
+     15s      frames=9   draw=5601d0e8a8906a8c
+     16s      frames=9   draw=4be7b1ab114ab21b
+     17s      frames=8   draw=fb778c45ec1f23ae
+     18s      frames=9   draw=987c476d82b7ec75
+     19s      frames=9   draw=babf1833b985d7b7
+     20s      frames=2   draw=3899e1d649334c32

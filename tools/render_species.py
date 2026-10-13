@@ -14,7 +14,7 @@ not drawn.
 Writes docs/species/<name>.png (first pose of each of the 7 states, at both
 sizes), docs/species/_all.png (idle pose of every species, home size) and
 docs/home.png (a mock of the pet screen, laid out as drawBottom() in
-src/main.cpp does it).
+src/home.h does it).
 
 Usage:
   uv run tools/render_species.py

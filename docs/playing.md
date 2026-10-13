@@ -20,10 +20,12 @@
 6. **Toy box** (hold the blue button). Two pages of icon tiles with more
    things to do. See [Toy box](toy-box.md).
 
-Apples drop one every 8 minutes the stick is on, hearts one every 12. Waking
-up costs one of each, so there is always something to do. When a row runs out
-the pet asks for attention, and that is the worst that happens. Time does not
-pass while the stick is off, so a pet left in a drawer comes back as it was.
+Apples drop one every 8 minutes the stick is awake, hearts one every 12. Naps
+do not count, and the minutes either side of one add up, so a day of short
+sessions wears the pet down as fast as one long one. Switching on after a
+power-off costs one of each, so there is always something to do, and starts
+both counts again. When a row runs out the pet asks for attention, and that
+is the worst that happens. A pet left in a drawer comes back as it was.
 
 ## The buttons lesson
 

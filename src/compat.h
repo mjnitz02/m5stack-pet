@@ -10,23 +10,11 @@
 // auto-detects the board at runtime.
 //
 // To keep the render code untouched, this header re-creates the legacy
-// display names it still uses (TFT_eSprite, TFT_eSPI) on top of M5GFX.
+// display name it still uses (TFT_eSprite) on top of M5GFX.
 // ---------------------------------------------------------------------------
 #include <M5Unified.h>
 #include <Arduino.h>
 
 // --- Display surfaces -------------------------------------------------------
 // TFT_eSprite -> M5Canvas (off-screen sprite, same drawing API).
-// TFT_eSPI    -> lgfx::LGFXBase, the common base of both M5GFX (M5.Lcd /
-//                M5.Display) and M5Canvas. buddyRenderTo() takes a pointer
-//                to it so it can draw to either the sprite or the live LCD.
 using TFT_eSprite = M5Canvas;
-using TFT_eSPI    = lgfx::LGFXBase;
-
-// --- Legacy bare color names (the old build pulled these from TFT_eSPI) -----
-#ifndef GREEN
-#define GREEN 0x07E0
-#endif
-#ifndef RED
-#define RED 0xF800
-#endif

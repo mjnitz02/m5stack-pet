@@ -14,40 +14,40 @@
       1s      frames=5   draw=c3de45d8dd6d3add
       2.085  beep 1800 25
       2.250  beep 2400 25
-      2s      frames=14  draw=c80ece924e097cc5
-      3s      frames=31  draw=aa128805093c7e1e
-      4.857  beep 2000 60
-      4s      frames=30  draw=9c696c0886c57070
-      5s      frames=30  draw=6c237a8a500a79aa
-      6.969  beep 500 60
-      6s      frames=30  draw=c87548f78f22d44d
-      7s      frames=31  draw=370945564240c646
-      8s      frames=30  draw=d242b211736f5171
-      9.081  beep 500 60
-      9s      frames=30  draw=b7ca7a84df68bd65
+      2s      frames=14  draw=c66d7b93cd7f0c40
+      3s      frames=31  draw=1eaa457dc241c4a3
+      4.791  beep 2000 60
+      4s      frames=30  draw=e35aa6965096c801
+      5s      frames=30  draw=5f2eff16b2baed65
+      6.837  beep 2000 60
+      6s      frames=30  draw=2a70265c06f37005
+      7s      frames=31  draw=16c61edfa0dbcc66
+      8.883  beep 500 60
+      8s      frames=30  draw=d10ff1db996dc6aa
+      9s      frames=30  draw=bbf50e72938ba380
      10.302  serial bat=3900mV awake=0m
-     10s      frames=31  draw=1b0410117c2303e8
-     11.193  beep 500 60
-     11s      frames=30  draw=26c869ef5b2f4c13
-     12s      frames=30  draw=f0788978a7bab8b3
-     13.305  beep 2000 60
-     13.305  save happy=2
-     13.305  save sound=1
-     13.305  save bright=1
-     13.305  save stayon=0
-     13.305  save awake=0
-     13.305  save food=0
-     13.305  save stickers=0
-     13.305  save color=0
-     13.305  save hat=0
-     13.305  save eggtile=1
-     13.305  save pick=0
-     13.305  beep 1319 90
-     13.410  beep 1568 90
-     13.515  beep 2093 90
-     13s      frames=14  draw=4689a1a0d01e737f
-     14s      frames=8   draw=1d84e55560a0a514
-     15s      frames=10  draw=14e525e8e34d1bbd
-     16s      frames=8   draw=56f8ab99311b7639
-     17s      frames=9   draw=26df086a9805ad9c
-     18s      frames=4   draw=a1535db2ad0d207f
+     10.929  beep 500 60
+     10s      frames=31  draw=d94db9f315a04f9c
+     11s      frames=30  draw=d99af8e65d977e03
+     12.975  beep 500 60
+     12.975  save happy=2
+     12.975  save sound=1
+     12.975  save bright=1
+     12.975  save stayon=0
+     12.975  save awake=0
+     12.975  save food=0
+     12.975  save stickers=0
+     12.975  save color=0
+     12.975  save hat=0
+     12.975  save eggtile=1
+     12.975  save pick=0
+     12.975  beep 1319 90
+     12s      frames=29  draw=97689b90b77ab042
+     13.080  beep 1568 90
+     13.185  beep 2093 90
+     13s      frames=7   draw=f837e42c09f4631b
+     14s      frames=10  draw=9876db82f1d0484b
+     15s      frames=8   draw=ff0e07a74381a7da
+     16s      frames=9   draw=a3228b3172946e63
+     17s      frames=10  draw=dff9106259e863fe
+     18s      frames=4   draw=06f877ad227841df

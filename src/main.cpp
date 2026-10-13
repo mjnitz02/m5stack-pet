@@ -174,12 +174,15 @@ const char* screenName() { return SCREENS[mode].name; }
 static bool screenHas(uint8_t flag) { return SCREENS[mode].flags & flag; }
 
 void setup() {
-  // USB-CDC (native USB on ESP32-S3) blocks on write when no serial monitor
-  // is attached — the TX buffer fills and Serial.print() waits forever for a
-  // host, hanging setup()/loop(). Make it non-blocking so the device runs
-  // standalone. The StickC Plus has a real UART and no such call.
+  // USB-CDC (native USB on ESP32-S3) blocks on write when the stick is plugged
+  // into a computer and nothing there has the port open: the 256-byte TX
+  // buffer fills (thirteen battery lines, so two minutes after boot) and
+  // Serial.print() waits for a reader, hanging loop(). The shortest timeout
+  // makes a write give up instead. Not 0: the core counts its retries down
+  // from the timeout, and from 0 that wraps round to a wait of weeks. The
+  // StickC Plus has a real UART and no such call.
 #if defined(BOARD_STICKS3)
-  Serial.setTxTimeoutMs(0);
+  Serial.setTxTimeoutMs(1);
 #endif
   Wake wake = powerWake();
   bool napOver = wake == WAKE_TIMER, napWoken = wake == WAKE_BUTTON;
@@ -239,11 +242,14 @@ void setup() {
 }
 
 void loop() {
+  logStep("update");
   M5.update();
   motionNewFrame();
   uint32_t now = millis();
   Mode     was = mode;
+  logStep("power");
   powerTick(now);
+  logStep("input");
 
   Frame f = { now, false, false, false };
   inputTaps(now, &f.a, &f.b);
@@ -275,14 +281,17 @@ void loop() {
     else                leaveToHome(now);
   }
 
+  logStep("motion");
   if (screenHas(SCR_MOTION)) {
     sampleMotion(now);
     f.shook = imuFresh && imuDelta > SHAKE_DELTA;
   } else {
     imuFresh = false;
   }
+  logStep("log");
   logTick(now);
 
+  logStep("idle");
   switch (SCREENS[mode].idle) {
     case IDLE_HOME:
       if (idleFor(now, MENU_IDLE_MS)) enterHome();
@@ -302,12 +311,16 @@ void loop() {
     buddyInvalidate();
   }
 
+  logStep("tick");
   SCREENS[mode].tick(f);
+  logStep("draw");
 
   if (mode != was) inputScreenChanged();
 
   if (screenHas(SCR_KID)) drawBatteryTrim();
   if (screenHas(SCR_KID) && before(now, soundFlashUntil)) drawSoundFlash();
+  logStep("show");
   show();
+  logStep("delay");
   delay(mode == M_BED ? 100 : 33);
 }

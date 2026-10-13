@@ -9,11 +9,15 @@
 static const char*    LOG_PATH = "/log.csv";
 static const size_t   LOG_MAX  = 1024 * 1024;   // about 90 hours of rows, then it starts over
 static const uint32_t LOG_TICK_MS = 10000;
+static const uint32_t LOG_SLOW_MS = 1000;       // longer than any tune, which blocks the loop while it plays
 
 static bool     _logOk = false;
 static float    _logMotion = 0, _logTurn = 0;
 static uint16_t _logBtnA = 0, _logBtnB = 0, _logFrames = 0;
 static uint32_t _logMarkMs = 0;
+static const char* _logStep = "setup";
+static const char* _logSlowStep = nullptr;
+static uint32_t _logStepMs = 0, _logSlowMs = 0;
 
 void logRow(const char* event) {
   if (!_logOk) return;
@@ -62,7 +66,7 @@ static void logSerial() {
     int c = Serial.read();
     if (c == 'L') {
 #if defined(BOARD_STICKS3)
-      Serial.setTxTimeoutMs(200);   // setup() made writes non-blocking, which would drop most of a dump
+      Serial.setTxTimeoutMs(200);   // setup() made writes give up at once, which would drop most of a dump
 #endif
       File f = _logOk ? LittleFS.open(LOG_PATH, FILE_READ) : File();
       Serial.printf("#LOG BEGIN %u\n", f ? (unsigned)f.size() : 0u);
@@ -72,7 +76,7 @@ static void logSerial() {
       Serial.println("#LOG END");
       Serial.flush();
 #if defined(BOARD_STICKS3)
-      Serial.setTxTimeoutMs(0);
+      Serial.setTxTimeoutMs(1);
 #endif
       lastInteractMs = millis();    // don't nod off right after a long dump
     } else if (c == 'C') {
@@ -90,6 +94,16 @@ static void logSerial() {
   }
 }
 
+// A freeze shows in the ten-second rows only as a low fps. This names the
+// step that was running: the slowest one since the last slow row, written by
+// the next logTick().
+void logStep(const char* name) {
+  uint32_t now = millis(), took = now - _logStepMs;
+  if (took > LOG_SLOW_MS && took > _logSlowMs) { _logSlowStep = _logStep; _logSlowMs = took; }
+  _logStep = name;
+  _logStepMs = now;
+}
+
 void logTick(uint32_t now) {
   static int8_t seenMode = -1;
   _logFrames++;
@@ -100,6 +114,12 @@ void logTick(uint32_t now) {
     if (imuTurn  > _logTurn)   _logTurn   = imuTurn;
   }
   logSerial();
+  if (_logSlowMs) {
+    char event[40];
+    snprintf(event, sizeof(event), "slow:%s:%lu", _logSlowStep, (unsigned long)_logSlowMs);
+    _logSlowMs = 0;
+    logRow(event);
+  }
   if (seenMode != (int8_t)mode) {
     seenMode = (int8_t)mode;
     logRow("mode");

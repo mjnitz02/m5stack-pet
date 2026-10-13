@@ -119,8 +119,9 @@ struct Frame { uint32_t now; bool a, b, shook; };   // the two taps, and a shake
 enum : uint8_t {
   IDLE_NONE,     // looks after itself
   IDLE_HOME,     // drifts back to the pet
-  IDLE_BED,      // goes to bed like the pet screen does. Moving the stick counts
-                 // as playing, so a walk isn't cut short for want of a button press
+  IDLE_PLAY,     // an activity: set down or puzzled over, it drifts back to the pet
+                 // too, which then puts itself to bed. Moving the stick counts as
+                 // playing, so a walk isn't cut short for want of a button press
   IDLE_PARENT,   // opened by a squeeze in a bag, or walked away from: back to
                  // the kid's screen, which puts itself to bed
 };
@@ -132,6 +133,8 @@ enum : uint8_t {
 const uint8_t PLAIN = SCR_KID | SCR_MOTION, GAME = PLAIN | SCR_BLUE_BACK;
 
 const uint32_t MENU_IDLE_MS = 15000;  // toy box / food tray left alone → back to the pet
+const uint32_t PLAY_IDLE_MS = 20000;  // an activity left alone → back to the pet. Longer: a kid working
+                                      // out what to do is not moving either
 
 // The egg and the lesson have no pet to put to bed: left alone, they nap
 // where they are.
@@ -156,17 +159,17 @@ static const Screen SCREENS[] = {
   { "reward",   [](const Frame& f) { tickReward(f.now); },                  IDLE_NONE,   PLAIN },
   { "cal",      [](const Frame& f) { tickCal(f.now, f.a, f.b); },           IDLE_PARENT, SCR_MOTION },
   { "learn",    [](const Frame& f) { tickLearn(f.now, f.a, f.b); napIfLeft(M_LEARN, f.now); }, IDLE_NONE, PLAIN },
-  { "walk",     [](const Frame& f) { tickWalk(f.now); },                    IDLE_BED,    GAME },
-  { "bath",     [](const Frame& f) { tickBath(f.now); },                    IDLE_BED,    GAME },
-  { "rock",     [](const Frame& f) { tickRock(f.now); },                    IDLE_BED,    GAME },
-  { "freeze",   [](const Frame& f) { tickFreeze(f.now); },                  IDLE_BED,    GAME },
-  { "dress",    [](const Frame& f) { tickDress(f.a, f.b); },                IDLE_BED,    GAME },
+  { "walk",     [](const Frame& f) { tickWalk(f.now); },                    IDLE_PLAY,   GAME },
+  { "bath",     [](const Frame& f) { tickBath(f.now); },                    IDLE_PLAY,   GAME },
+  { "rock",     [](const Frame& f) { tickRock(f.now); },                    IDLE_PLAY,   GAME },
+  { "freeze",   [](const Frame& f) { tickFreeze(f.now); },                  IDLE_PLAY,   GAME },
+  { "dress",    [](const Frame& f) { tickDress(f.a, f.b); },                IDLE_PLAY,   GAME },
   { "stickers", [](const Frame& f) { tickStickers(); if (f.a || f.b) openMenu(T_STICKERS); }, IDLE_HOME, GAME },
-  { "draw",     [](const Frame& f) { tickDraw(f.now, f.a, f.shook); },      IDLE_BED,    GAME },
-  { "marble",   [](const Frame& f) { tickMarble(f.now, f.a); },             IDLE_BED,    GAME },
-  { "copy",     [](const Frame& f) { tickCopy(f.now, f.a, f.b); },          IDLE_BED,    GAME },
-  { "hide",     [](const Frame& f) { tickHide(f.now, f.a, f.b); },          IDLE_BED,    GAME },
-  { "dance",    [](const Frame& f) { tickDance(f.now); },                   IDLE_BED,    GAME },
+  { "draw",     [](const Frame& f) { tickDraw(f.now, f.a, f.shook); },      IDLE_PLAY,   GAME },
+  { "marble",   [](const Frame& f) { tickMarble(f.now, f.a); },             IDLE_PLAY,   GAME },
+  { "copy",     [](const Frame& f) { tickCopy(f.now, f.a, f.b); },          IDLE_PLAY,   GAME },
+  { "hide",     [](const Frame& f) { tickHide(f.now, f.a, f.b); },          IDLE_PLAY,   GAME },
+  { "dance",    [](const Frame& f) { tickDance(f.now); },                   IDLE_PLAY,   GAME },
 };
 static_assert(sizeof(SCREENS) / sizeof(SCREENS[0]) == M_N, "SCREENS is out of step with Mode");
 
@@ -296,9 +299,9 @@ void loop() {
     case IDLE_HOME:
       if (idleFor(now, MENU_IDLE_MS)) enterHome();
       break;
-    case IDLE_BED:
+    case IDLE_PLAY:
       if (imuFresh && imuDelta > 0.12f) lastInteractMs = now;
-      if (!pet().stayOn && idleFor(now, IDLE_BED_MS)) startBed(now, false);
+      if (idleFor(now, PLAY_IDLE_MS)) enterHome();
       break;
     case IDLE_PARENT:
       if (!pet().stayOn && idleFor(now, IDLE_BED_MS)) leaveParent();

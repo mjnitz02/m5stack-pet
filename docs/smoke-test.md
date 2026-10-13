@@ -20,6 +20,10 @@ Flash with `make flash`, unplug USB, and work down the list.
 - [ ] Note the awake time on the parent screen, then let it nap and wake it
       eight times without touching it otherwise. The awake time has gone up
       by 10 minutes or a little over, not 8.
+- [ ] Start the drawing game and put the stick down. After 20 seconds it is
+      back on the pet, and a minute later it sleeps as usual.
+- [ ] Start a walk and keep the stick moving without pressing anything for
+      half a minute. It stays on the walk.
 - [ ] Hold both buttons for the parent screen and leave it. After a minute
       it is back on the pet, and it then sleeps as usual.
 - [ ] On USB, `make monitor` prints a battery line every ten seconds.

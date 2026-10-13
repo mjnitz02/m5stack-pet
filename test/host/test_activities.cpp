@@ -20,13 +20,17 @@ TEST(walk_finishes_with_enough_moving) {
   CHECK_EQ(d.nvs.get("pet/happy"), 2u);
 }
 
+// A still stick gets nowhere on a walk: it waits, then goes back to the pet
+// with nothing earned.
 TEST(walk_waits_while_the_stick_is_still) {
   Device d = oneHeart();
   d.nvs.set("pet/stayon", 1);
   d.boot(Wake::Button, [](Stick& s) {
     openTile(s, 0);
-    s.run(5 * 60000);
+    s.run(15000);
     CHECK_EQ(probe::screen(), "walk");
+    s.run(5 * 60000);
+    CHECK_EQ(probe::screen(), "home");
     CHECK_EQ(probe::happy(), 1);
   });
 }
@@ -74,8 +78,10 @@ TEST(rocking_waits_while_the_stick_is_still) {
   d.nvs.set("pet/stayon", 1);
   d.boot(Wake::Button, [](Stick& s) {
     openTile(s, 2);
-    s.run(3 * 60000);
+    s.run(15000);
     CHECK_EQ(probe::screen(), "rock");
+    s.run(3 * 60000);
+    CHECK_EQ(probe::screen(), "home");      // not bed: nothing rocked it to sleep
   });
 }
 

@@ -9,13 +9,25 @@ static const uint8_t PET_MAX = 4;        // pips per need row
 static const uint8_t PET_NO_SPECIES = 0xFF;   // nothing has hatched yet
 static const uint8_t PET_ROSTER = 1;          // which animal list the saved indexes refer to
 
+// Screen brightness. Two steps is plenty: the screen is mostly black and
+// reads fine in daylight, and brighter mostly shows the backlight bleeding
+// through the black. Saves from when there were five steps (0..4) map 0 to
+// low and the rest to high. The debug build has a third, dimmer step to try
+// out before picking where low should sit.
+enum : uint8_t { BRIGHT_LOW, BRIGHT_HIGH, BRIGHT_DIM };
+#if defined(PET_LOG)
+const uint8_t BRIGHT_STEPS = 3;
+#else
+const uint8_t BRIGHT_STEPS = 2;
+#endif
+
 struct PetSave {
   bool     hatched;
   uint8_t  species;
   uint8_t  hunger;      // 0..PET_MAX, 0 = hungry
   uint8_t  happy;       // 0..PET_MAX
   bool     sound;
-  uint8_t  bright;      // 0..4 → display brightness 51..255
+  uint8_t  bright;      // BRIGHT_LOW, BRIGHT_HIGH (or BRIGHT_DIM in a debug build)
   bool     stayOn;      // battery testing: never auto power-off
   uint32_t awakeMin;    // cumulative powered-on minutes since last zero
   uint8_t  food;        // last food picked, so the tray opens on it

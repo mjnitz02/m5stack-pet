@@ -7,7 +7,7 @@ it.
   on.
 - **It puts itself to bed.** After 60 seconds without input the pet falls
   asleep on a dimmed screen. 15 seconds later the screen goes off and the
-  stick naps. For the next 60 minutes the blue button wakes it; after that it
+  stick naps. For the next 12 hours the blue button wakes it; after that it
   powers off and the side power button turns it back on.
 - **It leaves a game nobody is playing.** An activity with no button
   pressed and the stick not moving for 20 seconds goes back to the pet, and
@@ -15,14 +15,22 @@ it.
   one that goes to bed, so a stick set down anywhere ends up asleep.
 - **Slow CPU.** 80 MHz instead of 240. The animations run at 5 frames a
   second, so it is plenty.
-- **Low brightness.** 1 of 4 by default, changed on the parent screen.
+- **Low brightness.** `low` (20%) by default; `high` (40%) on the parent screen.
 
 The StickS3 screen is an LCD, not an OLED. Black pixels do not save power on
 it, because the backlight is lit either way. Only the brightness level and
 the time the screen is on affect the battery.
 
-Five dim dashes along the top edge of the screen show the charge, one per
-20%. The last one turns orange.
+Three dim dashes along the top edge of the screen show the charge in three
+states, like a handheld console: all three is full, two is some left, and one
+orange dash is "recharge me", when the home screen also shows an orange
+battery. Finer steps would just look like it was draining during play. Full
+is 3.75 V and up, recharge me is under 3.55 V; the parent screen shows the
+exact voltage. On a full charge, left awake on the home screen at low
+brightness, the stick ran 2 h 25 min: about an hour of full, 40 minutes of
+some left, and 40 minutes of recharge me before it went flat. Played the
+usual way, a bit of play and then a nap, it lasts much longer, since a nap
+costs only a few mV an hour.
 
 On USB the stick cannot cut its own power, so "off" is a deep sleep that the
 blue button wakes.
@@ -48,9 +56,10 @@ the cable, plug it back in, and `make log` writes the rows to `logs/` as CSV.
 `make log-clear` empties it. The columns are described in `src/petlog.h`.
 `make flash` goes back to a build with none of it.
 
-The debug build also naps for 12 hours instead of 60 minutes, so one night
-off the cable shows how much the nap itself drains: compare `bat_mv` on the
-"nap" row with the next "boot:" row.
+One night off the cable shows how much the nap itself drains: compare
+`bat_mv` on two "boot:button" rows either side of a long nap. The "nap" row
+is taken on a dimmed screen right after play and reads lower than a "boot:"
+row at the same charge, so do not compare the two.
 
 The power chip has no current sensor, so drain has to be read off how fast
 the voltage falls. While USB is connected the battery is charging and its

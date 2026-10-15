@@ -60,7 +60,10 @@ static void show() {
   spr.pushSprite(0, 0);
 }
 
-static void applyBrightness() { M5.Display.setBrightness((pet().bright + 1) * 51); }
+static void applyBrightness() {
+  static const uint8_t PWM[] = { 51, 102, 25 };   // low, high, dim (debug only)
+  M5.Display.setBrightness(PWM[pet().bright]);
+}
 
 static void beep(uint16_t freq, uint16_t dur) {
   if (pet().sound) M5.Speaker.tone(freq, dur);
@@ -80,18 +83,14 @@ static void startDance(uint32_t now);   // in activities.h; the home screen star
 #include "toybox.h"
 #include "parent.h"
 
-// Battery at a glance for a grown-up: five slim dashes along the very top
-// edge, one per 20%. Dim on purpose so it reads as trim, not as a gauge; the
-// last dash turns orange. A dash only comes back once the reading is clearly
-// above its step, so a beep sagging the voltage doesn't make it flicker.
+// Battery at a glance for a grown-up: three slim dashes along the very top
+// edge, one per state in batLevel(). Dim on purpose so it reads as trim, not
+// as a gauge; at "recharge me" the one dash left turns orange.
 static void drawBatteryTrim() {
-  static uint8_t segs = 0xFF;
-  if (batMv <= 0) return;
-  int pct = batPct();
-  uint8_t want = (pct + 19) / 20;
-  if (segs == 0xFF || want < segs || pct > segs * 20 + 5) segs = want;
-  for (int i = 0; i < 5; i++)
-    spr.fillRect(CX - 26 + i * 11, 1, 9, 2, i >= segs ? GRID : segs <= 1 ? HOT : DIM);
+  BatLevel lv = batLevel();
+  if (lv == BAT_UNKNOWN) return;
+  for (int i = 0; i < 3; i++)
+    spr.fillRect(CX - 26 + i * 19, 1, 17, 2, i > lv ? GRID : lv == BAT_LOW ? HOT : DIM);
 }
 
 // Speaker glyph shown for a moment after the hold-side mute toggle. Not

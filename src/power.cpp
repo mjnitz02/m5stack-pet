@@ -16,6 +16,14 @@ static uint32_t lastBatMs = 0;
 
 void awakeRestart(uint32_t mark) { awakeMarkMs = mark; }
 
+// Steps down at once, but only back up once the reading is clearly over the
+// line, so a beep sagging the voltage can't make it flicker.
+static BatLevel batShown = BAT_UNKNOWN;
+static BatLevel levelFor(int mv) {
+  return mv >= BAT_PART_MV ? BAT_FULL : mv >= BAT_LOW_MV ? BAT_PART : BAT_LOW;
+}
+BatLevel batLevel() { return batShown; }
+
 int batPct() {
   int pct = (batMv - 3200) / 10;
   return pct < 0 ? 0 : pct > 100 ? 100 : pct;
@@ -30,6 +38,11 @@ void powerTick(uint32_t now) {
   if (lastBatMs == 0 || now - lastBatMs >= 10000) {
     lastBatMs = now;
     batMv = M5.Power.getBatteryVoltage();
+    if (batMv > 0) {
+      BatLevel now = levelFor(batMv), clear = levelFor(batMv - BAT_RISE_MV);
+      if (batShown == BAT_UNKNOWN || now < batShown) batShown = now;
+      else if (clear > batShown) batShown = clear;
+    }
     Serial.printf("bat=%dmV awake=%lum\n", batMv, (unsigned long)pet().awakeMin);
   }
 }

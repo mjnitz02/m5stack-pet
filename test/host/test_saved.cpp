@@ -42,7 +42,7 @@ TEST(out_of_range_needs_and_brightness_are_pulled_in) {
   d.boot(Wake::Button, [](Stick& s) {
     CHECK_EQ(probe::hunger(), 4);
     CHECK_EQ(probe::happy(), 4);
-    CHECK_EQ(s.brightness(), 102);
+    CHECK_EQ(s.brightness(), 51);
   });
 }
 

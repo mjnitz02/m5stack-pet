@@ -2,37 +2,37 @@
       0.250  m5 begin
       0.250  pm1 led 1
       0.250  i2c 69 7D=04
-      0.250  brightness 102
+      0.250  brightness 51
       0.270  serial bat=3900mV awake=0m
       0.996  beep 1200 60
-      0s      frames=8   draw=5548b328adeaa834
+      0s      frames=8   draw=922edf721e97e6e1
       1.260  beep 1800 25
       1.425  beep 1800 25
       1.590  beep 1800 25
       1.755  beep 1800 25
       1.920  beep 1800 25
-      1s      frames=5   draw=c3de45d8dd6d3add
+      1s      frames=5   draw=e546dc937393ef8d
       2.085  beep 1800 25
       2.250  beep 2400 25
-      2s      frames=14  draw=c66d7b93cd7f0c40
-      3s      frames=31  draw=1eaa457dc241c4a3
+      2s      frames=14  draw=16d1d84d86421c56
+      3s      frames=31  draw=6d92f425ad6bf96d
       4.791  beep 2000 60
-      4s      frames=30  draw=e35aa6965096c801
-      5s      frames=30  draw=5f2eff16b2baed65
+      4s      frames=30  draw=7de4c389041c9831
+      5s      frames=30  draw=db88762c47741a35
       6.837  beep 2000 60
-      6s      frames=30  draw=2a70265c06f37005
-      7s      frames=31  draw=16c61edfa0dbcc66
+      6s      frames=30  draw=913255a7451aed99
+      7s      frames=31  draw=415e9f2a2f4bd0a8
       8.883  beep 500 60
-      8s      frames=30  draw=d10ff1db996dc6aa
-      9s      frames=30  draw=bbf50e72938ba380
+      8s      frames=30  draw=758226c74266688d
+      9s      frames=30  draw=02686d6a605ee522
      10.302  serial bat=3900mV awake=0m
      10.929  beep 500 60
-     10s      frames=31  draw=d94db9f315a04f9c
-     11s      frames=30  draw=d99af8e65d977e03
+     10s      frames=31  draw=4f099dae40dee3b4
+     11s      frames=30  draw=5c93e6a32b61ae89
      12.975  beep 500 60
      12.975  save happy=2
      12.975  save sound=1
-     12.975  save bright=1
+     12.975  save bright=0
      12.975  save stayon=0
      12.975  save awake=0
      12.975  save food=0
@@ -42,12 +42,12 @@
      12.975  save eggtile=1
      12.975  save pick=0
      12.975  beep 1319 90
-     12s      frames=29  draw=97689b90b77ab042
+     12s      frames=29  draw=0648195f57a8678c
      13.080  beep 1568 90
      13.185  beep 2093 90
-     13s      frames=7   draw=f837e42c09f4631b
-     14s      frames=10  draw=9876db82f1d0484b
-     15s      frames=8   draw=ff0e07a74381a7da
-     16s      frames=9   draw=a3228b3172946e63
-     17s      frames=10  draw=dff9106259e863fe
-     18s      frames=4   draw=06f877ad227841df
+     13s      frames=7   draw=2b2c7d2832e8985b
+     14s      frames=10  draw=aaa53e1ecb6b0dfb
+     15s      frames=8   draw=91d7deb58e23c0ce
+     16s      frames=9   draw=efcb154784d3b904
+     17s      frames=10  draw=1a2b1874a7e89391
+     18s      frames=4   draw=feeb850d4945b5b3

@@ -2,30 +2,30 @@
       0.250  m5 begin
       0.250  pm1 led 1
       0.250  i2c 69 7D=04
-      0.250  brightness 102
+      0.250  brightness 51
       0.270  serial bat=3900mV awake=0m
       0.996  beep 1200 60
-      0s      frames=8   draw=5548b328adeaa834
+      0s      frames=8   draw=922edf721e97e6e1
       1.260  beep 1800 25
       1.425  beep 1800 25
       1.590  beep 1800 25
       1.755  beep 1800 25
       1.920  beep 1800 25
-      1s      frames=5   draw=c3de45d8dd6d3add
+      1s      frames=5   draw=e546dc937393ef8d
       2.085  beep 1800 25
       2.250  beep 1800 25
       2.415  beep 1800 25
       2.580  beep 2400 25
-      2s      frames=8   draw=59a154564c1f2c26
-      3s      frames=20  draw=95c8ef16cf282289
+      2s      frames=8   draw=3c3e901415734d05
+      3s      frames=20  draw=04ce3bde1ff8b86a
       4.065  beep 2000 60
-      4s      frames=30  draw=1236e1816e46a617
+      4s      frames=30  draw=599b922f707d6369
       5.715  beep 2000 60
-      5s      frames=30  draw=5933b1d2ade00370
+      5s      frames=30  draw=c84f96774c8106a3
       6.507  beep 2000 60
       6.507  save happy=2
       6.507  save sound=1
-      6.507  save bright=1
+      6.507  save bright=0
       6.507  save stayon=0
       6.507  save awake=0
       6.507  save food=0
@@ -38,13 +38,13 @@
       6.612  beep 1568 90
       6.717  beep 2093 90
       6.822  beep 2637 90
-      6s      frames=18  draw=faa81bb2044910a3
-      7s      frames=11  draw=731ea40f3a2831db
-      8s      frames=11  draw=0a5ccd140b51999e
-      9s      frames=15  draw=b70eebd59423a2f8
+      6s      frames=18  draw=7f47dec89484bfa2
+      7s      frames=11  draw=0c1cb581b1477aca
+      8s      frames=11  draw=0d3b86bd476b6d5d
+      9s      frames=15  draw=b1d98ab7013c236b
      10.293  serial bat=3900mV awake=0m
-     10s      frames=11  draw=e31f56cba6c39dd1
-     11s      frames=8   draw=ce439949afd45f2c
-     12s      frames=10  draw=9d4664e60ef491d6
-     13s      frames=8   draw=0b4e02fc213e2d6f
-     14s      frames=4   draw=842b38a18628ce27
+     10s      frames=11  draw=96a115555efbbab5
+     11s      frames=8   draw=add3647bfc3bcd01
+     12s      frames=10  draw=6e7c7488f9568e2e
+     13s      frames=8   draw=aad736a5810ef3f5
+     14s      frames=4   draw=7ae318bc34773901

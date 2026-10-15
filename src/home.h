@@ -48,7 +48,7 @@ static void drawBottom(bool showSel) {
     else                     drawMoon(cx, cy, 9);
     if (showSel && i == iconSel) drawFrame(cx - 20, 204, 40, 35, 6);
   }
-  if (batMv > 0 && batPct() < 15) {            // low battery: tell a grown-up
+  if (batLevel() == BAT_LOW) {                 // recharge me: tell a grown-up
     spr.drawRect(W - 18, 3, 14, 8, HOT);
     spr.fillRect(W - 4, 5, 2, 4, HOT);
     spr.fillRect(W - 16, 5, 3, 4, HOT);

@@ -72,7 +72,7 @@ moves, blue changes.
 
 | Line | What it does |
 | --- | --- |
-| `bright` | Screen brightness, 0 to 4. Starts at 1. |
+| `bright` | Screen brightness, `low` or `high`. Starts at `low`. |
 | `sound` | On or off. |
 | `stay on` | Never auto power-off. For battery testing. |
 | `egg tile` | Show or hide New egg in the toy box. |

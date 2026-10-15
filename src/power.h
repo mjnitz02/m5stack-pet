@@ -9,18 +9,29 @@
 // button.
 const uint32_t IDLE_BED_MS = 60000;   // no input this long → bedtime
 const uint32_t BED_OFF_MS  = 15000;   // asleep this long → screen off, nap
-#if defined(PET_LOG)
-// Debug build: a nap long enough for its drain to show in the log overnight.
+// Napping this long → power off. Long enough to last the night, so the blue
+// button still wakes it in the morning; with the green light off a nap costs
+// a few mV an hour (two sticks, overnight, 2026-10-13).
 const uint32_t NAP_MS      = 12UL * 60 * 60 * 1000;
-#else
-const uint32_t NAP_MS      = 60UL * 60 * 1000;   // napping this long → power off
-#endif
 const uint8_t  BED_BRIGHT  = 12;
 
 // Awake minutes persist every 5 min so a run-to-empty battery test still
 // leaves a usable number behind (worst case it under-reports by 5 min).
 extern int batMv;
 int  batPct();
+
+// Charge as three coarse states, like a handheld console: full, some left,
+// recharge me. Finer steps would just read as "draining" during play. Lines
+// come from one awake run to empty at low backlight (2026-10-15, 145 min):
+// the voltage fell steadily, about 7 mV a minute, to 3.65 V, then slower to
+// 3.5 V, then dropped off a cliff in the last 20 minutes. That splits it into
+// about an hour full, 40 minutes some left, and 40 minutes of recharge me.
+// Thresholds are read with the screen on, which sags the reading a bit.
+enum BatLevel : uint8_t { BAT_LOW, BAT_PART, BAT_FULL, BAT_UNKNOWN };
+const int BAT_PART_MV = 3750;   // below this: some left
+const int BAT_LOW_MV  = 3550;   // below this: recharge me
+const int BAT_RISE_MV = 50;     // a level only comes back this far above its line
+BatLevel batLevel();
 void powerTick(uint32_t now);
 void awakeRestart(uint32_t mark);   // count the awake minutes from here
 

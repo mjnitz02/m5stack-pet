@@ -124,6 +124,7 @@ in small hands.
 | What | Where | Constants |
 | --- | --- | --- |
 | Time to bed, nap and power-off | `power.h` | `IDLE_BED_MS`, `BED_OFF_MS`, `NAP_MS` |
+| Where the battery trim steps between full, some left and recharge me | `power.h` | `BAT_PART_MV`, `BAT_LOW_MV` |
 | Time before a menu or an activity left alone goes back to the pet | `main.cpp` | `MENU_IDLE_MS`, `PLAY_IDLE_MS` |
 | How fast apples and hearts drop | `home.h` | `HUNGER_DECAY_MS`, `HAPPY_DECAY_MS` |
 | Taps to hatch | `home.h` | `EGG_TAPS` |

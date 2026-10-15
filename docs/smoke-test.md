@@ -14,7 +14,7 @@ Flash with `make flash`, unplug USB, and work down the list.
 - [ ] The blue button wakes it at once, on the pet screen, and that press
       does not open the food tray.
 - [ ] Put it face down on a table. It goes to bed within a second or two.
-- [ ] After a nap that has run its full length (an hour), the blue button no
+- [ ] After a nap that has run its full length (12 hours), the blue button no
       longer wakes it and the side power button does.
 - [ ] Plugged in to USB, a nap still wakes on the blue button.
 - [ ] Note the awake time on the parent screen, then let it nap and wake it

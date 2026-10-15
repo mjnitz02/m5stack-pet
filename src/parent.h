@@ -177,7 +177,7 @@ static void leaveParent() {
 static void applyParent(uint8_t idx, uint32_t now) {
   PetSave& s = pet();
   switch (idx) {
-    case PA_BRIGHT: s.bright = (s.bright + 1) % 5; applyBrightness(); break;
+    case PA_BRIGHT: s.bright = (s.bright + 1) % BRIGHT_STEPS; applyBrightness(); break;
     case PA_SOUND:  s.sound = !s.sound; break;
     case PA_STAYON: s.stayOn = !s.stayOn; break;
     case PA_EGGTILE: s.eggTile = !s.eggTile; break;   // hides "new egg" in the toy box
@@ -229,7 +229,7 @@ static void tickParent(uint32_t now, bool a, bool b) {
     spr.print(armed ? "really?" : PARENT_ITEMS[i]);
     spr.setTextColor(DIM, BG);
     spr.setCursor(84, y);
-    if (i == PA_BRIGHT)      spr.printf("%u/4", s.bright);
+    if (i == PA_BRIGHT)      spr.print(s.bright == BRIGHT_HIGH ? "high" : s.bright == BRIGHT_DIM ? "dim" : "low");
     else if (i == PA_SOUND)  spr.print(s.sound ? "on" : "off");
     else if (i == PA_STAYON) spr.print(s.stayOn ? "on" : "off");
     else if (i == PA_EGGTILE) spr.print(s.eggTile ? "on" : "off");

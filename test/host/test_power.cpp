@@ -8,7 +8,7 @@ static bool has(const Boot& b, const char* text) { return b.trace.find(text) != 
 TEST(home_left_alone_goes_to_bed_then_naps) {
   Device d = hatchedPet();
   Boot b = d.boot(Wake::Button, [](Stick& s) {
-    CHECK_EQ(s.brightness(), 102);
+    CHECK_EQ(s.brightness(), 51);
     s.run(59000);
     CHECK_EQ(probe::screen(), "home");
     s.run(2000);
@@ -22,7 +22,7 @@ TEST(home_left_alone_goes_to_bed_then_naps) {
   });
   CHECK_EQ(b.end, End::Nap);
   CHECK(b.buttonArmed);
-  CHECK_EQ(b.napUs, 3600000000ull);            // an hour, then it wakes to power off
+  CHECK_EQ(b.napUs, 43200000000ull);           // 12 hours, then it wakes to power off
   // Everything on the board is switched off by hand before the nap.
   CHECK(has(b, "display sleep"));
   CHECK(has(b, "speaker off"));
@@ -47,7 +47,7 @@ TEST(a_button_wakes_the_pet_from_bed_without_selecting) {
     CHECK_EQ(probe::screen(), "bed");
     s.tap(A);
     CHECK_EQ(probe::screen(), "home");
-    CHECK_EQ(s.brightness(), 102);
+    CHECK_EQ(s.brightness(), 51);
     s.run(62000);
     CHECK_EQ(probe::screen(), "bed");
     s.tap(B);
@@ -199,6 +199,25 @@ TEST(awake_minutes_are_saved_every_five) {
   CHECK_EQ(d.nvs.get("pet/awake", 0), 0u);
   d.boot(Wake::Button, [](Stick& s) { s.run(11 * 60000 + 30000); });
   CHECK_EQ(d.nvs.get("pet/awake", 0), 10u);
+}
+
+// The charge shows as three states. It steps down at once but only comes
+// back once the reading is clearly over the line, so a sag doesn't flicker it.
+TEST(battery_shows_three_coarse_states) {
+  Device d = hatchedPet();
+  d.batteryMv = 4000;
+  d.boot(Wake::Button, [](Stick& s) {
+    s.run(1000);
+    CHECK_EQ(probe::batLevel(), 2);               // full
+    s.battery(3749);  s.run(10000);
+    CHECK_EQ(probe::batLevel(), 1);               // some left
+    s.battery(3780);  s.run(10000);
+    CHECK_EQ(probe::batLevel(), 1);               // back over the line, not clearly
+    s.battery(3800);  s.run(10000);
+    CHECK_EQ(probe::batLevel(), 2);               // full
+    s.battery(3500);  s.run(10000);
+    CHECK_EQ(probe::batLevel(), 0);               // recharge me
+  });
 }
 
 // `make monitor` on an ordinary build: the battery line every ten seconds.

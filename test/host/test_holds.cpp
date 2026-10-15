@@ -151,7 +151,7 @@ TEST(holding_the_egg_tile_starts_a_new_egg) {
   d.nvs.set("pet/color", 2);
   d.nvs.set("pet/hat", 3);
   d.nvs.set("pet/sound", 0);
-  d.nvs.set("pet/bright", 3);
+  d.nvs.set("pet/bright", 1);
   d.boot(Wake::Button, [](Stick& s) {
     s.hold(A, 800);
     for (int i = 0; i < 11; i++) s.tap(B);
@@ -166,7 +166,7 @@ TEST(holding_the_egg_tile_starts_a_new_egg) {
   CHECK_EQ(d.nvs.get("pet/hat"), 0u);
   // Settings and the lesson are the grown-up's, and stay.
   CHECK_EQ(d.nvs.get("pet/sound"), 0u);
-  CHECK_EQ(d.nvs.get("pet/bright"), 3u);
+  CHECK_EQ(d.nvs.get("pet/bright"), 1u);
   CHECK_EQ(d.nvs.get("pet/learned"), 1u);
 }
 

@@ -16,15 +16,24 @@ TEST(parent_brightness_steps_and_wraps) {
   Device d = hatchedPet();
   d.boot(Wake::Button, [](Stick& s) {
     openParent(s, BRIGHT);
-    const int want[] = { 153, 204, 255, 51, 102 };   // from the default of 1/4
+    const int want[] = { 102, 51, 102 };          // low (the default), high, low
     for (int v : want) {
       s.tap(A);
       CHECK_EQ(s.brightness(), v);
     }
-    s.tap(A);
   });
-  CHECK_EQ(d.nvs.get("pet/bright"), 2u);
-  d.boot(Wake::Button, [](Stick& s) { CHECK_EQ(s.brightness(), 153); });
+  CHECK_EQ(d.nvs.get("pet/bright"), 1u);
+  d.boot(Wake::Button, [](Stick& s) { CHECK_EQ(s.brightness(), 102); });
+}
+
+// A save from when brightness had five steps: 0 is low, anything brighter high.
+TEST(five_step_brightness_saves_become_low_or_high) {
+  const struct { uint32_t saved; int want; } cases[] = { { 0, 51 }, { 1, 102 }, { 2, 102 }, { 4, 102 } };
+  for (const auto& c : cases) {
+    Device d = hatchedPet();
+    d.nvs.set("pet/bright", c.saved);
+    d.boot(Wake::Button, [&](Stick& s) { CHECK_EQ(s.brightness(), c.want); });
+  }
 }
 
 TEST(parent_switches_are_saved) {
@@ -105,7 +114,7 @@ TEST(parent_reset_wipes_everything_but_the_tilt_calibration) {
   Device d = hatchedPet(5, 4, 4);
   d.nvs.set("pet/stickers", 0x0FFF, 2);
   d.nvs.set("pet/sound", 0);
-  d.nvs.set("pet/bright", 4);
+  d.nvs.set("pet/bright", 1);
   d.nvs.set("pet/stayon", 1);
   d.nvs.set("pet/awake", 500, 4);
   d.nvs.set("pet/pick", 3);
@@ -125,7 +134,7 @@ TEST(parent_reset_wipes_everything_but_the_tilt_calibration) {
     CHECK_EQ(probe::screen(), "learn");        // as if freshly flashed
     CHECK(!probe::hatched());
     CHECK(probe::sound());
-    CHECK_EQ(s.brightness(), 102);
+    CHECK_EQ(s.brightness(), 51);
   });
   CHECK_EQ(d.nvs.get("pet/hatched"), 0u);
   CHECK_EQ(d.nvs.get("pet/learned"), 0u);

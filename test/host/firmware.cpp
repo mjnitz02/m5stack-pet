@@ -25,6 +25,7 @@ int  stickers() { return __builtin_popcount(pet().stickers); }
 std::string species() { return buddySpeciesName(); }
 int  speciesCount() { return buddySpeciesCount(); }
 int  menuTile() { return menuSel; }
+int  batLevel() { return ::batLevel(); }
 
 void marbleOffset(int* dx, int* dy) {
   *dx = mbAX - (int)mbX;

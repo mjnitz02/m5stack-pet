@@ -15,7 +15,7 @@ void petLoad() {
   _pet.hunger   = _prefs.getUChar("hunger", 2);
   _pet.happy    = _prefs.getUChar("happy", 2);
   _pet.sound    = _prefs.getBool("sound", true);
-  _pet.bright   = _prefs.getUChar("bright", 1);
+  _pet.bright   = _prefs.getUChar("bright", 0);
   _pet.stayOn   = _prefs.getBool("stayon", false);
   _pet.awakeMin = _prefs.getUInt("awake", 0);
   _pet.food     = _prefs.getUChar("food", 0);
@@ -33,7 +33,8 @@ void petLoad() {
   _prefs.end();
   if (_pet.hunger > PET_MAX) _pet.hunger = PET_MAX;
   if (_pet.happy  > PET_MAX) _pet.happy  = PET_MAX;
-  if (_pet.bright > 4)       _pet.bright = 1;
+  if (_pet.bright > 4)       _pet.bright = BRIGHT_LOW;
+  else if (_pet.bright >= BRIGHT_STEPS) _pet.bright = BRIGHT_HIGH;
 }
 
 void petSave() {

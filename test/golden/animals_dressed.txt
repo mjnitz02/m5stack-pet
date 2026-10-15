@@ -3,7 +3,7 @@
       0.250  m5 begin
       0.250  pm1 led 1
       0.250  i2c 69 7D=04
-      0.250  brightness 102
+      0.250  brightness 51
       0s      frames=3   draw=b983d0d2bc466ed4
       1s      frames=5   draw=6fc0720d877b416c
       2s      frames=5   draw=784473f87057e37d
@@ -206,7 +206,7 @@
       0.250  m5 begin
       0.250  pm1 led 1
       0.250  i2c 69 7D=04
-      0.250  brightness 102
+      0.250  brightness 51
       0s      frames=3   draw=d02b86192c706184
       1s      frames=5   draw=27fc72fbf69cff58
       2s      frames=5   draw=d0378422a85945ae
@@ -409,7 +409,7 @@
       0.250  m5 begin
       0.250  pm1 led 1
       0.250  i2c 69 7D=04
-      0.250  brightness 102
+      0.250  brightness 51
       0s      frames=3   draw=c9fd1e629ac15721
       1s      frames=5   draw=8dfa4801d8a58d50
       2s      frames=5   draw=34f52dafe8f00541
@@ -612,7 +612,7 @@
       0.250  m5 begin
       0.250  pm1 led 1
       0.250  i2c 69 7D=04
-      0.250  brightness 102
+      0.250  brightness 51
       0s      frames=3   draw=d197317b9f8d5dbf
       1s      frames=5   draw=a60cd3e757cb994f
       2s      frames=5   draw=7574bc536fa7b7f3
@@ -815,7 +815,7 @@
       0.250  m5 begin
       0.250  pm1 led 1
       0.250  i2c 69 7D=04
-      0.250  brightness 102
+      0.250  brightness 51
       0s      frames=3   draw=8291dc4558ed1a33
       1s      frames=5   draw=10993846f22a2784
       2s      frames=5   draw=a64c86ecf1ca6442
@@ -1018,7 +1018,7 @@
       0.250  m5 begin
       0.250  pm1 led 1
       0.250  i2c 69 7D=04
-      0.250  brightness 102
+      0.250  brightness 51
       0s      frames=3   draw=4a0f035589653f85
       1s      frames=5   draw=ea0d599a68fe7740
       2s      frames=5   draw=3dc47613c8909727
@@ -1221,7 +1221,7 @@
       0.250  m5 begin
       0.250  pm1 led 1
       0.250  i2c 69 7D=04
-      0.250  brightness 102
+      0.250  brightness 51
       0s      frames=3   draw=f0d4c3223116c1a7
       1s      frames=5   draw=0b3a0a4812574fbd
       2s      frames=5   draw=6efb70bf2d38ed72

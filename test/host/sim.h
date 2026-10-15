@@ -57,6 +57,8 @@ class Stick {
   void wiggle();                           // walking, dancing
   void sway();                             // gentle rocking
 
+  void battery(int mv);                    // the voltage from here on (read every 10 s)
+
   int brightness() const;
   int beeps() const;                       // since this boot started
 

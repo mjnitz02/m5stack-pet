@@ -252,6 +252,8 @@ void Stick::tap(Btn b) { press(b); run(70); release(b); run(40); }
 void Stick::hold(Btn b, uint32_t ms) { press(b); run(ms); release(b); run(40); }
 void Stick::holdBoth(uint32_t ms) { press(A); press(B); run(ms); release(A); release(B); run(40); }
 
+void Stick::battery(int mv) { w.batMv = mv; }
+
 void Stick::pose(float x, float y, float z) { w.pose[0] = x; w.pose[1] = y; w.pose[2] = z; }
 void Stick::heldToPlay() { pose(HELD[0], HELD[1], HELD[2]); }
 void Stick::tilt(float right, float down) {

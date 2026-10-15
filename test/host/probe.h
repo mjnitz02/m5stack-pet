@@ -19,6 +19,7 @@ int         stickers();      // how many have been earned
 std::string species();       // the animal on screen
 int         speciesCount();
 int         menuTile();      // the tile the toy box frame is on
+int         batLevel();      // 0 recharge me, 1 some left, 2 full, 3 not read yet
 
 // What a player would read off the screen in the games that need looking at.
 void        marbleOffset(int* dx, int* dy);   // from the ball to the apple, in pixels
